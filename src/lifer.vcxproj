@@ -100,13 +100,13 @@
   <ItemGroup>
     <ClCompile Include="lifer.c" />
     <ClCompile Include="win\dirent.c" />
-    <ClCompile Include="win\wingetopt.c" />
+    <ClCompile Include="win\getopt.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="liblife\liblife.h" />
     <ClInclude Include="version.h" />
     <ClInclude Include="win\dirent.h" />
-    <ClInclude Include="win\wingetopt.h" />
+    <ClInclude Include="win\getopt.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="liblife\liblife.vcxproj">

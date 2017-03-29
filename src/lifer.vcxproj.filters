@@ -21,7 +21,7 @@
     <ClCompile Include="win\dirent.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="win\wingetopt.c">
+    <ClCompile Include="win\getopt.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -35,7 +35,7 @@
     <ClInclude Include="win\dirent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="win\wingetopt.h">
+    <ClInclude Include="win\getopt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,0 +1,37 @@
+INSTALLATION
+
+LINUX
+In a command terminal
+  * Navigate to the ./src directory
+  * Issue the following command:
+  
+    gcc ./lifer.c ./liblife/liblife.c -o lifer
+
+Provided gcc and the development tools are installed on your system and no
+errors were reported you should now have the tool 'lifer' sitting in your
+src directory. You can test that it works by issuing the command:
+
+    ./lifer ./Test/Test.lnk
+	
+The terminal should fill with data relating to the Microsoft shortcut example:
+https://msdn.microsoft.com/en-us/library/dd871375.aspx
+
+
+WINDOWS
+The source code comes with a set of Visual Studio 2017 Community Edition 
+solution files. If you don't have Visual Studio installed you can get the 
+community edition from:
+https://www.visualstudio.com/vs/community/
+With this installed you should be able to navigate with the file explorer to
+the 'src' folder and double-click on the 'lifer.vcxproj' file to open up the
+solution in Visual Studio.
+Check that the build target is suitable for your system (e.g. 'Debug' and 
+'x64') and build the solution (Ctrl + Shift + B). Provided there were no errors
+you should now have 'lifer.exe' in the associated build folder.
+
+I have regularly come across the situation where an error occurs in the build
+process and the linker fails to find the 'liblife' library functions 'get_lif'
+and 'get_lif_a'. If this happens then right click on the liblife project in 
+the solution explorer and choose properties. Ensure that the Configuration Type
+is set to 'Static library (.lib)' and the Target Extension is set to '.lib'.
+The solution should now build.

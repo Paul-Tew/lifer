@@ -46,7 +46,7 @@ This file is part of Lifer.
 /* Windows */
 #include <io.h>
 #include "./win/dirent.h"
-#include "./win/wingetopt.h"
+#include "./win/getopt.h"
 #else
 /* *nix */
 #include <unistd.h>
