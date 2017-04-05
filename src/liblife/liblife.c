@@ -1681,7 +1681,7 @@ void get_filetime_a_short(int64_t ft, unsigned char result[])
   ft = ft/cns2sec; //Reduce to seconds
   ft = ft-epoch_diff; //Number of seconds between epoch dates
 
-  if((sizeof(time_t) == sizeof(int64_t)) || ((ft>0) && (ft<0x7FFFFFFFL)))
+  if((sizeof(time_t) == sizeof(int64_t)) && ((ft>0) && (ft<0x7FFFFFFFL)))
     {
       time = (time_t) ft;
       tms = gmtime(&time);
@@ -1712,7 +1712,7 @@ void get_filetime_a_long(int64_t ft, unsigned char result[])
   cns = (uint64_t)ft%cns2sec; //Extract the 100 nanosecond component
   ft = ft/cns2sec; //Reduce to seconds
   ft = ft-epoch_diff; //Number of seconds between epoch dates
-  if((sizeof(time_t) == sizeof(int64_t)) || ((ft>0) && (ft<0x7FFFFFFFL)))
+  if((sizeof(time_t) == sizeof(int64_t)) && ((ft>0) && (ft<0x7FFFFFFFL)))
     {
       time = (time_t) ft;
       tms = gmtime(&time);

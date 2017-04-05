@@ -98,6 +98,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="liblife\liblife.c" />
     <ClCompile Include="lifer.c" />
     <ClCompile Include="win\dirent.c" />
     <ClCompile Include="win\getopt.c" />
@@ -107,11 +108,6 @@
     <ClInclude Include="version.h" />
     <ClInclude Include="win\dirent.h" />
     <ClInclude Include="win\getopt.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="liblife\liblife.vcxproj">
-      <Project>{fa0e6feb-0776-4c7a-bd0b-95a436ee1e1b}</Project>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

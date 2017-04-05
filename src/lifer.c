@@ -41,12 +41,14 @@ This file is part of Lifer.
 #include "./liblife/liblife.h"
 #include "./version.h"
 
-/*Conditional includes dependant on OS*/
+/*Conditional includes and definitions dependant on OS*/
 #ifdef _WIN32
 /* Windows */
 #include <io.h>
 #include "./win/dirent.h"
 #include "./win/getopt.h"
+#include <direct.h>
+#define PATH_MAX _MAX_PATH // Why is this different between Win & *nix? (I have no idea BTW)
 #else
 /* *nix */
 #include <unistd.h>
@@ -209,12 +211,12 @@ void sv_out(FILE* fp, char* fname, int less, char sep)
         }
       printf("ExtraData Structures%c", sep);
       if(less == 0)
-        //TODO Other ExtraData structures
+        // TODO Other ExtraData structures
 
         //Property Store
         {
           /* Commented out because this didn't work in liblife
-          //TODO Restore this
+      // TODO Restore this
 
           printf("ED PS Size (bytes)%c", sep);
           printf("ED PS Signature%c", sep);
@@ -382,13 +384,13 @@ void sv_out(FILE* fp, char* fname, int less, char sep)
       printf("%s%c", lif_a.leda.Size,sep);
     }
   printf("%s%c", lif_a.leda.edtypes,sep);
-  //TODO Other ED structures
+  // TODO Other ED structures
 
   //Property Store Props
   if(less == 0)
     {
       /* Commented out because it does not work in liblife
-      //TODO Restore this
+  // TODO Restore this
       printf("%s%c", lif_a.leda.lpspa.Size,sep);
       printf("%s%c", lif_a.leda.lpspa.sig,sep);
       printf("%s%c", lif_a.leda.lpspa.NumStores,sep);
@@ -703,7 +705,7 @@ void text_out(FILE* fp, char* fname, int less)
       //debug
       printf("    ED Structures:       %s\n", lif_a.leda.edtypes);
     }
-  //TODO other ED structures here
+  // TODO other ED structures here
   if(lif.led.edtypes & PROPERTY_STORE_PROPS)
     {
       printf("    {EXTRA DATA - PROPERTY STORE}\n");
@@ -869,7 +871,7 @@ void proc_file(char* fname, int less)
   if((fp = fopen(fname, "rb")) == NULL)
     {
       //unsuccessful
-      perror("Error in function proc_file()");
+      perror("Error");
       fprintf(stderr, "whilst processing file: \'%s\'\n", fname);
     }
   else
@@ -922,20 +924,20 @@ void read_dir(char* dirname, int less)
   DIR *dp;
   struct dirent *entry;
   struct stat statbuf;
-  char olddir[512], *returnbuf;
+  char olddir[PATH_MAX], *returnbuf;
 
   if((dp = opendir(dirname)) == NULL)
     {
-      perror("Error in function read_dir()");
+      perror("Error");
       fprintf(stderr, "whilst processing directory: \'%s\'\n", dirname);
       return;
     }
   //Preserve the old directory and move to the new one
-  returnbuf = getcwd(olddir, strlen(olddir));
+  returnbuf = _getcwd(olddir, strlen(olddir));
   if(returnbuf == NULL)
-    fprintf(stderr,"Could not get current directory name");
-  if(!chdir(dirname))
-    fprintf(stderr,"Unable to preserve old directory name");
+    fprintf(stderr,"Could not get current directory name\n");
+  if(_chdir(dirname)!=0)
+    fprintf(stderr,"Unable to preserve old directory name\n");
   //Iterate through the directory entries
   while((entry = readdir(dp)) != NULL)
     {
@@ -947,17 +949,17 @@ void read_dir(char* dirname, int less)
         }
     }//End of iterating through directory entries
   //Restore the old directory
-  if(!chdir(olddir))
-    fprintf(stderr,"Unable to restore old directory");
+  if(chdir(olddir)!=0)
+    fprintf(stderr,"Unable to restore old directory\n");
 }
 //
 //Main function
 int main(int argc, char *argv[])
 {
-  int opt, process=1, less=0; //less is the flag for short info
-  //(can't use short, it's a keyword)
-  int proc_dir = 0;          //A flag to deal with processing just one directory
-  struct stat statbuffer;    //file details buffer
+  int opt, process=1, less=0; // less is the flag for short info 
+							  // (can't use short, it's a keyword)
+  int proc_dir = 0;           // A flag to deal with processing just one directory
+  struct stat statbuffer;     // File details buffer
 
   output_type = txt;      //default output type
   filecount = 0;
@@ -1007,8 +1009,7 @@ directory\n");
           else
             {
               printf("Invalid argument to option \'-o\'\n");
-              printf("Valid arguments are: \'csv\', \'tsv\', or \'txt\'\
-           [default]\n");
+              printf("Valid arguments are: \'csv\', \'tsv\', or \'txt\'[default]\n");
               process = 0;
             }
           break;

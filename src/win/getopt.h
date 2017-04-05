@@ -35,6 +35,12 @@ PROFITS, BUSINESS INTERRUPTION, LOSS OF PROGRAMS OR OTHER DATA ON
 YOUR INFORMATION HANDLING SYSTEM OR OTHERWISE, EVEN If WE ARE
 EXPRESSLY ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
+
+/* Added to compile as a static library for lifer (P. Tew 2017)
+   See https://www.codeproject.com/articles/157001/full-getopt-port-for-unicode-and-multibyte-microso */
+#define STATIC_GETOPT
+
+/* Back to original code... */
 #ifndef __GETOPT_H_
 	#define __GETOPT_H_
 
@@ -45,7 +51,6 @@ EXPRESSLY ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 	#if defined(EXPORTS_GETOPT) && defined(STATIC_GETOPT)
 		#error "The preprocessor definitions of EXPORTS_GETOPT and STATIC_GETOPT can only be used individually"
 	#elif defined(STATIC_GETOPT)
-		#pragma message("Warning static builds of getopt violate the Lesser GNU Public License")
 		#define _GETOPT_API
 	#elif defined(EXPORTS_GETOPT)
 		#pragma message("Exporting getopt library")
