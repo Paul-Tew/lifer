@@ -53,6 +53,8 @@ This file is part of Lifer.
 /* *nix */
 #include <unistd.h>
 #include <dirent.h>
+#define _getcwd getcwd  // _getcwd() is Windows getcwd() is *nix
+#define _chdir chdir    // same issue here
 #endif
 
 //Global stuff
