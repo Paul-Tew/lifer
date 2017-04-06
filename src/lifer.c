@@ -53,7 +53,7 @@ This file is part of Lifer.
 /* *nix */
 #include <unistd.h>
 #include <dirent.h>
-#define _getcwd getcwd  // _getcwd() is Windows getcwd() is *nix
+#define _getcwd getcwd  // _getcwd() is Windows, getcwd() is *nix
 #define _chdir chdir    // same issue here
 #endif
 
@@ -949,9 +949,9 @@ void read_dir(char* dirname, int less)
         {
           proc_file(entry->d_name, less);
         }
-    }//End of iterating through directory entries
-  //Restore the old directory
-  if(chdir(olddir)!=0)
+    }//End of iterating through directory entry
+  // All entries done, restore the old directory
+  if(_chdir(olddir)!=0)
     fprintf(stderr,"Unable to restore old directory\n");
 }
 //
