@@ -41,6 +41,15 @@ This file is part of Lifer.
     You should have received a copy of the GNU General Public License
     along with Lifer.  If not, see <http://www.gnu.org/licenses/>.
 */
+
+/*
+
+The numbering system in the comments that follow directly relate to the paragraph
+numbering in the Microsoft MS-SHLLINK Open Document (available from:
+https://msdn.microsoft.com/en-us/library/dd871305.aspx )
+
+*/
+
 #ifndef _LIBLIFE_H_
 #define _LIBLIFE_H_ 1
 
@@ -69,7 +78,7 @@ enum EDTYPES
   VISTA_AND_ABOVE_IDLIST_PROPS = 1024
 };
 
-struct LIF_CLSID
+struct LIF_CLSID 
 {
   uint32_t           Data1;       //32bit Data1         - Represented LE
   uint16_t           Data2;       //16bit Data2         - Represented LE
@@ -439,9 +448,9 @@ struct LIF_HDR
   struct LIF_CLSID   CLSID;        //GUID identifier - must be standard
   uint32_t           Flags;        //What can I say? flags! (Sec 2.1.1)
   uint32_t           Attr;         //File attributes (Sec 2.1.2)
-  int64_t            CrDate;       //Creation Time
-  int64_t            AcDate;       //Access Time
-  int64_t            WtDate;       //Write Time
+  int64_t            CrDate;       //Embedded Creation Time
+  int64_t            AcDate;       //Embedded Access Time
+  int64_t            WtDate;       //Embedded Write Time
   uint32_t           Size;         //File Size
   int32_t            IconIndex;    //Icon Location in a given resource.
   uint32_t           ShowState;    //Starting state for the application.
