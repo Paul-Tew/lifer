@@ -1690,7 +1690,7 @@ void get_filetime_a_short(int64_t ft, unsigned char result[])
   //Can't cope with large time_t values
   else if(ft == -11644473600LL)
     {
-      snprintf((char *)result, 30, "1601-01-01 00:00:00 (UTC)");
+      snprintf((char *)result, 30, "Date not set (i.e. 0 value)");
     }
   else
     {
@@ -1722,7 +1722,7 @@ void get_filetime_a_long(int64_t ft, unsigned char result[])
   //Can't cope with large time_t values
   else if(ft == -11644473600LL)
     {
-      snprintf((char *)result, 40, "1601-01-01 00:00:00.0 (UTC)");
+      snprintf((char *)result, 40, "Date not set (i.e. 0 value)");
     }
   else
     {

@@ -39,8 +39,8 @@ EXPRESSLY ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 /* Added to compile as a static library for lifer (P. Tew 2017)
    See https://www.codeproject.com/articles/157001/full-getopt-port-for-unicode-and-multibyte-microso */
 #define STATIC_GETOPT
-
 /* Back to original code... */
+
 #ifndef __GETOPT_H_
 	#define __GETOPT_H_
 

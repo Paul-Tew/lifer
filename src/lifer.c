@@ -391,12 +391,9 @@ void sv_out(FILE* fp, char* fname, int less, char sep)
   //Property Store Props
   if(less == 0)
     {
-      /* Commented out because it does not work in liblife
-  // TODO Restore this
       printf("%s%c", lif_a.leda.lpspa.Size,sep);
       printf("%s%c", lif_a.leda.lpspa.sig,sep);
       printf("%s%c", lif_a.leda.lpspa.NumStores,sep);
-      */
     }
   //Special Folder Props
   if(less == 0)

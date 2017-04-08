@@ -30,6 +30,6 @@ This file is part of Lifer, a Windows link file analyser.
 #define _MAJOR  1
 #define _MINOR  2
 // This is my revision number
-#define _BUILD  30
+#define _BUILD  31
 // Just the current year
 #define _YEAR   2017
