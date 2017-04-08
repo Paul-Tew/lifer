@@ -1,19 +1,20 @@
 # lifer
 A forensic tool for Windows link file examinations
 
-## Synopsis
+## SYNOPSIS
 
-'lifer' is a Windows or *nix command-line tool inspired by the whitepaper 'The Meaning of Link Files in Forensic Examinations' by Harry Parsonage and available [**here**](http://computerforensics.parsonage.co.uk/downloads/TheMeaningofLIFE.pdf)
+'lifer' is a Windows or *nix command-line tool inspired by the whitepaper 'The Meaning of Link Files in Forensic Examinations' by Harry Parsonage and available [**here**](http://computerforensics.parsonage.co.uk/downloads/TheMeaningofLIFE.pdf).
 It started life as a lightweight tool that I wrote in order to extract certain information from link files to assist in enquiries I was making whilst working as a computer forensic analyst. Now I am retired but I am looking to expand it's usefulness and publish it so that others can benefit.
-The information extracted is in accordance with the Microsoft Open Specification Document 'MS-SHLLNK' which can be found online [**here**](https://msdn.microsoft.com/en-us/library/dd871305.aspx)
+
+The information extracted is in accordance with the Microsoft Open Specification Document 'MS-SHLLNK' which can be found online [**here**](https://msdn.microsoft.com/en-us/library/dd871305.aspx).
 At the time of writing only parts of specification version 1.2 are implemented. Over time however, I hope to bring the tool into line with the full current specification (version 3.0).
 
-## Example usage
+## EXAMPLE USAGE
 Once you have installed the tool open a command-line shell (e.g. bash or Powershell). Type:
 ```
 lifer -s ./Test/Test.lnk
 ```
-This will give the output:
+This should give the output:
 ```
 LINK FILE -------------- .\Test\Test.lnk
   {stat DATA}
@@ -47,7 +48,7 @@ LINK FILE -------------- .\Test\Test.lnk
         UUID Time:         2008-09-10 10:23:17 (UTC)
         UUID Node (MAC):   00:13:72:16:87:4A
 ```
-A fuller output (including more accurate timestamps) can be obtained by omitting the '-s' option.
+A more fulsome output (including more accurate timestamps) can be obtained by omitting the '-s' option.
 
 All the link files in a directory (folder) can be parsed by just passing the name of the directory:
 ```
@@ -77,7 +78,7 @@ git clone https://github.com/Paul-Tew/lifer.git
 ```
 A new directory named 'lifer' will be created.
 
-### LINUX INSTALLATION (and other *nix platforms)
+#### LINUX INSTALLATION (and other *nix platforms)
 (This may work for Mac installations but I don't have the kind of money needed to test it out for sure...)
 Because this tool is pretty basic, the dependencies are minimal, ensure you have the 'gcc' compiler and the relevant 'libc' development libraries installed, that's all.
 Start a command-line terminal and navigate to the **./lifer/src** directory.
@@ -103,18 +104,18 @@ sudo install ./lifer /usr/bin/
 ```
 This will enable you to use lifer anywhere on your system without specifying the directory prefix (e.g. `lifer ./Test/Test.lnk` rather than `./lifer ./Test/Test.lnk`)
 
-### WINDOWS INSTALLATION
+#### WINDOWS INSTALLATION
 The lifer github project comes complete with a Visual Studio 2017 project solution so the easiest way to create a Windows executable is to install Visual Studio 2017 first. There is a free version (known as the 'community' version) available [here](https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community&rel=15).
 Once Visual Studio is installed:
-*Left-click on **File->Open->Project/Solution** and browse to the **lifer.sln** file to load the solution into Visual Studio.
-*On the Standard Toolbar, set the Solution Configuration options to those that suit your machine and preference (for example, I use: 'x64' and 'Debug')
-*Build the solution from the 'Build' menu or simply use the key combination: **Ctrl+Shift+B**
-*Provided there were no errors you should have an executable 'lifer.exe' file in the relevant sub-folder of your project.
-*At this point I usually open a Powershell terminal and navigate to the folder containing the executable which for me is done by issuing the command:
+* Left-click on **File->Open->Project/Solution** and browse to the **lifer.sln** file to load the solution into Visual Studio.
+* On the Standard Toolbar, set the Solution Configuration options to those that suit your machine and preference (for example, I use: 'x64' and 'Debug')
+* Build the solution from the 'Build' menu or simply use the key combination: **Ctrl+Shift+B**
+* Provided there were no errors you should have an executable 'lifer.exe' file in the relevant sub-folder of your project.
+* At this point I usually open a Powershell terminal and navigate to the folder containing the executable which for me is done by issuing the command:
 ```
 cd "F:\\lifer\src\x64\Debug\"
 ```
-*I then test the executable using the command:
+* I then test the executable using the command:
 ```
 .\lifer.exe ..\..\Test\Test.lnk
 ```
@@ -125,7 +126,7 @@ Once installed, lifer can be built in the ./src/ directory by issuing the comman
 CL lifer.c .\liblife\liblife.c .\Win\dirent.c .\Win\getopt.c
 ```
 ## ACKNOWLEDGEMENTS
-'lifer' was originally a Linux/GNU only tool which was not really portable into Windows until I found solutions to the main stumbling blocks of navigating a directory or parsing the command-line options in the same way that GNU does. To this end I am deeply indebted to the following two projects:
+'lifer' was originally a Linux/GNU only tool which was not really portable into Windows until I found solutions to the main stumbling blocks of navigating a directory and parsing the command-line options in the same way that GNU does. To this end I am deeply indebted to the following two projects:
 1. [dirent](http://www.two-sdg.demon.co.uk/curbralan/code/dirent/dirent.html)     Kevlin Henney
 2. [getopt](https://www.codeproject.com/articles/157001/full-getopt-port-for-unicode-and-multibyte-microso)     Ludvik Jerabek
 
