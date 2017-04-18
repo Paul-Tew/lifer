@@ -315,7 +315,7 @@ struct LIF_STRINGDATA
   uint32_t           Size;          //This isn't in the specification but I've
   //included it to help calculate the position
   uint16_t           CountChars[5];
-  unsigned char               Data[5][300]; //StringData can be any length but I've
+  unsigned char      Data[5][300]; //StringData can be any length but I've
   //restricted it to returning just 300 chars
 };
 
