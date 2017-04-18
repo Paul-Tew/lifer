@@ -10,6 +10,8 @@ The information extracted is in accordance with the Microsoft Open Specification
 At the time of writing only parts of specification version 1.2 are implemented. Over time however, I hope to bring the tool into line with the full current specification (version 3.0).
 
 ## EXAMPLE USAGE
+Details of the files to be found in the Test directory and how to use them is given in the '.\Test\Tests.txt' file. What follows is a brief outline...
+
 Once you have installed the tool open a command-line shell (e.g. bash or Powershell). Type:
 ```
 lifer -s ./Test/Test.lnk
@@ -66,7 +68,7 @@ lifer -so tsv ./Test/WinXP > WinXP.tsv
 ```
 for a file that has some of the superfluous and uninteresting data redacted.
 ### WARNING ABOUT COMMA SEPARATED OUTPUT!!
-Some of the strings within link files can sometimes contain commas. Because this causes a conflict with the field separator any commas within strings have been replaced with semi-colons (i.e. ',' replaced with ';'). This is only true for the '-o csv' option and not the default '-o txt' or the '-o tsv' options.
+Strings within link files can sometimes contain commas. Because this causes a conflict with the field separator any commas within strings have been replaced with semi-colons (i.e. ',' replaced with ';'). This is only true for the '-o csv' option and not the default '-o txt' or the '-o tsv' options.
 
 ## MOTIVATION
 Windows link files (shortcuts) can harbour a trove of information for a forensic analyst. For example, perhaps determining that a disk that is no longer attached to the machine may well have been attached sometime in the past or maybe an indication of the the names and location of folders that have since been deleted.
