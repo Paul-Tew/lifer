@@ -110,9 +110,20 @@
     <ClInclude Include="win\getopt.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\INSTALLATION" />
-    <None Include="..\LICENSE" />
-    <None Include="..\README.md" />
+    <None Include="..\INSTALLATION">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="..\LICENSE">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="..\README.md">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Test\Tests.txt">
+      <DeploymentContent>true</DeploymentContent>
+    </Text>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

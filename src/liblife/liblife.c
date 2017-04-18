@@ -45,8 +45,8 @@ int get_stringdata(FILE *, int, struct LIF *);
 int get_stringdata_a(struct LIF_STRINGDATA *, struct LIF_STRINGDATA_A *);
 int get_extradata(FILE *, int, struct LIF *);
 int get_extradata_a(struct LIF_EXTRA_DATA *, struct LIF_EXTRA_DATA_A *);
-void get_flag_a(unsigned char [], struct LIF_HDR *);
-void get_attr_a(unsigned char [], struct LIF_HDR *);
+void get_flag_a(unsigned char *, struct LIF_HDR *);
+void get_attr_a(unsigned char *, struct LIF_HDR *);
 uint64_t get_le_uint64(unsigned char [], int);
 uint32_t  get_le_uint32(unsigned char [], int);
 uint16_t get_le_uint16(unsigned char [], int);
@@ -55,7 +55,7 @@ void get_chars(unsigned char [], int, int, unsigned char []);
 int get_le_unistr(unsigned char [], int, int, wchar_t[]);
 void get_filetime_a_short(int64_t, unsigned char []);
 void get_filetime_a_long(int64_t, unsigned char[]);
-void get_ltp(struct LIF_TRACKER_PROPS *, unsigned char[]);
+void get_ltp(struct LIF_TRACKER_PROPS *, unsigned char*);
 void get_droid_a(struct LIF_CLSID *, struct LIF_CLSID_A *);
 void led_setnull(struct LIF_EXTRA_DATA *);
 
@@ -238,7 +238,7 @@ int get_lhdr(FILE *fp, struct LIF *lif)
 //into a readable form and populates the strings in LIF_HDR_A
 int get_lhdr_a(struct LIF_HDR* lh, struct LIF_HDR_A* lha)
 {
-  unsigned char lk[20], hk1[10], hk2[10], hk3[10], attr_str[115], flag_str[420];
+  unsigned char lk[20], hk1[10], hk2[10], hk3[10], attr_str[400], flag_str[600];
 
   snprintf((char *)lha->H_size, 10, "%"PRIu32, lh->H_size);
   snprintf((char *)lha->CLSID, 40, "{00021401-0000-0000-C000-000000000046}");
@@ -265,54 +265,56 @@ int get_lhdr_a(struct LIF_HDR* lh, struct LIF_HDR_A* lha)
     default:
       snprintf((char *)lha->ShowState, 40, "SW_SHOWNORMAL");
     }
-  // Low key
+  // 
+  // High key first
+  if (lh->Hotkey.HighKey & 0x01)
+  {
+	  sprintf((char *)hk1, "SHIFT + ");
+  }
+  else
+  {
+	  sprintf((char *)hk1, "");
+  }
+  if (lh->Hotkey.HighKey & 0x02)
+  {
+	  sprintf((char *)hk2, "CTRL + ");
+  }
+  else
+  {
+	  sprintf((char *)hk2, "");
+  }
+  if (lh->Hotkey.HighKey & 0x04)
+  {
+	  sprintf((char *)hk3, "ALT + ");
+  }
+  else
+  {
+	  sprintf((char *)hk3, "");
+  }
+  // Then the Low key
   if(((lh->Hotkey.LowKey > 0x2F ) && (lh->Hotkey.LowKey < 0x5B)))
     {
-      sprintf((char *)lk, "\'%u\' ", (unsigned int)lh->Hotkey.LowKey);
+      sprintf((char *)lk, "%u", (unsigned int)lh->Hotkey.LowKey);
     }
   else if(((lh->Hotkey.LowKey > 0x6F ) && (lh->Hotkey.LowKey < 0x88)))
     {
-      sprintf((char *)lk, "\'F%u\' ", (unsigned int)lh->Hotkey.LowKey - 111);
+      sprintf((char *)lk, "F%u", (unsigned int)lh->Hotkey.LowKey - 111);
     }
   else if(lh->Hotkey.LowKey == 0x90)
     {
-      sprintf((char *)lk, "\'NUM LOCK\' ");
+      sprintf((char *)lk, "NUM LOCK");
     }
-  else if(lh->Hotkey.LowKey == 0x90)
+  else if(lh->Hotkey.LowKey == 0x91)
     {
-      sprintf((char *)lk, "\'SCROLL LOCK\' ");
+      sprintf((char *)lk, "SCROLL LOCK");
     }
   else
     {
-      sprintf((char *)lk, "[NOT DEFINED] ");
+      sprintf((char *)lk, "[NOT DEFINED]");
     }
-  // High key
-  if(lh->Hotkey.HighKey & 0x01)
-    {
-      sprintf((char *)hk1, "\'SHIFT\' ");
-    }
-  else
-    {
-      sprintf((char *)hk1, " ");
-    }
-  if(lh->Hotkey.HighKey & 0x02)
-    {
-      sprintf((char *)hk2, "\'CTRL\' ");
-    }
-  else
-    {
-      sprintf((char *)hk2, " ");
-    }
-  if(lh->Hotkey.HighKey & 0x04)
-    {
-      sprintf((char *)hk3, "\'ALT\'");
-    }
-  else
-    {
-      sprintf((char *)hk3, " ");
-    }
+
   //Now write the keys to the LIF_HDR_A
-  snprintf((char *)lha->Hotkey, 40, "%s%s%s%s", lk, hk1, hk2, hk3);
+  snprintf((char *)lha->Hotkey, 40, "%s%s%s%s", hk1, hk2, hk3, lk);
   snprintf((char *)lha->Reserved1, 10,"0x0000");
   snprintf((char *)lha->Reserved2, 20,"0x00000000");
   snprintf((char *)lha->Reserved3, 20,"0x00000000");
@@ -1007,7 +1009,7 @@ int get_stringdata(FILE * fp, int pos, struct LIF * lif)
   unsigned char      size_buf[2];   //A small buffer to hold the size element
   uint32_t           tsize = 0, str_size = 0;
   int                i, j;
-  unsigned char               data_buf[600];
+  unsigned char      data_buf[600];
   wchar_t            uni_buf[300];
 
   // Initialise the lif->lsd values to 0
@@ -1055,7 +1057,8 @@ int get_stringdata(FILE * fp, int pos, struct LIF * lif)
               size_buf[1] = getc(fp);
               str_size = get_le_uint16(size_buf, 0);
               lif->lsd.CountChars[i] = str_size;
-              if(str_size > 299)
+              // I'm restricting the 
+			  if(str_size > 299)
                 {
                   str_size = 299;
                 }
@@ -1066,9 +1069,13 @@ int get_stringdata(FILE * fp, int pos, struct LIF * lif)
               get_chars(data_buf, 0, str_size+1, lif->lsd.Data[i]);
               if(str_size == 299)
                 {
-                  lif->lsd.Data[i][str_size] = 0;
+				  lif->lsd.Data[i][str_size] = 0;
                 }
-
+			  // TODO if the output type is 'csv' and there are commas in the string then replace them with semicolons
+			  // commas are common when referring to resources within dll libraries
+			  // these commas need replacing to prevent messed-up formatting in a csv file.
+			  // the output therefore won't be strictly correct
+			  // strchr
               tsize += (lif->lsd.CountChars[i] + 2);
             }
         }
@@ -1472,59 +1479,59 @@ void get_flag_a(unsigned char *flag_str, struct LIF_HDR *lh)
       return;
     }
   if(lh->Flags & 0x1)
-    strcat((char *)flag_str, "TARGET_ID_LIST | ");
+    strcat((char *)flag_str, "HasLinkTargetIDList | ");
   if(lh->Flags & 0x2)
-    strcat((char *)flag_str, "LINK_INFO | ");
+    strcat((char *)flag_str, "HasLinkInfo | ");
   if(lh->Flags & 0x4)
-    strcat((char *)flag_str, "NAME | ");
+    strcat((char *)flag_str, "HasName | ");
   if(lh->Flags & 0x8)
-    strcat((char *)flag_str, "RELATIVE_PATH | ");
+    strcat((char *)flag_str, "HasRelativePath | ");
   if(lh->Flags & 0x10)
-    strcat((char *)flag_str, "WORKING_DIR | ");
+    strcat((char *)flag_str, "HasWorkingDir | ");
   if(lh->Flags & 0x20)
-    strcat((char *)flag_str, "ARGUMENTS | ");
+    strcat((char *)flag_str, "HasArguments | ");
   if(lh->Flags & 0x40)
-    strcat((char *)flag_str, "ICON_LOCATION | ");
+    strcat((char *)flag_str, "HasIconLocation | ");
   if(lh->Flags & 0x80)
-    strcat((char *)flag_str, "UNICODE | ");
+    strcat((char *)flag_str, "IsUnicode | ");
   if(lh->Flags & 0x100)
-    strcat((char *)flag_str, "FORCE_NO_LINK_INFO | ");
+    strcat((char *)flag_str, "ForceNoLinkInfo | ");
   if(lh->Flags & 0x200)
-    strcat((char *)flag_str, "EXP_STRING | ");
+    strcat((char *)flag_str, "HasExpString | ");
   if(lh->Flags & 0x400)
-    strcat((char *)flag_str, "RUN_SEP_PROCESS | ");
+    strcat((char *)flag_str, "RunInSeparateProcess | ");
   if(lh->Flags & 0x800)
-    strcat((char *)flag_str, "UNUSED_FLAG1 | ");
+    strcat((char *)flag_str, "Unused1 | ");
   if(lh->Flags & 0x1000)
-    strcat((char *)flag_str, "DARWIN_ID | ");
+    strcat((char *)flag_str, "HasDarwinID | ");
   if(lh->Flags & 0x2000)
-    strcat((char *)flag_str, "RUN_AS_USER | ");
+    strcat((char *)flag_str, "RunAsUser | ");
   if(lh->Flags & 0x4000)
-    strcat((char *)flag_str, "EXP_ICON | ");
+    strcat((char *)flag_str, "HasExpIcon | ");
   if(lh->Flags & 0x8000)
-    strcat((char *)flag_str, "NO_PIDL_ALIAS | ");
+    strcat((char *)flag_str, "NoPidlAlias | ");
   if(lh->Flags & 0x10000)
-    strcat((char *)flag_str, "UNUSED_FLAG_2 | ");
+    strcat((char *)flag_str, "Unused2 | ");
   if(lh->Flags & 0x20000)
-    strcat((char *)flag_str, "SHIM_LAYER | ");
+    strcat((char *)flag_str, "RunWithShimLayer | ");
   if(lh->Flags & 0x40000)
-    strcat((char *)flag_str, "FORCE_NO_LINK_TRACKER | ");
+    strcat((char *)flag_str, "ForceNoLinkTrack | ");
   if(lh->Flags & 0x80000)
-    strcat((char *)flag_str, "TARGET_METADATA | ");
+    strcat((char *)flag_str, "EnableTargetMetadata | ");
   if(lh->Flags & 0x100000)
-    strcat((char *)flag_str, "DISABLE_LINK_PATH_TRACKING | ");
+    strcat((char *)flag_str, "DisableLinkPathTracking | ");
   if(lh->Flags & 0x200000)
-    strcat((char *)flag_str, "DISABLE_KNOWN_FOLDER_TRACKING | ");
+    strcat((char *)flag_str, "DisableKnownFolderTracking | ");
   if(lh->Flags & 0x400000)
-    strcat((char *)flag_str, "DISABLE_KNOWN_FOLDER_ALIAS | ");
+    strcat((char *)flag_str, "DisableKnownFolderAlias | ");
   if(lh->Flags & 0x800000)
-    strcat((char *)flag_str, "LINK_TO_LINK | ");
+    strcat((char *)flag_str, "AllowLinkToLink | ");
   if(lh->Flags & 0x1000000)
-    strcat((char *)flag_str, "UNALIAS_ON_SAVE | ");
+    strcat((char *)flag_str, "UnaliasOnSave | ");
   if(lh->Flags & 0x2000000)
-    strcat((char *)flag_str, "PREFER_ENVIRONMENT_PATH | ");
+    strcat((char *)flag_str, "PreferEnvironmentPath | ");
   if(lh->Flags & 0x4000000)
-    strcat((char *)flag_str, "KEEP_LOCAL_ID_LIST | ");
+    strcat((char *)flag_str, "KeepLocalIDListForUNCTarget | ");
 
   if(strlen((char *)flag_str) > 0)
     flag_str[strlen((char *)flag_str)-3] = (unsigned char)0;
@@ -1545,33 +1552,38 @@ void get_attr_a(unsigned char *attr_str, struct LIF_HDR *lh)
     }
   if(lh->Attr == 0x80) //'NORMAL attribute set - no others allowed
     {
-      sprintf((char *)attr_str, "NORMAL");
+      sprintf((char *)attr_str, "FILE_ATTRIBUTE_NORMAL");
       return;
     }
   if(lh->Attr & 0x1)
-    strcat((char *)attr_str, "READONLY | ");
+    strcat((char *)attr_str, "FILE_ATTRIBUTE_READONLY | ");
   if(lh->Attr & 0x2)
-    strcat((char *)attr_str, "HIDDEN | ");
+    strcat((char *)attr_str, "FILE_ATTRIBUTE_HIDDEN | ");
   if(lh->Attr & 0x4)
-    strcat((char *)attr_str, "SYSTEM | ");
+    strcat((char *)attr_str, "FILE_ATTRIBUTE_SYSTEM | ");
   if(lh->Attr & 0x10)
-    strcat((char *)attr_str, "DIR | ");
+    strcat((char *)attr_str, "FILE_ATTRIBUTE_DIRECTORY | ");
   if(lh->Attr & 0x20)
-    strcat((char *)attr_str, "ARCHIVE | ");
+    strcat((char *)attr_str, "FILE_ATTRIBUTE_ARCHIVE | ");
+  if(lh->Attr & 0x40)
+	  // There is something wrong with the link file if we are here
+	  // According to MS-SHLLINK S.2.1.2 G
+	strcat((char *)attr_str, "Reserved2 | ");
+	  // FILE_ATTRIBUTE_NORMAL (0x80) is dealt with above
   if(lh->Attr & 0x100)
-    strcat((char *)attr_str, "TEMP | ");
+    strcat((char *)attr_str, "FILE_ATTRIBUTE_TEMPORARY | ");
   if(lh->Attr & 0x200)
-    strcat((char *)attr_str, "SPARSE | ");
+    strcat((char *)attr_str, "FILE_ATTRIBUTE_SPARSE_FILE | ");
   if(lh->Attr & 0x400)
-    strcat((char *)attr_str, "REPARSE | ");
+    strcat((char *)attr_str, "FILE_ATTRIBUTE_REPARSE_POINT | ");
   if(lh->Attr & 0x800)
-    strcat((char *)attr_str, "COMPRESSED | ");
+    strcat((char *)attr_str, "FILE_ATTRIBUTE_COMPRESSED | ");
   if(lh->Attr & 0x1000)
-    strcat((char *)attr_str, "OFFLINE | ");
+    strcat((char *)attr_str, "FILE_ATTRIBUTE_OFFLINE | ");
   if(lh->Attr & 0x2000)
-    strcat((char *)attr_str, "NOT_INDEXED | ");
+    strcat((char *)attr_str, "FILE_ATTRIBUTE_NOT_CONTENT_INDEXED | ");
   if(lh->Attr & 0x4000)
-    strcat((char *)attr_str, "ENCRYPTED | ");
+    strcat((char *)attr_str, "FILE_ATTRIBUTE_ENCRYPTED | ");
   attr_str[strlen((char *)attr_str)-3] = (unsigned char)0;
   return;
 }
@@ -1841,7 +1853,7 @@ void get_droid_a(struct LIF_CLSID * droid, struct LIF_CLSID_A * droid_a)
   int16_t Timehi, ClockSeq;
   int64_t Time;
 // Build the UUID string
-  snprintf((char *)droid_a->UUID, 40, "{%.8"PRIX32"-%.4"PRIX16"-%.2"PRIX16"\
+  snprintf((char *)droid_a->UUID, 40, "{%.8"PRIX32"-%.4"PRIX16"-%.4"PRIX16"\
 -%.2"PRIX8"%.2"PRIX8"-%.2"PRIX8"%.2"PRIX8"%.2"PRIX8"%.2"PRIX8"%.2"PRIX8"\
 %.2"PRIX8"}",
            droid->Data1,
@@ -1980,6 +1992,3 @@ void led_setnull(struct LIF_EXTRA_DATA * led)
 
   led->terminal = 0;
 }
-//
-//
-

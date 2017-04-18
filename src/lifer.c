@@ -89,6 +89,29 @@ contain details\n");
 ***********\n");
 }
 //
+//Function: replace_comma(unsigned char * str, int len)
+//          Takes a zero terminated string 'str' of length 'len' max
+//          and substitutes semi-colons for commas.
+//          Return value is the number of substitutions.
+//          This function is useful for CSV output so that strings don't mess 
+//          up the formatting
+int replace_comma(unsigned char * str, int len)
+{
+	int result = 0;
+	for (int i = 0; (i < len); i++)
+	{
+		// Quit if we find a string terminator before len number of characters
+		if (str[i] == (int)0)
+			return result;
+		else if (str[i] == ',')
+		{
+			str[i] = ';';
+			result++;
+		}
+	}
+	return result;
+}
+//
 //Function: sv_out(FILE * fp) processes the link file and outputs the csv or tsv
 //          version of the decoded data.
 void sv_out(FILE* fp, char* fname, int less, char sep)
@@ -217,13 +240,9 @@ void sv_out(FILE* fp, char* fname, int less, char sep)
 
         //Property Store
         {
-          /* Commented out because this didn't work in liblife
-      // TODO Restore this
-
           printf("ED PS Size (bytes)%c", sep);
           printf("ED PS Signature%c", sep);
           printf("ED PS Number of Stores %c", sep);
-          */
         }
       //ED Special Folder Data
       if(less == 0)
@@ -378,6 +397,11 @@ void sv_out(FILE* fp, char* fname, int less, char sep)
         {
           printf("%s%c", lif_a.lsda.CountChars[i],sep);
         }
+	  //If csv output then replace a comma in the string with a semi-colon
+	  if (output_type == csv)
+	  {
+		  replace_comma(lif_a.lsda.Data[i], (int)lif_a.lsda.CountChars[i]);
+	  }
       printf("%s%c", lif_a.lsda.Data[i],sep);
     }
   //Extra data
@@ -499,21 +523,22 @@ void text_out(FILE* fp, char* fname, int less)
       return;
     }
   //Print out the results
-  printf("LINK FILE -------------- %s\n", fname);
-  printf("  {stat DATA}\n");
+  printf("\nLINK FILE -------------- %s\n", fname);
+  printf("{**OPERATING SYSTEM (stat) DATA**}\n");
   //Print a record
   if(less == 0) //omit this stuff if short info required
     {
-      printf("    File Size:           %u bytes\n", (unsigned int)statbuf.st_size);
+      printf("  File Size:           %u bytes\n", (unsigned int)statbuf.st_size);
     }
   strftime(buf, 29, "%Y-%m-%d %H:%M:%S (UTC)", gmtime(&statbuf.st_atime));
-  printf("    Last Accessed:       %s\n", buf);
+  printf("  Last Accessed:       %s\n", buf);
   strftime(buf, 29, "%Y-%m-%d %H:%M:%S (UTC)", gmtime(&statbuf.st_mtime));
-  printf("    Last Modified:       %s\n", buf);
+  printf("  Last Modified:       %s\n", buf);
   strftime(buf, 29, "%Y-%m-%d %H:%M:%S (UTC)", gmtime(&statbuf.st_ctime));
-  printf("    Last Changed:        %s\n\n", buf);
+  printf("  Last Changed:        %s\n\n", buf);
 
-  printf("  {LINK FILE - HEADER}\n");
+  printf("{**LINK FILE EMBEDDED DATA**}\n");
+  printf("  {S_2.1 - ShellLinkHeader}\n");
   if(less == 0)
     {
       printf("    Header Size:         %s bytes\n",lif_a.lha.H_size);
@@ -547,7 +572,7 @@ void text_out(FILE* fp, char* fname, int less)
     {
       if(less == 0)
         {
-          printf("  {LINK FILE - TARGET ID LIST}\n");
+          printf("  {S_2.2 - LinkTargetIDList}\n");
           printf("    IDList Size:         %s bytes\n",
                  lif_a.lidla.IDL_size);
           printf("    Number of Items:     %s\n",lif_a.lidla.NumItemIDs);
@@ -555,7 +580,7 @@ void text_out(FILE* fp, char* fname, int less)
     }
   if(lif.lh.Flags & 0x00000002) //If there is a LinkInfo
     {
-      printf("  {LINK FILE - LINK INFO}\n");
+      printf("  {S_2.3 - LinkInfo}\n");
       if(less == 0)
         {
           printf("    Total Size:          %s bytes\n", lif_a.lia.Size);
@@ -571,7 +596,7 @@ void text_out(FILE* fp, char* fname, int less)
       //There is a Volume ID structure (& LBP)
       if(lif.li.Flags & 0x00000001)
         {
-          printf("    {LINK INFO - VOLUME ID}\n");
+          printf("    {S_2.3.1 - LinkInfo - VolumeID}\n");
           if(less == 0)
             {
               printf("      Vol ID Size:       %s bytes\n", lif_a.lia.VolID.Size);
@@ -598,12 +623,12 @@ void text_out(FILE* fp, char* fname, int less)
             {
               printf("      Volume LabelU:     %s\n", lif_a.lia.VolID.VolumeLabelU);
             }
-          printf("    Local Base Path:     %s\n", lif_a.lia.LBP);
+          printf("      Local Base Path:   %s\n", lif_a.lia.LBP);
         }//End of VolumeID
       //CommonNetworkRelativeLink
       if(lif.li.Flags & 0x00000002)
         {
-          printf("    {LINK INFO - COMMON NETWORK RELATIVE LINK}\n");
+          printf("    {S_2.3.2 - LinkInfo - CommonNetworkRelativeLink}\n");
           if(less == 0)
             {
               printf("      CNR Size:          %s\n", lif_a.lia.CNR.Size);
@@ -638,14 +663,14 @@ void text_out(FILE* fp, char* fname, int less)
   //STRINGDATA
   if(lif.lh.Flags & 0x0000007C)
     {
-      printf("  {LINK FILE - STRING DATA}\n");
+      printf("  {S_2.4 - StringData}\n");
       if(less == 0)
         {
           printf("    StringData Size:     %s bytes\n", lif_a.lsda.Size);
         }
       if(lif.lh.Flags & 0x00000004)
         {
-          printf("    {STRING DATA - NAME STRING}\n");
+          printf("    {S_2.4 - StringData - NAME_STRING}\n");
           if(less == 0)
             {
               printf("      CountCharacters:   %s characters\n",
@@ -655,49 +680,49 @@ void text_out(FILE* fp, char* fname, int less)
         }
       if(lif.lh.Flags & 0x00000008)
         {
-          printf("    {STRING DATA - RELATIVE PATH}\n");
+          printf("    {S_2.4 - StringData - RELATIVE_PATH}\n");
           if(less == 0)
             {
               printf("      CountCharacters:   %s characters\n",
                      lif_a.lsda.CountChars[1]);
             }
-          printf("      Relative Path:     %s\n", lif_a.lsda.Data[1]);
+		  printf("      Relative Path:     %s\n", lif_a.lsda.Data[1]);
         }
       if(lif.lh.Flags & 0x00000010)
         {
-          printf("    {STRING DATA - WORKING DIR}\n");
+          printf("    {S_2.4 - StringData - WORKING_DIR}\n");
           if(less == 0)
             {
               printf("      CountCharacters:   %s characters\n",
                      lif_a.lsda.CountChars[2]);
             }
-          printf("      Working Dir:       %s\n", lif_a.lsda.Data[2]);
+		  printf("      Working Dir:       %s\n", lif_a.lsda.Data[2]);
         }
       if(lif.lh.Flags & 0x00000020)
         {
-          printf("    {STRING DATA - CMD LINE ARGS}\n");
+          printf("    {S_2.4 - StringData - COMMAND_LINE_ARGUMENTS}\n");
           if(less == 0)
             {
               printf("      CountCharacters:   %s characters\n",
                      lif_a.lsda.CountChars[3]);
             }
-          printf("      Cmd Line Args:     %s\n", lif_a.lsda.Data[3]);
+		  printf("      Cmd Line Args:     %s\n", lif_a.lsda.Data[3]);
         }
       if(lif.lh.Flags & 0x00000040)
         {
-          printf("    {STRING DATA - ICON LOCATION}\n");
+          printf("    {S_2.4 - StringData - ICON_LOCATION}\n");
           if(less == 0)
             {
               printf("      CountCharacters:   %s characters\n",
                      lif_a.lsda.CountChars[4]);
             }
-          printf("      Icon Location:     %s\n", lif_a.lsda.Data[4]);
+		  printf("      Icon Location:     %s\n", lif_a.lsda.Data[4]);
         }
 
     }// End of STRINGDATA
 
   //EXTRADATA
-  printf("  {LINK FILE - EXTRA DATA}\n");
+  printf("  {S_2.5 - ExtraData}\n");
   if(less == 0)
     {
       printf("    Extra Data Size:     %s bytes\n", lif_a.leda.Size);
@@ -707,17 +732,17 @@ void text_out(FILE* fp, char* fname, int less)
   // TODO other ED structures here
   if(lif.led.edtypes & PROPERTY_STORE_PROPS)
     {
-      printf("    {EXTRA DATA - PROPERTY STORE}\n");
+      printf("    {S_2.5.7 - ExtraData - PropertyStoreDataBlock}\n");
       if(less == 0)
         {
           printf("      BlockSize:         %s bytes\n", lif_a.leda.lpspa.Size);
           printf("      BlockSignature:    %s\n", lif_a.leda.lpspa.sig);
-          // TODO Restore this: printf("      Number of Stores:  %s\n", lif_a.leda.lpspa.NumStores);
+          printf("      Number of Stores:  %s\n", lif_a.leda.lpspa.NumStores);
         }
     }
   if(lif.led.edtypes & SPECIAL_FOLDER_PROPS)
     {
-      printf("    {EXTRA DATA - SPECIAL FOLDER DATA}\n");
+      printf("    {S_2.5.9 - ExtraData - SpecialFolderDataBlock}\n");
       if(less == 0)
         {
           printf("      BlockSize:         %s bytes\n", lif_a.leda.lsfpa.Size);
@@ -729,7 +754,7 @@ void text_out(FILE* fp, char* fname, int less)
     }
   if(lif.led.edtypes & TRACKER_PROPS)
     {
-      printf("    {EXTRA DATA - TRACKER DATA}\n");
+      printf("    {S_2.5.10 - ExtraData - TrackerDataBlock}\n");
       if(less == 0)
         {
           printf("      BlockSize:         %s bytes\n", lif_a.leda.ltpa.Size);
@@ -849,7 +874,7 @@ void text_out(FILE* fp, char* fname, int less)
     {
       if(less == 0)
         {
-          printf("    {EXTRA DATA - VISTA & ABOVE IDLIST}\n");
+          printf("    {S_2.5.11 - ExtraData - VistaAndAboveIDListDataBlock}\n");
           printf("      BlockSize:         %s bytes\n", lif_a.leda.lvidlpa.Size);
           printf("      BlockSignature:    %s\n", lif_a.leda.lvidlpa.sig);
           printf("      Number of Items:     %s\n",lif_a.leda.lvidlpa. NumItemIDs);
@@ -879,20 +904,20 @@ void proc_file(char* fname, int less)
       if(statbuf.st_size >= 76) //Don't bother with files that aren't big enough
         {
           //successful
-          if(test_link(fp) == 0)
+          if(test_link(fp) == 0) // Test to see if the file has the right magic
             {
               switch(output_type)
                 {
                 case csv:
-                  sv_out(fp, fname, less, ',');
+                  sv_out(fp, fname, less, ','); // Output to a separated file with the separator being a comma
                   break;
                 case tsv:
-                  sv_out(fp, fname, less, '\t');
+                  sv_out(fp, fname, less, '\t'); // Output to a separated file with the separator being a tab
                   break;
                 case txt:
                 default:       //Anything other than these 3 options should have been
                   //trapped already - this is just belt & braces!
-                  text_out(fp, fname, less);
+                  text_out(fp, fname, less); // Output to plain text
                 }
               filecount++;
             }
@@ -972,7 +997,8 @@ int main(int argc, char *argv[])
 
   //Parse the options
   while((opt = getopt(argc, argv, "vhso:")) != -1)
-    {
+    { 
+	  // Parse supplied command line options
       switch(opt)
         {
         case 'v':

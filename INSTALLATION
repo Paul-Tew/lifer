@@ -1,37 +1,92 @@
-INSTALLATION
+** INSTALLATION **
 
-LINUX
-In a command terminal
-  * Navigate to the ./src directory
-  * Issue the following command:
-  
-    gcc ./lifer.c ./liblife/liblife.c -o lifer
 
-Provided gcc and the development tools are installed on your system and no
-errors were reported you should now have the tool 'lifer' sitting in your
-src directory. You can test that it works by issuing the command:
+* GENERAL *
+
+
+The first thing to do is to ensure you have git installed on your 
+machine/device.
+In a command-line shell, change to your desired project root directory and 
+issue the command:
+
+    git clone https://github.com/Paul-Tew/lifer.git
+
+A new directory named 'lifer' will be created.
+
+
+* LINUX INSTALLATION (and other *nix platforms) *
+
+(This may work for Mac installations but I don't have the kind of money needed
+to test it out for sure...)
+Because this tool is pretty basic, the dependencies are minimal, ensure you
+have the 'gcc' compiler and the relevant 'libc' development libraries installed,
+that's all.
+
+Start a command-line terminal and navigate to the **./lifer/src** directory.
+Issue the command:
+
+    gcc -Wall ./lifer.c ./liblife/liblife.c -o lifer
+
+Provided no warnings or errors appeared, you should now have an executable file
+'lifer' sitting in the directory, you might want to check this by issuing the
+command:
+
+    ls -la
+
+If all is OK then you can test that lifer works by testing it out on the file
+specified in the Microsoft document which I included as part of the git
+repository you cloned and should be sitting in the ./Test/ directory. You can
+do this by issuing the command:
 
     ./lifer ./Test/Test.lnk
-	
-The terminal should fill with data relating to the Microsoft shortcut example:
-https://msdn.microsoft.com/en-us/library/dd871375.aspx
+
+You can also test that lifer works on a bunch of link files sitting in a
+directory by issuing the command:
+
+    ./lifer ./Test/WinXP/
+
+Install the tool onto the OS by issuing the command:
+
+    sudo install ./lifer /usr/bin/
+
+This will enable you to use lifer anywhere on your system without specifying
+the directory prefix 
+(e.g. `lifer ./Test/Test.lnk` rather than `./lifer ./Test/Test.lnk`)
 
 
-WINDOWS
-The source code comes with a set of Visual Studio 2017 Community Edition 
-solution files. If you don't have Visual Studio installed you can get the 
-community edition from:
-https://www.visualstudio.com/vs/community/
-With this installed you should be able to navigate with the file explorer to
-the 'src' folder and double-click on the 'lifer.vcxproj' file to open up the
-solution in Visual Studio.
-Check that the build target is suitable for your system (e.g. 'Debug' and 
-'x64') and build the solution (Ctrl + Shift + B). Provided there were no errors
-you should now have 'lifer.exe' in the associated build folder.
+* WINDOWS INSTALLATION *
 
-I have regularly come across the situation where an error occurs in the build
-process and the linker fails to find the 'liblife' library functions 'get_lif'
-and 'get_lif_a'. If this happens then right click on the liblife project in 
-the solution explorer and choose properties. Ensure that the Configuration Type
-is set to 'Static library (.lib)' and the Target Extension is set to '.lib'.
-The solution should now build.
+
+The lifer github project comes complete with a Visual Studio 2017 project
+solution so the easiest way to create a Windows executable is to install Visual
+Studio 2017 first. There is a free version (known as the 'community' version)
+available at 
+https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community&rel=15
+
+Once Visual Studio is installed:
+* Left-click on **File->Open->Project/Solution** and browse to the
+  **lifer.sln** file to load the solution into Visual Studio.
+* On the Standard Toolbar, set the Solution Configuration options to those that
+  suit your machine and preference (for example, I use: 'x64' and 'Debug')
+* Build the solution from the 'Build' menu or simply use the key combination: 
+  **Ctrl+Shift+B**
+* Provided there were no errors you should have an executable 'lifer.exe' file
+  in the relevant sub-folder of your project.
+* At this point I usually open a Powershell terminal and navigate to the folder
+  containing the executable which for me is done by issuing the command:
+
+    cd "F:\\lifer\src\x64\Debug\"
+
+* I then test the executable using the command:
+
+    .\lifer.exe ..\..\Test\Test.lnk
+
+---
+
+It is possible to make lifer in Windows without installing Visual Studio but you
+will still need to download and install the Visual C++ build tools available at
+http://landinghub.visualstudio.com/visual-cpp-build-tools
+
+Once installed, lifer can be built in the ./src/ directory by issuing the command:
+
+CL lifer.c .\liblife\liblife.c .\Win\dirent.c .\Win\getopt.c
