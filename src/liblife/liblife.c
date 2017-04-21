@@ -273,7 +273,7 @@ int get_lhdr_a(struct LIF_HDR* lh, struct LIF_HDR_A* lha)
   }
   else
   {
-	  sprintf((char *)hk1, "");
+	  hk1[0] = 0;
   }
   if (lh->Hotkey.HighKey & 0x02)
   {
@@ -281,7 +281,7 @@ int get_lhdr_a(struct LIF_HDR* lh, struct LIF_HDR_A* lha)
   }
   else
   {
-	  sprintf((char *)hk2, "");
+	  hk2[0] = 0;
   }
   if (lh->Hotkey.HighKey & 0x04)
   {
@@ -289,7 +289,7 @@ int get_lhdr_a(struct LIF_HDR* lh, struct LIF_HDR_A* lha)
   }
   else
   {
-	  sprintf((char *)hk3, "");
+	  hk3[0] = 0;
   }
   // Then the Low key
   if(((lh->Hotkey.LowKey > 0x2F ) && (lh->Hotkey.LowKey < 0x5B)))

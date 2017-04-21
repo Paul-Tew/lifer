@@ -7,7 +7,10 @@ A forensic tool for Windows link file examinations
 It started life as a lightweight tool that I wrote in order to extract certain information from link files to assist in enquiries I was making whilst working as a computer forensic analyst. Now I am retired but I am looking to expand it's usefulness and publish it so that others can benefit.
 
 The information extracted is in accordance with the Microsoft Open Specification Document 'MS-SHLLNK' which can be found online [**here**](https://msdn.microsoft.com/en-us/library/dd871305.aspx).
-At the time of writing only parts of specification version 1.2 are implemented. Over time however, I hope to bring the tool into line with the full current specification (version 3.0).
+At the time of writing only parts of specification version 3.0 are implemented. Over time however, I hope to bring the tool into line with the full current specification and also include other goodies such as:
+* A full output conforming to all of the sections in the MS-SHLLINK documentation.
+* Relevant output from IDList containers
+* Recognition of, and parsing of link file data within jump list containers.
 
 ## EXAMPLE USAGE
 Details of the files to be found in the Test directory and how to use them is given in the '.\Test\Tests.txt' file. What follows is a brief outline...
