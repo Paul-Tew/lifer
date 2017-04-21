@@ -95,7 +95,7 @@ contain details\n");
 //          Return value is the number of substitutions.
 //          This function is useful for CSV output so that strings don't mess 
 //          up the formatting
-int replace_comma(unsigned char * str, int len)
+int replace_comma(unsigned char * str, uint16_t len)
 {
 	int result = 0;
 	for (int i = 0; (i < len); i++)
@@ -400,7 +400,7 @@ void sv_out(FILE* fp, char* fname, int less, char sep)
 	  //If csv output then replace a comma in the string with a semi-colon
 	  if (output_type == csv)
 	  {
-		  replace_comma(lif_a.lsda.Data[i], (int)lif_a.lsda.CountChars[i]);
+		  replace_comma(lif_a.lsda.Data[i], lif.lsd.CountChars[i]);
 	  }
       printf("%s%c", lif_a.lsda.Data[i],sep);
     }
