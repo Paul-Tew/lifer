@@ -119,6 +119,7 @@
     <None Include="..\README.md">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="Test\WinXP.xlsx" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Test\Tests.txt">

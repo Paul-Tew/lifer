@@ -52,6 +52,9 @@
     <None Include="..\INSTALLATION">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="Test\WinXP.xlsx">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Test\Tests.txt">
