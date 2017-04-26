@@ -102,14 +102,58 @@ struct LIF_CONSOLE_PROPS
 {
   uint32_t           Size;
   uint32_t           sig;
-  //TODO Define this
+  uint16_t           FillAttributes;
+  uint16_t           PopupFillAttributes;
+  uint16_t           ScreenBufferSizeX;
+  uint16_t           ScreenBufferSizeY;
+  uint16_t			 WindowSizeX;
+  uint16_t			 WindowSizeY;
+  uint16_t			 WindowOriginX;
+  uint16_t			 WindowOriginY;
+  uint32_t			 Unused1;
+  uint32_t			 Unused2;
+  uint32_t			 FontSize;
+  uint32_t			 FontFamily;
+  uint32_t			 FontWeight;
+  wchar_t			 FaceName[32];
+  uint32_t			 CursorSize;
+  uint32_t			 FullScreen;
+  uint32_t			 QuickEdit;
+  uint32_t			 InsertMode;
+  uint32_t			 AutoPosition;
+  uint32_t			 HistoryBufferSize;
+  uint32_t			 NumberOfHistoryBuffers;
+  uint32_t			 HistoryNoDup;
+  uint32_t			 ColorTable[16];
 };
 
 struct LIF_CONSOLE_PROPS_A
 {
-  unsigned char               Size[10];
-  unsigned char               sig[12];
-  //TODO Define this
+  unsigned char          Size[10];
+  unsigned char          sig[12];
+  unsigned char          FillAttributes[8];
+  unsigned char          PopupFillAttributes[8];
+  unsigned char          ScreenBufferSizeX[8];
+  unsigned char          ScreenBufferSizeY[8];
+  unsigned char			 WindowSizeX[8];
+  unsigned char			 WindowSizeY[8];
+  unsigned char			 WindowOriginX[8];
+  unsigned char			 WindowOriginY[8];
+  unsigned char			 Unused1[12];
+  unsigned char			 Unused2[12];
+  unsigned char			 FontSize[12];
+  unsigned char			 FontFamily[12];
+  unsigned char			 FontWeight[12];
+  unsigned char			 FaceName[33];
+  unsigned char			 CursorSize[12];
+  unsigned char			 FullScreen[12];
+  unsigned char			 QuickEdit[12];
+  unsigned char			 InsertMode[12];
+  unsigned char			 AutoPosition[12];
+  unsigned char			 HistoryBufferSize[12];
+  unsigned char			 NumberOfHistoryBuffers[12];
+  unsigned char			 HistoryNoDup[12];
+  unsigned char			 ColorTable[16][12];
 };
 
 struct LIF_CONSOLE_FE_PROPS
@@ -398,9 +442,9 @@ struct LIF_INFO  // Link Info Structure
   uint32_t           LBPOffsetU; //Local Base path Offset (Unicode)
   uint32_t           CPSOffsetU; //Common Path Suffix Offset Unicode
   struct LIF_VOLID   VolID;     //Volume ID structure
-  unsigned char               LBP[300]; //Local Base Path
+  unsigned char      LBP[300]; //Local Base Path
   struct LIF_CNR     CNR;      //Common Network Relative Link structure
-  unsigned char               CPS[100]; //Common Path Suffix
+  unsigned char      CPS[100]; //Common Path Suffix
   wchar_t            LBPU[300]; //Local Base Path, Unicode version
   wchar_t            CPSU[100]; //Common Path Suffix, Unicode
 };
@@ -416,9 +460,9 @@ struct LIF_INFO_A
   unsigned char               CPSOffset[10];
   unsigned char               LBPOffsetU[10];
   unsigned char               CPSOffsetU[10];
-  struct LIF_VOLID_A VolID;
+  struct LIF_VOLID_A		  VolID;
   unsigned char               LBP[300]; //Local Base Path
-  struct LIF_CNR_A   CNR;
+  struct LIF_CNR_A			  CNR;
   unsigned char               CPS[100]; //Common Path Suffix
   unsigned char               LBPU[300]; //Local Base Path, Unicode version
   unsigned char               CPSU[100]; //Common Path Suffix, Unicode

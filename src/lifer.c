@@ -229,85 +229,90 @@ void sv_out(FILE* fp, char* fname, int less, char sep)
           printf("StrData Icon Loc Num Chars%c", sep);
         }
       printf("StrData Icon Location%c", sep);
-      //Extra data
+ 	  // S2.5 ExtraData structures
       if(less == 0)
         {
           printf("ExtraData Total Size (bytes)%c", sep);
         }
       printf("ExtraData Structures%c", sep);
-      if(less == 0)
-        // TODO Other ExtraData structures
 
-        //Property Store
-        {
-          printf("ED PS Size (bytes)%c", sep);
-          printf("ED PS Signature%c", sep);
-          printf("ED PS Number of Stores %c", sep);
-        }
-      //ED Special Folder Data
+	  // TODO Other ExtraData structures 
+	  // S2.5.1 ConsoleDataBlock
+	  if (less == 0)
+	  {
+		  printf("ED CD Size (bytes)%c", sep);
+		  printf("ED CD Signature%c", sep);
+		  //TODO CDB More Here
+	  }
+	  // S2.5.7 PropertyStoreDataBlock
       if(less == 0)
-        {
-          printf("ED SFolderData Size (bytes)%c", sep);
-          printf("ED SFolderData Signature%c", sep);
-          printf("ED SFolderData ID%c", sep);
-          printf("ED SFolderData Offset%c", sep);
-        }
-      // ED Tracker Data
+	  {
+		printf("ED PS Size (bytes)%c", sep);
+		printf("ED PS Signature%c", sep);
+	    printf("ED PS Number of Stores %c", sep);
+	  }
+      // S2.5.9 SpecialFolderDataBlock
       if(less == 0)
-        {
-          printf("ED TrackerData Size (bytes)%c", sep);
-          printf("ED TrackerData Signature%c", sep);
-          printf("ED TrackerData Length%c", sep);
-          printf("ED TrackerData Version%c", sep);
-        }
+      {
+        printf("ED SFolderData Size (bytes)%c", sep);
+        printf("ED SFolderData Signature%c", sep);
+        printf("ED SFolderData ID%c", sep);
+        printf("ED SFolderData Offset%c", sep);
+      }
+      // S 2.5.10 TrackerDataBlock
+      if(less == 0)
+      {
+        printf("ED TrackerData Size (bytes)%c", sep);
+        printf("ED TrackerData Signature%c", sep);
+        printf("ED TrackerData Length%c", sep);
+        printf("ED TrackerData Version%c", sep);
+      }
       printf("ED TrackerData MachineID%c", sep);
       printf("ED TrackerData Droid1%c", sep);
       if(less == 0)
-        {
-          printf("ED TD Droid1 Version%c", sep);
-          printf("ED TD Droid1 Variant%c", sep);
-        }
+      {
+        printf("ED TD Droid1 Version%c", sep);
+        printf("ED TD Droid1 Variant%c", sep);
+      }
       printf("ED TD Droid1 Time%c", sep);
       printf("ED TD Droid1 Clock Seq%c", sep);
       printf("ED TD Droid1 Node%c", sep);
       printf("ED TrackerData Droid2%c", sep);
       if(less == 0)
-        {
-          printf("ED TD Droid2 Version%c", sep);
-          printf("ED TD Droid2 Variant%c", sep);
-        }
+      {
+        printf("ED TD Droid2 Version%c", sep);
+        printf("ED TD Droid2 Variant%c", sep);
+      }
       printf("ED TD Droid2 Time%c", sep);
       printf("ED TD Droid2 Clock Seq%c", sep);
       printf("ED TD Droid2 Node%c", sep);
       printf("ED TrackerData DroidBirth1%c", sep);
       if(less == 0)
-        {
-          printf("ED TD DroidBirth1 Version%c", sep);
-          printf("ED TD DroidBirth1 Variant%c", sep);
-        }
+      {
+        printf("ED TD DroidBirth1 Version%c", sep);
+        printf("ED TD DroidBirth1 Variant%c", sep);
+      }
       printf("ED TD DroidBirth1 Time%c", sep);
       printf("ED TD DroidBirth1 Clock Seq%c", sep);
       printf("ED TD DroidBirth1 Node%c", sep);
       printf("ED TrackerData DroidBirth2%c", sep);
       if(less == 0)
-        {
-          printf("ED TD DroidBirth2 Version%c", sep);
-          printf("ED TD DroidBirth2 Variant%c", sep);
-        }
+      {
+        printf("ED TD DroidBirth2 Version%c", sep);
+        printf("ED TD DroidBirth2 Variant%c", sep);
+      }
       printf("ED TD DroidBirth2 Time%c", sep);
       printf("ED TD DroidBirth2 Clock Seq%c", sep);
       printf("ED TD DroidBirth2 Node%c", sep);
       //ED Vista & above IDList
       if(less == 0)
-        {
-          printf("ED >= Vista IDList Size%c", sep);
-          printf("ED >= Vista IDList Signature%c", sep);
-          printf("ED >= Vista IDList Num Items%c", sep);
-        }
-
+      {
+        printf("ED >= Vista IDList Size%c", sep);
+        printf("ED >= Vista IDList Signature%c", sep);
+        printf("ED >= Vista IDList Num Items%c", sep);
+      }
       printf("\n");
     }
-
   //Print a record
   printf("%s%c", fname, sep);
   if(less == 0)
@@ -404,7 +409,7 @@ void sv_out(FILE* fp, char* fname, int less, char sep)
 	  }
       printf("%s%c", lif_a.lsda.Data[i],sep);
     }
-  //Extra data
+  // S2.5 ExtraData
   if(less == 0)
     {
       printf("%s%c", lif_a.leda.Size,sep);
@@ -412,92 +417,96 @@ void sv_out(FILE* fp, char* fname, int less, char sep)
   printf("%s%c", lif_a.leda.edtypes,sep);
   // TODO Other ED structures
 
-  //Property Store Props
+  // S2.5.1 ConsoleDataBlock
+  if (less == 0)
+  {
+	  printf("%s%c", lif_a.leda.lcpa.Size, sep);
+	  printf("%s%c", lif_a.leda.lcpa.sig, sep);
+  }
+  // S2.5.7 PropertyStoreDataBlock
   if(less == 0)
-    {
-      printf("%s%c", lif_a.leda.lpspa.Size,sep);
-      printf("%s%c", lif_a.leda.lpspa.sig,sep);
-      printf("%s%c", lif_a.leda.lpspa.NumStores,sep);
-    }
-  //Special Folder Props
+  {
+    printf("%s%c", lif_a.leda.lpspa.Size,sep);
+    printf("%s%c", lif_a.leda.lpspa.sig,sep);
+    printf("%s%c", lif_a.leda.lpspa.NumStores,sep);
+  }
+  // S2.5.9 SpecialFolderDataBlock
   if(less == 0)
-    {
-      printf("%s%c", lif_a.leda.lsfpa.Size,sep);
-      printf("%s%c", lif_a.leda.lsfpa.sig,sep);
-      printf("%s%c", lif_a.leda.lsfpa.SpecialFolderID,sep);
-      printf("%s%c", lif_a.leda.lsfpa.Offset,sep);
-    }
-  //Tracker data
+  {
+    printf("%s%c", lif_a.leda.lsfpa.Size,sep);
+    printf("%s%c", lif_a.leda.lsfpa.sig,sep);
+    printf("%s%c", lif_a.leda.lsfpa.SpecialFolderID,sep);
+    printf("%s%c", lif_a.leda.lsfpa.Offset,sep);
+  }
+  // S2.5.10 TrackerDataBlock
   if(less == 0)
-    {
-      printf("%s%c", lif_a.leda.ltpa.Size,sep);
-      printf("%s%c", lif_a.leda.ltpa.sig,sep);
-      printf("%s%c", lif_a.leda.ltpa.Length,sep);
-      printf("%s%c", lif_a.leda.ltpa.Version,sep);
-    }
+  {
+    printf("%s%c", lif_a.leda.ltpa.Size,sep);
+    printf("%s%c", lif_a.leda.ltpa.sig,sep);
+    printf("%s%c", lif_a.leda.ltpa.Length,sep);
+    printf("%s%c", lif_a.leda.ltpa.Version,sep);
+  }
   printf("%s%c", lif_a.leda.ltpa.MachineID,sep);
   printf("%s%c", lif_a.leda.ltpa.Droid1.UUID,sep);
   if(less == 0)
-    {
-      printf("%s%c", lif_a.leda.ltpa.Droid1.Version,sep);
-      printf("%s%c", lif_a.leda.ltpa.Droid1.Variant,sep);
-      printf("%s%c", lif_a.leda.ltpa.Droid1.Time_long,sep);
-    }
+  {
+    printf("%s%c", lif_a.leda.ltpa.Droid1.Version,sep);
+    printf("%s%c", lif_a.leda.ltpa.Droid1.Variant,sep);
+    printf("%s%c", lif_a.leda.ltpa.Droid1.Time_long,sep);
+  }
   else
-    {
-      printf("%s%c", lif_a.leda.ltpa.Droid1.Time,sep);
-    }
+  {
+    printf("%s%c", lif_a.leda.ltpa.Droid1.Time,sep);
+  }
   printf("%s%c", lif_a.leda.ltpa.Droid1.ClockSeq,sep);
   printf("%s%c", lif_a.leda.ltpa.Droid1.Node,sep);
   printf("%s%c", lif_a.leda.ltpa.Droid2.UUID,sep);
   if(less == 0)
-    {
-      printf("%s%c", lif_a.leda.ltpa.Droid2.Version,sep);
-      printf("%s%c", lif_a.leda.ltpa.Droid2.Variant,sep);
-      printf("%s%c", lif_a.leda.ltpa.Droid2.Time_long,sep);
-    }
+  {
+    printf("%s%c", lif_a.leda.ltpa.Droid2.Version,sep);
+    printf("%s%c", lif_a.leda.ltpa.Droid2.Variant,sep);
+    printf("%s%c", lif_a.leda.ltpa.Droid2.Time_long,sep);
+  }
   else
-    {
-      printf("%s%c", lif_a.leda.ltpa.Droid2.Time,sep);
-    }
+  {
+    printf("%s%c", lif_a.leda.ltpa.Droid2.Time,sep);
+  }
   printf("%s%c", lif_a.leda.ltpa.Droid2.ClockSeq,sep);
   printf("%s%c", lif_a.leda.ltpa.Droid2.Node,sep);
   printf("%s%c", lif_a.leda.ltpa.DroidBirth1.UUID,sep);
   if(less == 0)
-    {
-      printf("%s%c", lif_a.leda.ltpa.DroidBirth1.Version,sep);
-      printf("%s%c", lif_a.leda.ltpa.DroidBirth1.Variant,sep);
-      printf("%s%c", lif_a.leda.ltpa.DroidBirth1.Time_long,sep);
-    }
+  {
+    printf("%s%c", lif_a.leda.ltpa.DroidBirth1.Version,sep);
+    printf("%s%c", lif_a.leda.ltpa.DroidBirth1.Variant,sep);
+    printf("%s%c", lif_a.leda.ltpa.DroidBirth1.Time_long,sep);
+  }
   else
-    {
-      printf("%s%c", lif_a.leda.ltpa.DroidBirth1.Time,sep);
-    }
+  {
+    printf("%s%c", lif_a.leda.ltpa.DroidBirth1.Time,sep);
+  }
   printf("%s%c", lif_a.leda.ltpa.DroidBirth1.ClockSeq,sep);
   printf("%s%c", lif_a.leda.ltpa.DroidBirth1.Node,sep);
   printf("%s%c", lif_a.leda.ltpa.DroidBirth2.UUID,sep);
   if(less == 0)
-    {
-      printf("%s%c", lif_a.leda.ltpa.DroidBirth2.Version,sep);
-      printf("%s%c", lif_a.leda.ltpa.DroidBirth2.Variant,sep);
-      printf("%s%c", lif_a.leda.ltpa.DroidBirth2.Time_long,sep);
-    }
+  {
+    printf("%s%c", lif_a.leda.ltpa.DroidBirth2.Version,sep);
+    printf("%s%c", lif_a.leda.ltpa.DroidBirth2.Variant,sep);
+    printf("%s%c", lif_a.leda.ltpa.DroidBirth2.Time_long,sep);
+  }
   else
-    {
-      printf("%s%c", lif_a.leda.ltpa.DroidBirth2.Time,sep);
-    }
+  {
+    printf("%s%c", lif_a.leda.ltpa.DroidBirth2.Time,sep);
+  }
   printf("%s%c", lif_a.leda.ltpa.DroidBirth2.ClockSeq,sep);
   printf("%s%c", lif_a.leda.ltpa.DroidBirth2.Node,sep);
-  //Vista & above IDList
+  // S2.5.11 VistaAndAboveIDListDataBlock
   if(less == 0)
-    {
-      printf("%s%c", lif_a.leda.lvidlpa.Size, sep);
-      printf("%s%c", lif_a.leda.lvidlpa.sig, sep);
-      printf("%s%c", lif_a.leda.lvidlpa.NumItemIDs, sep);
-    }
-
+  {
+    printf("%s%c", lif_a.leda.lvidlpa.Size, sep);
+    printf("%s%c", lif_a.leda.lvidlpa.sig, sep);
+    printf("%s%c", lif_a.leda.lvidlpa.NumItemIDs, sep);
+  }
   printf("\n");
-
 }
 //
 //Function: text_out(FILE * fp) processes the link file and outputs the text
@@ -730,6 +739,15 @@ void text_out(FILE* fp, char* fname, int less)
       printf("    ED Structures:       %s\n", lif_a.leda.edtypes);
     }
   // TODO other ED structures here
+  if (lif.led.edtypes & CONSOLE_PROPS)
+  {
+	  printf("    {S_2.5.1 - ExtraData - ConsoleDataBlock}\n");
+	  if (less == 0)
+	  {
+		  printf("      BlockSize:         %s bytes\n", lif_a.leda.lcpa.Size);
+		  printf("      BlockSignature:    %s\n", lif_a.leda.lcpa.sig);
+	  }
+  }
   if(lif.led.edtypes & PROPERTY_STORE_PROPS)
     {
       printf("    {S_2.5.7 - ExtraData - PropertyStoreDataBlock}\n");

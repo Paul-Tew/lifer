@@ -273,6 +273,7 @@ int get_lhdr_a(struct LIF_HDR* lh, struct LIF_HDR_A* lha)
   }
   else
   {
+	  //Just create a null length string if the relevant key isn't there
 	  hk1[0] = 0;
   }
   if (lh->Hotkey.HighKey & 0x02)
@@ -291,15 +292,19 @@ int get_lhdr_a(struct LIF_HDR* lh, struct LIF_HDR_A* lha)
   {
 	  hk3[0] = 0;
   }
+  //
   // Then the Low key
   if(((lh->Hotkey.LowKey > 0x2F ) && (lh->Hotkey.LowKey < 0x5B)))
     {
-      sprintf((char *)lk, "%u", (unsigned int)lh->Hotkey.LowKey);
+      // Regular keys
+	  sprintf((char *)lk, "%u", (unsigned int)lh->Hotkey.LowKey);
     }
   else if(((lh->Hotkey.LowKey > 0x6F ) && (lh->Hotkey.LowKey < 0x88)))
     {
-      sprintf((char *)lk, "F%u", (unsigned int)lh->Hotkey.LowKey - 111);
+      // Function keys
+	  sprintf((char *)lk, "F%u", (unsigned int)lh->Hotkey.LowKey - 111);
     }
+  // Special keys
   else if(lh->Hotkey.LowKey == 0x90)
     {
       sprintf((char *)lk, "NUM LOCK");
@@ -308,6 +313,7 @@ int get_lhdr_a(struct LIF_HDR* lh, struct LIF_HDR_A* lha)
     {
       sprintf((char *)lk, "SCROLL LOCK");
     }
+  // Probably an exotic keyboard if we land in this bit of code.
   else
     {
       sprintf((char *)lk, "[NOT DEFINED]");
@@ -1112,13 +1118,13 @@ int get_stringdata_a(struct LIF_STRINGDATA * lsd, struct LIF_STRINGDATA_A * lsda
 //Unicode strings to ASCII if necessary)
 int get_extradata(FILE * fp, int pos, struct LIF * lif)
 {
-  int                i, posn = 0;
+  int                i, j, posn = 0;
   uint32_t           blocksize, blocksig, datasize;
   unsigned char      size_buf[4];   //A small buffer to hold the size element
   unsigned char      sig_buf[4];
   unsigned char      data_buf[4096];
 
-  led_setnull(&lif->led); //set all the extradata sections to 0 initially
+  led_setnull(&lif->led); //set all the extradata BlockSize and BlockSignature sections to 0 initially
   lif->led.edtypes = EMPTY;
 
   fseek(fp, pos, SEEK_SET);
@@ -1156,10 +1162,44 @@ int get_extradata(FILE * fp, int pos, struct LIF * lif)
           //TODO Fill this
           break;
         case 0xA0000002: // Signature for a ConsoleDataBlock
+		  if (blocksize != 0x000000CC) // In the spec - this must be the blocksize value
+		  {
+			  fprintf(stderr, "Wrong size reported for ExtraData ConsoleDataBlock\n");
+			  break;
+		  }
           lif->led.lcp.Size = blocksize;
           lif->led.lcp.sig = blocksig;
           lif->led.edtypes += CONSOLE_PROPS;
-          //TODO Fill this
+          //TODO Test this - ONGOING
+		  lif->led.lcp.FillAttributes = get_le_uint16(data_buf, 0);
+		  lif->led.lcp.PopupFillAttributes = get_le_uint16(data_buf, 2);
+		  lif->led.lcp.ScreenBufferSizeX = get_le_uint16(data_buf, 4);
+		  lif->led.lcp.ScreenBufferSizeY = get_le_uint16(data_buf, 6);
+		  lif->led.lcp.WindowSizeX = get_le_uint16(data_buf, 8);
+		  lif->led.lcp.WindowSizeY = get_le_uint16(data_buf, 10);
+		  lif->led.lcp.WindowOriginX = get_le_uint16(data_buf, 12);
+		  lif->led.lcp.WindowOriginY = get_le_uint16(data_buf, 14);
+		  lif->led.lcp.Unused1 = get_le_uint32(data_buf, 16);
+		  lif->led.lcp.Unused2 = get_le_uint32(data_buf, 20);
+		  lif->led.lcp.FontSize = get_le_uint32(data_buf, 24);
+		  lif->led.lcp.FontFamily = get_le_uint32(data_buf, 28);
+		  lif->led.lcp.FontWeight = get_le_uint32(data_buf, 32);
+		  if (get_le_unistr(data_buf, 36, 32, lif->led.lcp.FaceName) < 0)
+		  {
+			  lif->led.lcp.FaceName[0] = (wchar_t)0; //Null string if no characters read
+		  }
+		  lif->led.lcp.CursorSize = get_le_uint32(data_buf, 100);
+		  lif->led.lcp.FullScreen = get_le_uint32(data_buf, 104);
+		  lif->led.lcp.QuickEdit = get_le_uint32(data_buf, 108);
+		  lif->led.lcp.InsertMode = get_le_uint32(data_buf, 112);
+		  lif->led.lcp.AutoPosition = get_le_uint32(data_buf, 116);
+		  lif->led.lcp.HistoryBufferSize = get_le_uint32(data_buf, 120);
+		  lif->led.lcp.NumberOfHistoryBuffers = get_le_uint32(data_buf, 124);
+		  lif->led.lcp.HistoryNoDup = get_le_uint32(data_buf, 128);
+		  for (j = 0; j < 16; j++)
+		  {
+			  lif->led.lcp.ColorTable[j] = get_le_uint32(data_buf, (j * 4) + 132);
+		  }
           break;
         case 0xA0000003: //Signature for a TrackerDataBlock
           lif->led.ltp.Size = blocksize;
@@ -1271,6 +1311,8 @@ int get_extradata_a(struct LIF_EXTRA_DATA * led, struct LIF_EXTRA_DATA_A * leda)
   if(led->edtypes & CONSOLE_PROPS)
     {
       strcat((char *)leda->edtypes, "CONSOLE_PROPS | ");
+	  snprintf((char *)leda->lcpa.Size, 10, "%"PRIu32, led->lcp.Size);
+	  snprintf((char *)leda->lcpa.sig, 12, "0x%.8"PRIX32, led->lcp.sig);
 
     }
   else
