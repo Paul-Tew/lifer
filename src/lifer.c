@@ -120,7 +120,7 @@ void sv_out(FILE* fp, char* fname, int less, char sep)
   struct LIF_A lif_a;
   struct stat statbuf;
   char buf[40];
-  int  i;
+  int  i, j;
 
 
   // Get the stat info for the file itself
@@ -240,9 +240,31 @@ void sv_out(FILE* fp, char* fname, int less, char sep)
 	  // S2.5.1 ConsoleDataBlock
 	  if (less == 0)
 	  {
-		  printf("ED CD Size (bytes)%c", sep);
-		  printf("ED CD Signature%c", sep);
-		  //TODO CDB More Here
+		  printf("ED CDB Size (bytes)%c", sep);
+		  printf("ED CDB Signature%c", sep);
+		  printf("ED CDB FillAttributes%c", sep);
+		  printf("ED CDB PopupFillAttr%c", sep);
+		  printf("ED CDB ScrBufSizeX%c", sep);
+		  printf("ED CDB ScrBufSizeY%c", sep);
+		  printf("ED CDB WindowSizeX%c", sep);
+		  printf("ED CDB WindowSizeY%c", sep);
+		  printf("ED CDB WindowOriginX%c", sep);
+		  printf("ED CDB WindowOriginY%c", sep);
+		  printf("ED CDB Unused1%c", sep);
+		  printf("ED CDB Unused2%c", sep);
+		  printf("ED CDB FontSize%c", sep);
+		  printf("ED CDB FontFamily%c", sep);
+		  printf("ED CDB FontWeight%c", sep);
+		  printf("ED CDB FaceName%c", sep);
+		  printf("ED CDB CursorSize%c", sep);
+		  printf("ED CDB FullScreen%c", sep);
+		  printf("ED CDB QuickEdit%c", sep);
+		  printf("ED CDB InsertMode%c", sep);
+		  printf("ED CDB AutoPosition%c", sep);
+		  printf("ED CDB HistoryBufSize%c", sep);
+		  printf("ED CDB NumHistoryBuf%c", sep);
+		  printf("ED CDB HistoryNoDup%c", sep);
+		  printf("ED CDB ColorTable%c", sep);
 	  }
 	  // S2.5.7 PropertyStoreDataBlock
       if(less == 0)
@@ -415,14 +437,45 @@ void sv_out(FILE* fp, char* fname, int less, char sep)
       printf("%s%c", lif_a.leda.Size,sep);
     }
   printf("%s%c", lif_a.leda.edtypes,sep);
-  // TODO Other ED structures
 
   // S2.5.1 ConsoleDataBlock
   if (less == 0)
   {
 	  printf("%s%c", lif_a.leda.lcpa.Size, sep);
 	  printf("%s%c", lif_a.leda.lcpa.sig, sep);
+	  printf("%s%c", lif_a.leda.lcpa.FillAttributes, sep);
+	  printf("%s%c", lif_a.leda.lcpa.PopupFillAttributes, sep);
+	  printf("%s%c", lif_a.leda.lcpa.ScreenBufferSizeX, sep);
+	  printf("%s%c", lif_a.leda.lcpa.ScreenBufferSizeY, sep);
+	  printf("%s%c", lif_a.leda.lcpa.WindowSizeX, sep);
+	  printf("%s%c", lif_a.leda.lcpa.WindowSizeY, sep);
+	  printf("%s%c", lif_a.leda.lcpa.WindowOriginX, sep);
+	  printf("%s%c", lif_a.leda.lcpa.WindowOriginY, sep);
+	  printf("%s%c", lif_a.leda.lcpa.Unused1, sep);
+	  printf("%s%c", lif_a.leda.lcpa.Unused2, sep);
+	  printf("%s%c", lif_a.leda.lcpa.FontSize, sep);
+	  printf("%s%c", lif_a.leda.lcpa.FontFamily, sep);
+	  printf("%s%c", lif_a.leda.lcpa.FontWeight, sep);
+	  printf("%s%c", lif_a.leda.lcpa.FaceName, sep);
+	  printf("%s%c", lif_a.leda.lcpa.CursorSize, sep);
+	  printf("%s%c", lif_a.leda.lcpa.FullScreen, sep);
+	  printf("%s%c", lif_a.leda.lcpa.QuickEdit, sep);
+	  printf("%s%c", lif_a.leda.lcpa.InsertMode, sep);
+	  printf("%s%c", lif_a.leda.lcpa.AutoPosition, sep);
+	  printf("%s%c", lif_a.leda.lcpa.HistoryBufferSize, sep);
+	  printf("%s%c", lif_a.leda.lcpa.NumberOfHistoryBuffers, sep);
+	  printf("%s%c", lif_a.leda.lcpa.HistoryNoDup, sep);
+	  for (j = 0; j < 15; j++)
+	  {
+		  //15 consecutive ColorTable Entries
+		  printf("%s%c", lif_a.leda.lcpa.ColorTable[j], ';');
+	  }
+	  // And the last one terminated with the field separator
+	  printf("%s%c", lif_a.leda.lcpa.ColorTable[j], sep);
   }
+
+  // TODO Other ED structures
+
   // S2.5.7 PropertyStoreDataBlock
   if(less == 0)
   {
@@ -744,8 +797,33 @@ void text_out(FILE* fp, char* fname, int less)
 	  printf("    {S_2.5.1 - ExtraData - ConsoleDataBlock}\n");
 	  if (less == 0)
 	  {
+		  //TODO Some of these need attributes adding maybe
 		  printf("      BlockSize:         %s bytes\n", lif_a.leda.lcpa.Size);
 		  printf("      BlockSignature:    %s\n", lif_a.leda.lcpa.sig);
+		  printf("      FillAttributes:    %s\n", lif_a.leda.lcpa.FillAttributes);
+		  printf("      PopupFillAttr:     %s\n", lif_a.leda.lcpa.PopupFillAttributes);
+		  printf("      ScreenBufSizeX:    %s\n", lif_a.leda.lcpa.ScreenBufferSizeX);
+		  printf("      ScreenBufSizeY:    %s\n", lif_a.leda.lcpa.ScreenBufferSizeY);
+		  printf("      WindowSizeX:       %s\n", lif_a.leda.lcpa.WindowSizeX);
+		  printf("      WindowSizeY:       %s\n", lif_a.leda.lcpa.WindowSizeY);
+		  printf("      WindowOriginX:     %s\n", lif_a.leda.lcpa.WindowOriginX);
+		  printf("      WindowOriginY:     %s\n", lif_a.leda.lcpa.WindowOriginY);
+		  printf("      Unused1:           %s\n", lif_a.leda.lcpa.Unused1);
+		  printf("      Unused2:           %s\n", lif_a.leda.lcpa.Unused2);
+		  printf("      FontSize:          %s\n", lif_a.leda.lcpa.FontSize);
+		  printf("      FontFamily:        %s\n", lif_a.leda.lcpa.FontFamily);
+		  printf("      FontWeight:        %s\n", lif_a.leda.lcpa.FontWeight);
+		  printf("      FaceName:          %s\n", lif_a.leda.lcpa.FaceName);
+		  printf("      CursorSize:        %s\n", lif_a.leda.lcpa.CursorSize);
+		  printf("      FullScreen:        %s\n", lif_a.leda.lcpa.FullScreen);
+		  printf("      QuickEdit:         %s\n", lif_a.leda.lcpa.QuickEdit);
+		  printf("      InsertMode:        %s\n", lif_a.leda.lcpa.InsertMode);
+		  printf("      AutoPosition:      %s\n", lif_a.leda.lcpa.AutoPosition);
+		  printf("      HistoryBufSize:    %s\n", lif_a.leda.lcpa.HistoryBufferSize);
+		  printf("      NumHistBuffers:    %s\n", lif_a.leda.lcpa.NumberOfHistoryBuffers);
+		  printf("      HistoryNoDup:      %s\n", lif_a.leda.lcpa.HistoryNoDup);
+		  printf("      ColorTable:        %s\n", lif_a.leda.lcpa.ColorTable);
+
 	  }
   }
   if(lif.led.edtypes & PROPERTY_STORE_PROPS)

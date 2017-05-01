@@ -17,7 +17,7 @@ or
     (pathto\)lifer.exe -o tsv .\Test2.lnk
 will not change the value of this string, however, if the command:
     (pathto\)lifer.exe -o csv .\Test2.lnk
-Is used then the comma in the string is changed to a semi-colon.
+is used then the comma in the string is changed to a semi-colon.
 
 FILE 'Test3.lnk'
 This is a shortcut file with an ExtraData ConsoleDataBlock

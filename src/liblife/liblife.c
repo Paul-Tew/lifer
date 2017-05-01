@@ -1063,7 +1063,6 @@ int get_stringdata(FILE * fp, int pos, struct LIF * lif)
               size_buf[1] = getc(fp);
               str_size = get_le_uint16(size_buf, 0);
               lif->lsd.CountChars[i] = str_size;
-              // I'm restricting the 
 			  if(str_size > 299)
                 {
                   str_size = 299;
@@ -1077,11 +1076,6 @@ int get_stringdata(FILE * fp, int pos, struct LIF * lif)
                 {
 				  lif->lsd.Data[i][str_size] = 0;
                 }
-			  // TODO if the output type is 'csv' and there are commas in the string then replace them with semicolons
-			  // commas are common when referring to resources within dll libraries
-			  // these commas need replacing to prevent messed-up formatting in a csv file.
-			  // the output therefore won't be strictly correct
-			  // strchr
               tsize += (lif->lsd.CountChars[i] + 2);
             }
         }
@@ -1170,8 +1164,7 @@ int get_extradata(FILE * fp, int pos, struct LIF * lif)
           lif->led.lcp.Size = blocksize;
           lif->led.lcp.sig = blocksig;
           lif->led.edtypes += CONSOLE_PROPS;
-          //TODO Test this - ONGOING
-		  lif->led.lcp.FillAttributes = get_le_uint16(data_buf, 0);
+          lif->led.lcp.FillAttributes = get_le_uint16(data_buf, 0);
 		  lif->led.lcp.PopupFillAttributes = get_le_uint16(data_buf, 2);
 		  lif->led.lcp.ScreenBufferSizeX = get_le_uint16(data_buf, 4);
 		  lif->led.lcp.ScreenBufferSizeY = get_le_uint16(data_buf, 6);
@@ -1184,7 +1177,7 @@ int get_extradata(FILE * fp, int pos, struct LIF * lif)
 		  lif->led.lcp.FontSize = get_le_uint32(data_buf, 24);
 		  lif->led.lcp.FontFamily = get_le_uint32(data_buf, 28);
 		  lif->led.lcp.FontWeight = get_le_uint32(data_buf, 32);
-		  if (get_le_unistr(data_buf, 36, 32, lif->led.lcp.FaceName) < 0)
+		  if (get_le_unistr(data_buf, 36, 32, lif->led.lcp.FaceName) == 0)
 		  {
 			  lif->led.lcp.FaceName[0] = (wchar_t)0; //Null string if no characters read
 		  }
@@ -1310,13 +1303,67 @@ int get_extradata_a(struct LIF_EXTRA_DATA * led, struct LIF_EXTRA_DATA_A * leda)
   //Get Console Data block
   if(led->edtypes & CONSOLE_PROPS)
     {
+	  //TODO Some of these need attributes adding maybe
       strcat((char *)leda->edtypes, "CONSOLE_PROPS | ");
 	  snprintf((char *)leda->lcpa.Size, 10, "%"PRIu32, led->lcp.Size);
 	  snprintf((char *)leda->lcpa.sig, 12, "0x%.8"PRIX32, led->lcp.sig);
-
+	  snprintf((char *)leda->lcpa.FillAttributes, 8, "0x%.4"PRIX16, led->lcp.FillAttributes);
+	  snprintf((char *)leda->lcpa.PopupFillAttributes, 8, "0x%.4"PRIX16, led->lcp.PopupFillAttributes);
+	  snprintf((char *)leda->lcpa.ScreenBufferSizeX, 8, "%"PRIu16, led->lcp.ScreenBufferSizeX);
+	  snprintf((char *)leda->lcpa.ScreenBufferSizeY, 8, "%"PRIu16, led->lcp.ScreenBufferSizeY);
+	  snprintf((char *)leda->lcpa.WindowSizeX, 8, "%"PRIu16, led->lcp.WindowSizeX);
+	  snprintf((char *)leda->lcpa.WindowSizeY, 8, "%"PRIu16, led->lcp.WindowSizeY);
+	  snprintf((char *)leda->lcpa.WindowOriginX, 8, "%"PRIu16, led->lcp.WindowOriginX);
+	  snprintf((char *)leda->lcpa.WindowOriginY, 8, "%"PRIu16, led->lcp.WindowOriginY);
+	  snprintf((char *)leda->lcpa.Unused1, 12, "0x%.8"PRIX32, led->lcp.Unused1);
+	  snprintf((char *)leda->lcpa.Unused2, 12, "0x%.8"PRIX32, led->lcp.Unused2);
+	  snprintf((char *)leda->lcpa.FontSize, 12, "%"PRIu32, led->lcp.FontSize);
+	  snprintf((char *)leda->lcpa.FontFamily, 12, "0x%.4"PRIX32, led->lcp.FontFamily);
+	  snprintf((char *)leda->lcpa.FontWeight, 12, "%"PRIu32, led->lcp.FontWeight);
+	  snprintf((char *)leda->lcpa.FaceName, 64, "%ls", led->lcp.FaceName);
+	  snprintf((char *)leda->lcpa.CursorSize, 12, "%"PRIu32, led->lcp.CursorSize);
+	  snprintf((char *)leda->lcpa.FullScreen, 12, "0x%.8"PRIX32, led->lcp.FullScreen);
+	  snprintf((char *)leda->lcpa.QuickEdit, 12, "0x%.8"PRIX32, led->lcp.QuickEdit);
+	  snprintf((char *)leda->lcpa.InsertMode, 12, "0x%.8"PRIX32, led->lcp.InsertMode);
+	  snprintf((char *)leda->lcpa.AutoPosition, 12, "0x%.8"PRIX32, led->lcp.AutoPosition);
+	  snprintf((char *)leda->lcpa.HistoryBufferSize, 12, "%"PRIu32, led->lcp.HistoryBufferSize);
+	  snprintf((char *)leda->lcpa.NumberOfHistoryBuffers, 12, "%"PRIu32, led->lcp.NumberOfHistoryBuffers);
+	  snprintf((char *)leda->lcpa.HistoryNoDup, 12, "0x%.8"PRIX32, led->lcp.HistoryNoDup);
+	  for (i = 0; i < 16; i++)
+	  {
+		  snprintf((char *)leda->lcpa.ColorTable[i], 12, "0x%.8"PRIX32, led->lcp.ColorTable[i]);
+	  }
     }
   else
     {
+	  snprintf((char *)leda->lcpa.Size, 10, "N/A");
+	  snprintf((char *)leda->lcpa.sig, 12, "N/A");
+	  snprintf((char *)leda->lcpa.FillAttributes, 8, "N/A");
+	  snprintf((char *)leda->lcpa.PopupFillAttributes, 8, "N/A");
+	  snprintf((char *)leda->lcpa.ScreenBufferSizeX, 8, "N/A");
+	  snprintf((char *)leda->lcpa.ScreenBufferSizeY, 8, "N/A");
+	  snprintf((char *)leda->lcpa.WindowSizeX, 8, "N/A");
+	  snprintf((char *)leda->lcpa.WindowSizeY, 8, "N/A");
+	  snprintf((char *)leda->lcpa.WindowOriginX, 8, "N/A");
+	  snprintf((char *)leda->lcpa.WindowOriginY, 8, "N/A");
+	  snprintf((char *)leda->lcpa.Unused1, 12, "N/A");
+	  snprintf((char *)leda->lcpa.Unused2, 12, "N/A");
+	  snprintf((char *)leda->lcpa.FontSize, 12, "N/A");
+	  snprintf((char *)leda->lcpa.FontFamily, 12, "N/A");
+	  snprintf((char *)leda->lcpa.FontWeight, 12, "N/A");
+	  snprintf((char *)leda->lcpa.FaceName, 64, "N/A");
+	  snprintf((char *)leda->lcpa.CursorSize, 12, "N/A");
+	  snprintf((char *)leda->lcpa.FullScreen, 12, "N/A");
+	  snprintf((char *)leda->lcpa.QuickEdit, 12, "N/A");
+	  snprintf((char *)leda->lcpa.InsertMode, 12, "N/A");
+	  snprintf((char *)leda->lcpa.AutoPosition, 12, "N/A");
+	  snprintf((char *)leda->lcpa.HistoryBufferSize, 12, "N/A");
+	  snprintf((char *)leda->lcpa.NumberOfHistoryBuffers, 12, "N/A");
+	  snprintf((char *)leda->lcpa.HistoryNoDup, 12, "N/A");
+	  for (i = 0; i < 16; i++)
+	  {
+		  snprintf((char *)leda->lcpa.ColorTable[i], 12, "N/A");
+	  }
 
     }
   //Get Console FE Data block
@@ -1811,8 +1858,8 @@ int get_le_unistr(unsigned char buf[], int pos, int max, wchar_t targ[])
 
   for(i = 0; i < (max-1); i++)
     {
-      temp_buf[0] = buf[(i*2)];
-      temp_buf[1] = buf[((i*2)+1)];
+      temp_buf[0] = buf[((i*2) + pos)];
+      temp_buf[1] = buf[((i*2) + 1 + pos)];
       widechar = get_le_uint16(temp_buf, 0);
       targ[i] = (wchar_t)widechar;
       n++;

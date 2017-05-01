@@ -144,7 +144,7 @@ struct LIF_CONSOLE_PROPS_A
   unsigned char			 FontSize[12];
   unsigned char			 FontFamily[12];
   unsigned char			 FontWeight[12];
-  unsigned char			 FaceName[33];
+  unsigned char			 FaceName[64];
   unsigned char			 CursorSize[12];
   unsigned char			 FullScreen[12];
   unsigned char			 QuickEdit[12];

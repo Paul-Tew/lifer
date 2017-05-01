@@ -26,10 +26,9 @@ This file is part of Lifer, a Windows link file analyser.
 */
 
 // These are equivalent to the protocol revision for MS-SHLLNK
-// TODO Needs increasing to version 3.0
 #define _MAJOR  3
 #define _MINOR  0
 // This is my revision number
-#define _BUILD  1
+#define _BUILD  3
 // Just the current year
 #define _YEAR   2017
