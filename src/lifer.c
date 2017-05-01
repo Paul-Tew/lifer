@@ -569,7 +569,8 @@ void text_out(FILE* fp, char* fname, int less)
   struct LIF     lif;
   struct LIF_A   lif_a;
   struct stat    statbuf;
-  char           buf[35];
+  char           buf[200];
+  int            i;
 
   // Get the stat info for the file itself
   stat(fname, &statbuf);
@@ -791,17 +792,54 @@ void text_out(FILE* fp, char* fname, int less)
       //debug
       printf("    ED Structures:       %s\n", lif_a.leda.edtypes);
     }
-  // TODO other ED structures here
   if (lif.led.edtypes & CONSOLE_PROPS)
   {
+	  // Even if we are printing the shortened version we show that there is a 
+	  // ConsoleDataBlock structure present.
 	  printf("    {S_2.5.1 - ExtraData - ConsoleDataBlock}\n");
 	  if (less == 0)
 	  {
 		  //TODO Some of these need attributes adding maybe
 		  printf("      BlockSize:         %s bytes\n", lif_a.leda.lcpa.Size);
 		  printf("      BlockSignature:    %s\n", lif_a.leda.lcpa.sig);
-		  printf("      FillAttributes:    %s\n", lif_a.leda.lcpa.FillAttributes);
-		  printf("      PopupFillAttr:     %s\n", lif_a.leda.lcpa.PopupFillAttributes);
+		  buf[0] = (char)0;
+		  if (lif.led.lcp.FillAttributes & 0x0001) strncat(buf, "FOREGROUND_BLUE | ", 18);
+		  if (lif.led.lcp.FillAttributes & 0x0002) strncat(buf, "FOREGROUND_GREEN | ", 19);
+		  if (lif.led.lcp.FillAttributes & 0x0004) strncat(buf, "FOREGROUND_RED | ", 17);
+		  if (lif.led.lcp.FillAttributes & 0x0008) strncat(buf, "FOREGROUND_INTENSITY | ", 23);
+		  if (lif.led.lcp.FillAttributes & 0x0010) strncat(buf, "BACKGROUND_BLUE | ", 18);
+		  if (lif.led.lcp.FillAttributes & 0x0020) strncat(buf, "BACKGROUND_GREEN | ", 19);
+		  if (lif.led.lcp.FillAttributes & 0x0040) strncat(buf, "BACKGROUND_RED | ", 17);
+		  if (lif.led.lcp.FillAttributes & 0x0080) strncat(buf, "BACKGROUND_INTENSITY | ", 23);
+		  i = strlen(buf);
+		  if (i > 2)
+		  {
+			  buf[i - 3] = (unsigned char)0; // Remove the last pipe character
+		  }
+		  else
+		  {
+			  snprintf(buf, 300, "No FillAttributes");
+		  }
+		  printf("      FillAttributes:    %s   %s\n", lif_a.leda.lcpa.FillAttributes, buf);
+		  buf[0] = (char)0;
+		  if (lif.led.lcp.PopupFillAttributes & 0x0001) strncat(buf, "FOREGROUND_BLUE | ", 18);
+		  if (lif.led.lcp.PopupFillAttributes & 0x0002) strncat(buf, "FOREGROUND_GREEN | ", 19);
+		  if (lif.led.lcp.PopupFillAttributes & 0x0004) strncat(buf, "FOREGROUND_RED | ", 17);
+		  if (lif.led.lcp.PopupFillAttributes & 0x0008) strncat(buf, "FOREGROUND_INTENSITY | ", 23);
+		  if (lif.led.lcp.PopupFillAttributes & 0x0010) strncat(buf, "BACKGROUND_BLUE | ", 18);
+		  if (lif.led.lcp.PopupFillAttributes & 0x0020) strncat(buf, "BACKGROUND_GREEN | ", 19);
+		  if (lif.led.lcp.PopupFillAttributes & 0x0040) strncat(buf, "BACKGROUND_RED | ", 17);
+		  if (lif.led.lcp.PopupFillAttributes & 0x0080) strncat(buf, "BACKGROUND_INTENSITY | ", 23);
+		  i = strlen(buf);
+		  if (i > 2)
+		  {
+			  buf[i - 3] = (unsigned char)0; // Remove the last pipe character
+		  }
+		  else
+		  {
+			  snprintf(buf, 300, "No PopupFillAttributes");
+		  }
+		  printf("      PopupFillAttr:     %s   %s\n", lif_a.leda.lcpa.PopupFillAttributes, buf);
 		  printf("      ScreenBufSizeX:    %s\n", lif_a.leda.lcpa.ScreenBufferSizeX);
 		  printf("      ScreenBufSizeY:    %s\n", lif_a.leda.lcpa.ScreenBufferSizeY);
 		  printf("      WindowSizeX:       %s\n", lif_a.leda.lcpa.WindowSizeX);
@@ -811,19 +849,129 @@ void text_out(FILE* fp, char* fname, int less)
 		  printf("      Unused1:           %s\n", lif_a.leda.lcpa.Unused1);
 		  printf("      Unused2:           %s\n", lif_a.leda.lcpa.Unused2);
 		  printf("      FontSize:          %s\n", lif_a.leda.lcpa.FontSize);
-		  printf("      FontFamily:        %s\n", lif_a.leda.lcpa.FontFamily);
-		  printf("      FontWeight:        %s\n", lif_a.leda.lcpa.FontWeight);
+		  buf[0] = (char)0;
+		  switch (lif.led.lcp.FontFamily)
+		  {
+			  case 0x0000:
+				  strncat(buf, "FF_DONTCARE", 11);
+				  break;
+			  case 0x0010:
+				  strncat(buf, "FF_ROMAN", 8);
+				  break;
+			  case 0x0020:
+				  strncat(buf, "FF_SWISS", 8);
+				  break;
+			  case 0x0030:
+				  strncat(buf, "FF_MODERN", 9);
+				  break;
+			  case 0x0040:
+				  strncat(buf, "FF_SCRIPT", 9);
+				  break;
+			  case 0x0050:
+				  strncat(buf, "FF_DECORATIVE", 13);
+				  break;
+			  default:
+				  strncat(buf, "UNKNOWN (Not allowed in specification)", 39);
+		  }
+		  printf("      FontFamily:        %s   %s\n", lif_a.leda.lcpa.FontFamily, buf);
+		  buf[0] = (char)0;
+		  if (lif.led.lcp.FontWeight < 700)
+		  {
+			  strncat(buf, "A regular-weight font", 21);
+		  }
+		  else
+		  {
+			  strncat(buf, "A bold font", 11);
+		  }
+		  printf("      FontWeight:        %s   %s\n", lif_a.leda.lcpa.FontWeight, buf);
 		  printf("      FaceName:          %s\n", lif_a.leda.lcpa.FaceName);
-		  printf("      CursorSize:        %s\n", lif_a.leda.lcpa.CursorSize);
-		  printf("      FullScreen:        %s\n", lif_a.leda.lcpa.FullScreen);
-		  printf("      QuickEdit:         %s\n", lif_a.leda.lcpa.QuickEdit);
-		  printf("      InsertMode:        %s\n", lif_a.leda.lcpa.InsertMode);
-		  printf("      AutoPosition:      %s\n", lif_a.leda.lcpa.AutoPosition);
+		  buf[0] = (char)0;
+		  if (lif.led.lcp.CursorSize <= 25)
+		  {
+			  strncat(buf, "A small cursor", 14);
+		  }
+		  else if ((lif.led.lcp.CursorSize > 25) & (lif.led.lcp.CursorSize <= 50))
+		  {
+			  strncat(buf, "A medium cursor", 15);
+		  }
+		  else if ((lif.led.lcp.CursorSize > 50) & (lif.led.lcp.CursorSize <= 100))
+		  {
+			  strncat(buf, "A large cursor", 14);
+		  }
+		  else
+		  {
+			  strncat(buf, "An undefined cursor size", 25);
+		  }
+		  printf("      CursorSize:        %s   %s\n", lif_a.leda.lcpa.CursorSize, buf);
+		  buf[0] = (char)0;
+		  if (lif.led.lcp.FullScreen == 0)
+		  {
+			  strncat(buf, "Off", 3);
+		  }
+		  else
+		  {
+			  strncat(buf, "On", 2);
+		  }
+		  printf("      FullScreen:        %s   %s\n", lif_a.leda.lcpa.FullScreen, buf);
+		  buf[0] = (char)0;
+		  if (lif.led.lcp.QuickEdit == 0)
+		  {
+			  strncat(buf, "Off", 3);
+		  }
+		  else
+		  {
+			  strncat(buf, "On", 2);
+		  }
+		  printf("      QuickEdit:         %s   %s\n", lif_a.leda.lcpa.QuickEdit, buf);
+		  buf[0] = (char)0;
+		  if (lif.led.lcp.InsertMode == 0)
+		  {
+			  strncat(buf, "Disabled", 8);
+		  }
+		  else
+		  {
+			  strncat(buf, "Enabled", 7);
+		  }
+		  printf("      InsertMode:        %s   %s\n", lif_a.leda.lcpa.InsertMode, buf);
+		  buf[0] = (char)0;
+		  if (lif.led.lcp.AutoPosition == 0)
+		  {
+			  strncat(buf, "Off", 20);
+		  }
+		  else
+		  {
+			  strncat(buf, "On", 19);
+		  }
+		  printf("      AutoPosition:      %s   %s\n", lif_a.leda.lcpa.AutoPosition, buf);
 		  printf("      HistoryBufSize:    %s\n", lif_a.leda.lcpa.HistoryBufferSize);
 		  printf("      NumHistBuffers:    %s\n", lif_a.leda.lcpa.NumberOfHistoryBuffers);
-		  printf("      HistoryNoDup:      %s\n", lif_a.leda.lcpa.HistoryNoDup);
-		  printf("      ColorTable:        %s\n", lif_a.leda.lcpa.ColorTable);
-
+		  buf[0] = (char)0;
+		  if (lif.led.lcp.HistoryNoDup == 0)
+		  {
+			  strncat(buf, "Duplicates not allowed", 22);
+		  }
+		  else
+		  {
+			  strncat(buf, "Duplicates allowed", 18);
+		  }
+		  printf("      HistoryNoDup:      %s   %s\n", lif_a.leda.lcpa.HistoryNoDup, buf);
+		  printf("      ColorTable:        ");
+		  printf("%s %s %s %s\n", lif_a.leda.lcpa.ColorTable[0],
+			  lif_a.leda.lcpa.ColorTable[1],
+			  lif_a.leda.lcpa.ColorTable[2],
+			  lif_a.leda.lcpa.ColorTable[3]);
+		  printf("                         %s %s %s %s\n", lif_a.leda.lcpa.ColorTable[4],
+			  lif_a.leda.lcpa.ColorTable[5],
+			  lif_a.leda.lcpa.ColorTable[6],
+			  lif_a.leda.lcpa.ColorTable[7]);
+		  printf("                         %s %s %s %s\n", lif_a.leda.lcpa.ColorTable[8],
+			  lif_a.leda.lcpa.ColorTable[9],
+			  lif_a.leda.lcpa.ColorTable[10],
+			  lif_a.leda.lcpa.ColorTable[11]);
+		  printf("                         %s %s %s %s\n", lif_a.leda.lcpa.ColorTable[12],
+			  lif_a.leda.lcpa.ColorTable[13],
+			  lif_a.leda.lcpa.ColorTable[14],
+			  lif_a.leda.lcpa.ColorTable[15]);
 	  }
   }
   if(lif.led.edtypes & PROPERTY_STORE_PROPS)
