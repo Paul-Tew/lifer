@@ -1,5 +1,5 @@
 # lifer
-A forensic tool for Windows link file examinations
+A forensic tool for Windows link file examinations (i.e. Windows shortcuts)
 
 ## SYNOPSIS
 
@@ -21,31 +21,32 @@ lifer -s ./Test/Test.lnk
 ```
 This should give the output:
 ```
-LINK FILE -------------- .\Test\Test.lnk
-  {stat DATA}
-    Last Accessed:       2017-04-03 14:47:49 (UTC)
-    Last Modified:       2017-04-03 14:47:49 (UTC)
-    Last Changed:        2017-04-03 14:47:49 (UTC)
+LINK FILE -------------- .\src\Test\Test1.lnk
+{**OPERATING SYSTEM (stat) DATA**}
+  Last Accessed:       2017-04-18 20:28:19 (UTC)
+  Last Modified:       2017-04-18 20:28:19 (UTC)
+  Last Changed:        2017-04-18 20:28:19 (UTC)
 
-  {LINK FILE - HEADER}
-    Attributes:          0x00000020   ARCHIVE
+{**LINK FILE EMBEDDED DATA**}
+  {S_2.1 - ShellLinkHeader}
+    Attributes:          0x00000020   FILE_ATTRIBUTE_ARCHIVE
     Creation Time:       2008-09-12 20:27:17 (UTC)
     Access Time:         2008-09-12 20:27:17 (UTC)
     Write Time:          2008-09-12 20:27:17 (UTC)
     Target Size:         0 bytes
-  {LINK FILE - LINK INFO}
-    {LINK INFO - VOLUME ID}
+  {S_2.3 - LinkInfo}
+    {S_2.3.1 - LinkInfo - VolumeID}
       Drive Type:        DRIVE_FIXED
       Drive Serial No:   307A8A81
       Volume Label:      [EMPTY]
-    Local Base Path:     C:\test\a.txt
-  {LINK FILE - STRING DATA}
-    {STRING DATA - RELATIVE PATH}
+      Local Base Path:   C:\test\a.txt
+  {S_2.4 - StringData}
+    {S_2.4 - StringData - RELATIVE_PATH}
       Relative Path:     .\a.txt
-    {STRING DATA - WORKING DIR}
+    {S_2.4 - StringData - WORKING_DIR}
       Working Dir:       C:\test
-  {LINK FILE - EXTRA DATA}
-    {EXTRA DATA - TRACKER DATA}
+  {S_2.5 - ExtraData}
+    {S_2.5.10 - ExtraData - TrackerDataBlock}
       MachineID:         chris-xps
       Droid1:            {94C77840-FA47-46C7-B356-5C2DC6B6D115}
       Droid2:            {7BCD46EC-7F22-11DD-9499-00137216874A}
