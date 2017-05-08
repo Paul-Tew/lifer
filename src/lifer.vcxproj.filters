@@ -55,6 +55,9 @@
     <None Include="Test\WinXP.xlsx">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\_config.yml">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Test\Tests.txt">

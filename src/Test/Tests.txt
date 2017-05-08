@@ -22,6 +22,9 @@ is used then the comma in the string is changed to a semi-colon.
 FILE 'Test3.lnk'
 This is a shortcut file with an ExtraData ConsoleDataBlock
 
+FILE 'Test4.lnk'
+This is a shortcut file with an ExtraData DarwinDataBlock
+
 DIRECTORY 'WinXP'
 This file contains all the shortcut files extracted from an old (very old) virtual machine that I
 created to teach students some computer forensic principles. To see how lifer can parse all of these

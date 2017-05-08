@@ -119,6 +119,7 @@
     <None Include="..\README.md">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="..\_config.yml" />
     <None Include="Test\WinXP.xlsx" />
   </ItemGroup>
   <ItemGroup>

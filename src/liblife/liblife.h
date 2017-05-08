@@ -179,7 +179,8 @@ struct LIF_DARWIN_PROPS
   uint16_t           Posn;	// Not in the spec but included to assist in forensic analysis and authentication of results
   uint32_t           Size;
   uint32_t           sig;
-  //TODO Define this
+  unsigned char      DarwinDataAnsi[260];
+  wchar_t            DarwinDataUnicode[260];
 };
 
 struct LIF_DARWIN_PROPS_A
@@ -187,7 +188,8 @@ struct LIF_DARWIN_PROPS_A
   unsigned char      Posn[8];
   unsigned char      Size[10];
   unsigned char      sig[12];
-  //TODO Define this
+  unsigned char      DarwinDataAnsi[260];
+  unsigned char      DarwinDataUnicode[520];
 };
 
 struct LIF_ENVIRONMENT_PROPS

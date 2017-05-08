@@ -101,10 +101,7 @@ int replace_comma(unsigned char * str, uint16_t len)
   int result = 0;
   for (int i = 0; (i < len); i++)
   {
-    // Quit if we find a string terminator before len number of characters
-    if (str[i] == (int)0)
-      return result;
-    else if (str[i] == ',')
+    if (str[i] == ',')
     {
       str[i] = ';';
       result++;
@@ -275,6 +272,15 @@ void sv_out(FILE* fp, char* fname, int less, char sep)
       printf("ED CFEDB Size (bytes)%c", sep);
       printf("ED CFEDB Signature%c", sep);
       printf("ED CFEDB CodePage%c", sep);
+    }
+    // S2.5.3 DarwinDataBlock
+    if (less == 0)
+    {
+      printf("ED DDB File Offset (bytes)%c", sep);
+      printf("ED DDB Size (bytes)%c", sep);
+      printf("ED DDB Signature%c", sep);
+      printf("ED DDB DarwinDataAnsi%c", sep);
+      printf("ED DDB DarwinDataUnicode%c", sep);
     }
     // TODO Other ExtraData structures 
     // S2.5.7 PropertyStoreDataBlock
@@ -496,6 +502,21 @@ void sv_out(FILE* fp, char* fname, int less, char sep)
     printf("%s%c", lif_a.leda.lcfepa.Size, sep);
     printf("%s%c", lif_a.leda.lcfepa.sig, sep);
     printf("%s%c", lif_a.leda.lcfepa.CodePage, sep);
+  }
+  // S2.5.3 DarwinDataBlock
+  if (less == 0)
+  {
+    printf("%s%c", lif_a.leda.ldpa.Posn, sep);
+    printf("%s%c", lif_a.leda.ldpa.Size, sep);
+    printf("%s%c", lif_a.leda.ldpa.sig, sep);
+    if (output_type == csv)
+    {
+      replace_comma(lif_a.leda.ldpa.DarwinDataAnsi, 260);
+      replace_comma(lif_a.leda.ldpa.DarwinDataUnicode, 520);
+    }
+
+    printf("%s%c", lif_a.leda.ldpa.DarwinDataAnsi, sep);
+    printf("%s%c", lif_a.leda.ldpa.DarwinDataUnicode, sep);
   }
   // TODO Other ED structures
 
@@ -817,7 +838,6 @@ void text_out(FILE* fp, char* fname, int less)
   if (less == 0)
   {
     printf("    Extra Data Size:     %s bytes\n", lif_a.leda.Size);
-    //debug
     printf("    ED Structures:       %s\n", lif_a.leda.edtypes);
   }
   if (lif.led.edtypes & CONSOLE_PROPS)
@@ -827,7 +847,6 @@ void text_out(FILE* fp, char* fname, int less)
     printf("    {S_2.5.1 - ExtraData - ConsoleDataBlock}\n");
     if (less == 0)
     {
-      //TODO Some of these need attributes adding maybe
       printf("      File Offset:       %s bytes\n", lif_a.leda.lcpa.Posn);
       printf("      BlockSize:         %s bytes\n", lif_a.leda.lcpa.Size);
       printf("      BlockSignature:    %s\n", lif_a.leda.lcpa.sig);
@@ -1012,6 +1031,18 @@ void text_out(FILE* fp, char* fname, int less)
       printf("      BlockSize:         %s bytes\n", lif_a.leda.lcfepa.Size);
       printf("      BlockSignature:    %s\n", lif_a.leda.lcfepa.sig);
       printf("      Code Page:         %s\n", lif_a.leda.lcfepa.CodePage);
+    }
+  }
+  if (lif.led.edtypes & DARWIN_PROPS)
+  {
+    printf("    {S_2.5.3 - ExtraData - DarwinDataBlock}\n");
+    if (less == 0)
+    {
+      printf("      File Offset:       %s bytes\n", lif_a.leda.ldpa.Posn);
+      printf("      BlockSize:         %s bytes\n", lif_a.leda.ldpa.Size);
+      printf("      BlockSignature:    %s\n", lif_a.leda.ldpa.sig);
+      printf("      DarwinDataAnsi:    %s\n", lif_a.leda.ldpa.DarwinDataAnsi);
+      printf("      DarwinDataUnicode: %s\n", lif_a.leda.ldpa.DarwinDataUnicode);
     }
   }
   if (lif.led.edtypes & PROPERTY_STORE_PROPS)

@@ -1120,15 +1120,10 @@ int get_extradata(FILE * fp, int pos, struct LIF * lif)
       lif->led.lep.Size = blocksize;
       lif->led.lep.sig = blocksig;
       lif->led.edtypes += ENVIRONMENT_PROPS;
-      //TODO Fill this
       break;
     case 0xA0000002: // Signature for a ConsoleDataBlock
       lif->led.lcp.Posn = (uint16_t)offset;
-      if (blocksize != 0x000000CC) // In the spec - this must be the blocksize value
-      {
-        fprintf(stderr, "Wrong size reported for ExtraData ConsoleDataBlock\n");
-        break;
-      }
+      assert(blocksize == 0x000000CC); // Spec states this MUST be the value
       lif->led.lcp.Size = blocksize;
       lif->led.lcp.sig = blocksig;
       lif->led.edtypes += CONSOLE_PROPS;
@@ -1171,6 +1166,7 @@ int get_extradata(FILE * fp, int pos, struct LIF * lif)
       break;
     case 0xA0000004: // Signature for a ConsoleFEDataBlock
       lif->led.lcfep.Posn = (uint16_t)offset;
+      assert(blocksize == 0x0000000C); // Spec states this MUST be the value
       lif->led.lcfep.Size = blocksize;
       lif->led.lcfep.sig = blocksig;
       lif->led.edtypes += CONSOLE_FE_PROPS;
@@ -1186,10 +1182,15 @@ int get_extradata(FILE * fp, int pos, struct LIF * lif)
       break;
     case 0xA0000006: // Signature for a DarwinDataBlock
       lif->led.ldp.Posn = (uint16_t)offset;
+      assert(blocksize == 0x00000314); // Spec states this MUST be the value
       lif->led.ldp.Size = blocksize;
       lif->led.ldp.sig = blocksig;
       lif->led.edtypes += DARWIN_PROPS;
-      //TODO Fill this
+      get_chars(data_buf, 0, 260, lif->led.ldp.DarwinDataAnsi);
+      if(get_le_unistr(data_buf, 260, 260, lif->led.ldp.DarwinDataUnicode) < 0)
+      {
+        lif->led.ldp.DarwinDataUnicode[0] = (wchar_t)0;
+      }
       break;
     case 0xA0000007: // Signature for a IconEnvironmentDataBlock
       lif->led.liep.Posn = (uint16_t)offset;
@@ -1277,7 +1278,7 @@ int get_extradata_a(struct LIF_EXTRA_DATA * led, struct LIF_EXTRA_DATA_A * leda)
   int i;
 
   snprintf((char *)leda->Size, 10, "%"PRIu32, led->Size);
-  snprintf((char *)leda->edtypes, 2, " ");
+  leda->edtypes[0] = (char)0;
   //Get Console Data block
   if (led->edtypes & CONSOLE_PROPS)
   {
@@ -1367,12 +1368,16 @@ int get_extradata_a(struct LIF_EXTRA_DATA * led, struct LIF_EXTRA_DATA_A * leda)
     snprintf((char *)leda->ldpa.Posn, 8, "%"PRIu16, led->ldp.Posn);
     snprintf((char *)leda->ldpa.Size, 10, "%"PRIu32, led->ldp.Size);
     snprintf((char *)leda->ldpa.sig, 12, "0x%.8"PRIX32, led->ldp.sig);
+    snprintf((char *)leda->ldpa.DarwinDataAnsi, 260, "%s", led->ldp.DarwinDataAnsi);
+    snprintf((char *)leda->ldpa.DarwinDataUnicode, 520, "%ls", led->ldp.DarwinDataUnicode);
   }
   else
   {
     snprintf((char *)leda->ldpa.Posn, 8, "[N/A]");
     snprintf((char *)leda->ldpa.Size, 10, "[N/A]");
     snprintf((char *)leda->ldpa.sig, 12, "[N/A]");
+    snprintf((char *)leda->ldpa.DarwinDataAnsi, 260, "[N/A]");
+    snprintf((char *)leda->ldpa.DarwinDataUnicode, 520, "[N/A]");
   }
   //Get Environment Variable Data block
   if (led->edtypes & ENVIRONMENT_PROPS)
