@@ -4,7 +4,7 @@
 **                                                      **
 ** A library to handle the data from Windows link files **
 **                                                      **
-**         Copyright Paul Tew 2011 to 2012              **
+**         Copyright Paul Tew 2011 to 2017              **
 **                                                      **
 *********************************************************/
 
@@ -1174,7 +1174,7 @@ int get_extradata(FILE * fp, int pos, struct LIF * lif)
       lif->led.lcfep.Size = blocksize;
       lif->led.lcfep.sig = blocksig;
       lif->led.edtypes += CONSOLE_FE_PROPS;
-      //TODO Fill this
+      lif->led.lcfep.CodePage = get_le_int32(data_buf, 0);
       break;
     case 0xA0000005: // Signature for a SpecialFolderDataBlock
       lif->led.lsfp.Posn = (uint16_t)offset;
@@ -1351,12 +1351,14 @@ int get_extradata_a(struct LIF_EXTRA_DATA * led, struct LIF_EXTRA_DATA_A * leda)
     snprintf((char *)leda->lcfepa.Posn, 8, "%"PRIu16, led->lcfep.Posn);
     snprintf((char *)leda->lcfepa.Size, 10, "%"PRIu32, led->lcfep.Size);
     snprintf((char *)leda->lcfepa.sig, 12, "0x%.8"PRIX32, led->lcfep.sig);
+    snprintf((char *)leda->lcfepa.CodePage, 12, "0x%.8"PRIX32, led->lcfep.CodePage);
   }
   else
   {
     snprintf((char *)leda->lcfepa.Posn, 8, "[N/A]");
     snprintf((char *)leda->lcfepa.Size, 10, "[N/A]");
     snprintf((char *)leda->lcfepa.sig, 12, "[N/A]");
+    snprintf((char *)leda->lcfepa.CodePage, 12, "[N/A]");
   }
   //Get Darwin Data block
   if (led->edtypes & DARWIN_PROPS)

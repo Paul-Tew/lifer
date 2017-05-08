@@ -2,7 +2,7 @@
 **                                                      **
 **                      lifer                           **
 **                                                      **
-**            A Windows link file analyser              **
+**            A Windows link file examiner              **
 **                                                      **
 **         Copyright Paul Tew 2011 to 2017              **
 **                                                      **
@@ -13,20 +13,20 @@
 *********************************************************/
 
 /*
-This file is part of Lifer.
+This file is part of lifer.
 
     Lifer is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    Lifer is distributed in the hope that it will be useful,
+    lifer is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with Lifer.  If not, see <http://www.gnu.org/licenses/>.
+    along with lifer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 
@@ -37,20 +37,20 @@ This file is part of Lifer.
 #include <sys/types.h>
 #include <time.h>
 #include <wchar.h>
-/* local headers */
+// local headers
 #include "./liblife/liblife.h"
 #include "./version.h"
 
-/*Conditional includes and definitions dependant on OS*/
+//Conditional includes and definitions dependant on OS
 #ifdef _WIN32
-/* Windows */
+// Windows 
 #include <io.h>
 #include "./win/dirent.h"
 #include "./win/getopt.h"
 #include <direct.h>
 #define PATH_MAX _MAX_PATH // Why is this different between Win & *nix? (I have no idea BTW)
 #else
-/* *nix */
+// *nix 
 #include <unistd.h>
 #include <dirent.h>
 #define _getcwd getcwd  // _getcwd() is Windows, getcwd() is *nix
@@ -88,6 +88,7 @@ contain details\n");
   printf("*********************************************************************\
 ***********\n");
 }
+
 //
 //Function: replace_comma(unsigned char * str, int len)
 //          Takes a zero terminated string 'str' of length 'len' max
@@ -111,6 +112,7 @@ int replace_comma(unsigned char * str, uint16_t len)
   }
   return result;
 }
+
 //
 //Function: sv_out(FILE * fp) processes the link file and outputs the csv or tsv
 //          version of the decoded data.
@@ -272,6 +274,7 @@ void sv_out(FILE* fp, char* fname, int less, char sep)
       printf("ED CFEDB File Offset (bytes)%c", sep);
       printf("ED CFEDB Size (bytes)%c", sep);
       printf("ED CFEDB Signature%c", sep);
+      printf("ED CFEDB CodePage%c", sep);
     }
     // TODO Other ExtraData structures 
     // S2.5.7 PropertyStoreDataBlock
@@ -492,6 +495,7 @@ void sv_out(FILE* fp, char* fname, int less, char sep)
     printf("%s%c", lif_a.leda.lcfepa.Posn, sep);
     printf("%s%c", lif_a.leda.lcfepa.Size, sep);
     printf("%s%c", lif_a.leda.lcfepa.sig, sep);
+    printf("%s%c", lif_a.leda.lcfepa.CodePage, sep);
   }
   // TODO Other ED structures
 
@@ -584,6 +588,7 @@ void sv_out(FILE* fp, char* fname, int less, char sep)
   }
   printf("\n");
 }
+
 //
 //Function: text_out(FILE * fp) processes the link file and outputs the text
 //          version of the decoded data.
@@ -998,6 +1003,17 @@ void text_out(FILE* fp, char* fname, int less)
         lif_a.leda.lcpa.ColorTable[15]);
     }
   }
+  if (lif.led.edtypes & CONSOLE_FE_PROPS)
+  {
+    printf("    {S_2.5.2 - ExtraData - ConsoleFEDataBlock}\n");
+    if (less == 0)
+    {
+      printf("      File Offset:       %s bytes\n", lif_a.leda.lcfepa.Posn);
+      printf("      BlockSize:         %s bytes\n", lif_a.leda.lcfepa.Size);
+      printf("      BlockSignature:    %s\n", lif_a.leda.lcfepa.sig);
+      printf("      Code Page:         %s\n", lif_a.leda.lcfepa.CodePage);
+    }
+  }
   if (lif.led.edtypes & PROPERTY_STORE_PROPS)
   {
     printf("    {S_2.5.7 - ExtraData - PropertyStoreDataBlock}\n");
@@ -1151,10 +1167,9 @@ void text_out(FILE* fp, char* fname, int less)
       printf("      Number of Items:     %s\n", lif_a.leda.lvidlpa.NumItemIDs);
     }
   }
-
   printf("\n");
-
 }
+
 //
 //Function: proc_file() processes regular files
 void proc_file(char* fname, int less)
@@ -1211,6 +1226,7 @@ void proc_file(char* fname, int less)
     }
   }
 }
+
 //
 //Function: read_dir() iterates through the files in a directory and processes
 //them
@@ -1247,6 +1263,7 @@ void read_dir(char* dirname, int less)
   if (_chdir(olddir) != 0)
     fprintf(stderr, "Unable to restore old directory\n");
 }
+
 //
 //Main function
 int main(int argc, char *argv[])
@@ -1282,8 +1299,7 @@ int main(int argc, char *argv[])
       process = 0;
       break;
     case '?':
-      printf("Usage: lifer [-vhs] [-o csv|tsv|txt] file(s)|\
-directory\n");
+      printf("Usage: lifer [-vhs] [-o csv|tsv|txt] file(s)|directory\n");
       process = 0;
       break;
     case 's':

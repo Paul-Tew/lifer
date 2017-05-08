@@ -163,7 +163,7 @@ struct LIF_CONSOLE_FE_PROPS
   uint16_t           Posn;	// Not in the spec but included to assist in forensic analysis and authentication of results
   uint32_t           Size;
   uint32_t           sig;
-  //TODO Define this
+  uint32_t           CodePage;
 };
 
 struct LIF_CONSOLE_FE_PROPS_A
@@ -171,7 +171,7 @@ struct LIF_CONSOLE_FE_PROPS_A
   unsigned char      Posn[8];
   unsigned char      Size[10];
   unsigned char      sig[12];
-  //TODO Define this
+  unsigned char      CodePage[12];
 };
 
 struct LIF_DARWIN_PROPS
