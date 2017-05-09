@@ -197,7 +197,8 @@ struct LIF_ENVIRONMENT_PROPS
   uint16_t           Posn;	// Not in the spec but included to assist in forensic analysis and authentication of results
   uint32_t           Size;
   uint32_t           sig;
-  //TODO Define this
+  unsigned char      TargetAnsi[260];
+  wchar_t            TargetUnicode[260];
 };
 
 struct LIF_ENVIRONMENT_PROPS_A
@@ -205,7 +206,8 @@ struct LIF_ENVIRONMENT_PROPS_A
   unsigned char      Posn[8];
   unsigned char      Size[10];
   unsigned char      sig[12];
-  //TODO Define this
+  unsigned char      TargetAnsi[260];
+  unsigned char      TargetUnicode[520];
 };
 
 struct LIF_ICON_ENVIRONMENT_PROPS

@@ -1115,13 +1115,19 @@ int get_extradata(FILE * fp, int pos, struct LIF * lif)
     }
     switch (blocksig)
     {
-    case 0xA0000001: // Signature for a EnvironmentVariableDataBlock
+    case 0xA0000001: // Signature for a EnvironmentVariableDataBlock S2.5.4
       lif->led.lep.Posn = (uint16_t)offset;
+      assert(blocksize == 0x00000314); // Spec states this MUST be the value
       lif->led.lep.Size = blocksize;
       lif->led.lep.sig = blocksig;
       lif->led.edtypes += ENVIRONMENT_PROPS;
+      get_chars(data_buf, 0, 260, lif->led.lep.TargetAnsi);
+      if (get_le_unistr(data_buf, 260, 260, lif->led.lep.TargetUnicode) < 0)
+      {
+        lif->led.lep.TargetUnicode[0] = (wchar_t)0;
+      }
       break;
-    case 0xA0000002: // Signature for a ConsoleDataBlock
+    case 0xA0000002: // Signature for a ConsoleDataBlock S2.5.1
       lif->led.lcp.Posn = (uint16_t)offset;
       assert(blocksize == 0x000000CC); // Spec states this MUST be the value
       lif->led.lcp.Size = blocksize;
@@ -1157,14 +1163,14 @@ int get_extradata(FILE * fp, int pos, struct LIF * lif)
         lif->led.lcp.ColorTable[j] = get_le_uint32(data_buf, (j * 4) + 132);
       }
       break;
-    case 0xA0000003: //Signature for a TrackerDataBlock
+    case 0xA0000003: //Signature for a TrackerDataBlock S2.5.10
       lif->led.ltp.Posn = (uint16_t)offset;
       lif->led.ltp.Size = blocksize;
       lif->led.ltp.sig = blocksig;
       lif->led.edtypes += TRACKER_PROPS;
       get_ltp(&lif->led.ltp, data_buf);
       break;
-    case 0xA0000004: // Signature for a ConsoleFEDataBlock
+    case 0xA0000004: // Signature for a ConsoleFEDataBlock S2.5.2
       lif->led.lcfep.Posn = (uint16_t)offset;
       assert(blocksize == 0x0000000C); // Spec states this MUST be the value
       lif->led.lcfep.Size = blocksize;
@@ -1172,7 +1178,7 @@ int get_extradata(FILE * fp, int pos, struct LIF * lif)
       lif->led.edtypes += CONSOLE_FE_PROPS;
       lif->led.lcfep.CodePage = get_le_int32(data_buf, 0);
       break;
-    case 0xA0000005: // Signature for a SpecialFolderDataBlock
+    case 0xA0000005: // Signature for a SpecialFolderDataBlock S2.5.9
       lif->led.lsfp.Posn = (uint16_t)offset;
       lif->led.lsfp.Size = blocksize;
       lif->led.lsfp.sig = blocksig;
@@ -1180,7 +1186,7 @@ int get_extradata(FILE * fp, int pos, struct LIF * lif)
       lif->led.lsfp.SpecialFolderID = get_le_uint32(data_buf, 0);
       lif->led.lsfp.Offset = get_le_uint32(data_buf, 4);
       break;
-    case 0xA0000006: // Signature for a DarwinDataBlock
+    case 0xA0000006: // Signature for a DarwinDataBlock S2.5.3
       lif->led.ldp.Posn = (uint16_t)offset;
       assert(blocksize == 0x00000314); // Spec states this MUST be the value
       lif->led.ldp.Size = blocksize;
@@ -1192,14 +1198,14 @@ int get_extradata(FILE * fp, int pos, struct LIF * lif)
         lif->led.ldp.DarwinDataUnicode[0] = (wchar_t)0;
       }
       break;
-    case 0xA0000007: // Signature for a IconEnvironmentDataBlock
+    case 0xA0000007: // Signature for a IconEnvironmentDataBlock S2.5.5
       lif->led.liep.Posn = (uint16_t)offset;
       lif->led.liep.Size = blocksize;
       lif->led.liep.sig = blocksig;
       lif->led.edtypes += ICON_ENVIRONMENT_PROPS;
       //TODO Fill this
       break;
-    case 0xA0000008: // Signature for a ShimDataBlock
+    case 0xA0000008: // Signature for a ShimDataBlock S2.5.8
       lif->led.lsp.Posn = (uint16_t)offset;
       lif->led.lsp.Size = blocksize;
       lif->led.lsp.sig = blocksig;
@@ -1209,7 +1215,7 @@ int get_extradata(FILE * fp, int pos, struct LIF * lif)
         lif->led.lsp.LayerName[0] = (wchar_t)0;
       }
       break;
-    case 0xA0000009: // Signature for a PropertyStoreDataBlock
+    case 0xA0000009: // Signature for a PropertyStoreDataBlock S2.5.7
       lif->led.lpsp.Posn = (uint16_t)offset;
       lif->led.lpsp.Size = blocksize;
       lif->led.lpsp.sig = blocksig;
@@ -1218,7 +1224,7 @@ int get_extradata(FILE * fp, int pos, struct LIF * lif)
       i = 0;
       //TODO Fill This
       break;
-    case 0xA000000A: // Signature for a VistaAndAboveIDListDataBlock
+    case 0xA000000A: // Signature for a VistaAndAboveIDListDataBlock S2.5.11
       lif->led.lvidlp.Posn = (uint16_t)offset;
       lif->led.lvidlp.Size = blocksize;
       lif->led.lvidlp.sig = blocksig;
@@ -1231,7 +1237,7 @@ int get_extradata(FILE * fp, int pos, struct LIF * lif)
         lif->led.lvidlp.NumItemIDs++;
       }
       break;
-    case 0xA000000B: // Signature for a KnownFolderDataBlock
+    case 0xA000000B: // Signature for a KnownFolderDataBlock S2.5.6
       lif->led.lkfp.Posn = (uint16_t)offset;
       lif->led.lkfp.Size = blocksize;
       lif->led.lkfp.sig = blocksig;
@@ -1386,6 +1392,8 @@ int get_extradata_a(struct LIF_EXTRA_DATA * led, struct LIF_EXTRA_DATA_A * leda)
     snprintf((char *)leda->lepa.Posn, 8, "%"PRIu16, led->lep.Posn);
     snprintf((char *)leda->lepa.Size, 10, "%"PRIu32, led->lep.Size);
     snprintf((char *)leda->lepa.sig, 12, "0x%.8"PRIX32, led->lep.sig);
+    snprintf((char *)leda->lepa.TargetAnsi, 260, "%s", led->lep.TargetAnsi);
+    snprintf((char *)leda->lepa.TargetUnicode, 520, "%ls", led->lep.TargetUnicode);
   }
   else
   {
