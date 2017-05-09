@@ -1414,6 +1414,8 @@ int get_extradata_a(struct LIF_EXTRA_DATA * led, struct LIF_EXTRA_DATA_A * leda)
     snprintf((char *)leda->liepa.Posn, 8, "[N/A]");
     snprintf((char *)leda->liepa.Size, 10, "[N/A]");
     snprintf((char *)leda->liepa.sig, 12, "[N/A]");
+    snprintf((char *)leda->lepa.TargetAnsi, 260, "[N/A]");
+    snprintf((char *)leda->lepa.TargetUnicode, 520, "[N/A]");
   }
   //Get Known Folder data block
   if (led->edtypes & KNOWN_FOLDER_PROPS)
