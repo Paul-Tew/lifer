@@ -1200,10 +1200,15 @@ int get_extradata(FILE * fp, int pos, struct LIF * lif)
       break;
     case 0xA0000007: // Signature for a IconEnvironmentDataBlock S2.5.5
       lif->led.liep.Posn = (uint16_t)offset;
+      assert(blocksize == 0x00000314); // Spec states this MUST be the value
       lif->led.liep.Size = blocksize;
       lif->led.liep.sig = blocksig;
       lif->led.edtypes += ICON_ENVIRONMENT_PROPS;
-      //TODO Fill this
+      get_chars(data_buf, 0, 260, lif->led.liep.TargetAnsi);
+      if (get_le_unistr(data_buf, 260, 260, lif->led.liep.TargetUnicode) < 0)
+      {
+        lif->led.liep.TargetUnicode[0] = (wchar_t)0;
+      }
       break;
     case 0xA0000008: // Signature for a ShimDataBlock S2.5.8
       lif->led.lsp.Posn = (uint16_t)offset;
@@ -1410,12 +1415,16 @@ int get_extradata_a(struct LIF_EXTRA_DATA * led, struct LIF_EXTRA_DATA_A * leda)
     snprintf((char *)leda->liepa.Posn, 8, "%"PRIu16, led->liep.Posn);
     snprintf((char *)leda->liepa.Size, 10, "%"PRIu32, led->liep.Size);
     snprintf((char *)leda->liepa.sig, 12, "0x%.8"PRIX32, led->liep.sig);
+    snprintf((char *)leda->liepa.TargetAnsi, 260, "%s", led->liep.TargetAnsi);
+    snprintf((char *)leda->liepa.TargetUnicode, 520, "%ls", led->liep.TargetUnicode);
   }
   else
   {
     snprintf((char *)leda->liepa.Posn, 8, "[N/A]");
     snprintf((char *)leda->liepa.Size, 10, "[N/A]");
     snprintf((char *)leda->liepa.sig, 12, "[N/A]");
+    snprintf((char *)leda->liepa.TargetAnsi, 260, "[N/A]");
+    snprintf((char *)leda->liepa.TargetUnicode, 520, "[N/A]");
   }
   //Get Known Folder data block
   if (led->edtypes & KNOWN_FOLDER_PROPS)

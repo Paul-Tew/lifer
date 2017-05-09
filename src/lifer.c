@@ -291,6 +291,15 @@ void sv_out(FILE* fp, char* fname, int less, char sep)
       printf("ED EVDB TargetAnsi%c", sep);
       printf("ED EVDB TargetUnicode%c", sep);
     }
+    // S2.5.5 IconEnvironmentDataBlock
+    if (less == 0)
+    {
+      printf("ED IEDB File Offset (bytes)%c", sep);
+      printf("ED IEDB Size (bytes)%c", sep);
+      printf("ED IEDB Signature%c", sep);
+      printf("ED IEDB TargetAnsi%c", sep);
+      printf("ED IEDB TargetUnicode%c", sep);
+    }
     // TODO Other ExtraData structures 
     // S2.5.7 PropertyStoreDataBlock
     if (less == 0)
@@ -541,6 +550,21 @@ void sv_out(FILE* fp, char* fname, int less, char sep)
 
     printf("%s%c", lif_a.leda.lepa.TargetAnsi, sep);
     printf("%s%c", lif_a.leda.lepa.TargetUnicode, sep);
+  }
+  // S2.5.5 IconEnvironmentDataBlock
+  if (less == 0)
+  {
+    printf("%s%c", lif_a.leda.liepa.Posn, sep);
+    printf("%s%c", lif_a.leda.liepa.Size, sep);
+    printf("%s%c", lif_a.leda.liepa.sig, sep);
+    if (output_type == csv)
+    {
+      replace_comma(lif_a.leda.liepa.TargetAnsi, 260);
+      replace_comma(lif_a.leda.liepa.TargetUnicode, 520);
+    }
+
+    printf("%s%c", lif_a.leda.liepa.TargetAnsi, sep);
+    printf("%s%c", lif_a.leda.liepa.TargetUnicode, sep);
   }
   // TODO Other ED structures
 
@@ -1081,7 +1105,19 @@ void text_out(FILE* fp, char* fname, int less)
       printf("      TargetUnicode:     %s\n", lif_a.leda.lepa.TargetUnicode);
     }
   }
-
+  if (lif.led.edtypes & ICON_ENVIRONMENT_PROPS)
+  {
+    printf("    {S_2.5.5 - ExtraData - IconEnvironmentDataBlock}\n");
+    if (less == 0)
+    {
+      printf("      File Offset:       %s bytes\n", lif_a.leda.liepa.Posn);
+      printf("      BlockSize:         %s bytes\n", lif_a.leda.liepa.Size);
+      printf("      BlockSignature:    %s\n", lif_a.leda.liepa.sig);
+      printf("      TargetAnsi:        %s\n", lif_a.leda.liepa.TargetAnsi);
+      printf("      TargetUnicode:     %s\n", lif_a.leda.liepa.TargetUnicode);
+    }
+  }
+  // TODO S2.5.6 Here
   if (lif.led.edtypes & PROPERTY_STORE_PROPS)
   {
     printf("    {S_2.5.7 - ExtraData - PropertyStoreDataBlock}\n");
