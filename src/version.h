@@ -29,6 +29,6 @@ This file is part of Lifer, a Windows link file analyser.
 #define _MAJOR  3
 #define _MINOR  0
 // This is my revision number
-#define _BUILD  6 // Included ED IconEnvironmentDataBlock
+#define _BUILD  7 // Included ED KnownFolderDataBlock
 // Just the current year
 #define _YEAR   2017

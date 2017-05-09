@@ -300,7 +300,15 @@ void sv_out(FILE* fp, char* fname, int less, char sep)
       printf("ED IEDB TargetAnsi%c", sep);
       printf("ED IEDB TargetUnicode%c", sep);
     }
-    // TODO Other ExtraData structures 
+    // S2.5.6 KnownFolderDataBlock
+    if (less == 0)
+    {
+      printf("ED KFDB File Offset (bytes)%c", sep);
+      printf("ED KFDB Size (bytes)%c", sep);
+      printf("ED KFDB Signature%c", sep);
+      printf("ED KFDB KnownFolderID%c", sep);
+      printf("ED KFDB Offset%c", sep);
+    }
     // S2.5.7 PropertyStoreDataBlock
     if (less == 0)
     {
@@ -562,12 +570,18 @@ void sv_out(FILE* fp, char* fname, int less, char sep)
       replace_comma(lif_a.leda.liepa.TargetAnsi, 260);
       replace_comma(lif_a.leda.liepa.TargetUnicode, 520);
     }
-
     printf("%s%c", lif_a.leda.liepa.TargetAnsi, sep);
     printf("%s%c", lif_a.leda.liepa.TargetUnicode, sep);
   }
-  // TODO Other ED structures
-
+  // S2.5.7 PropertyStoreDataBlock
+  if (less == 0)
+  {
+    printf("%s%c", lif_a.leda.lkfpa.Posn, sep);
+    printf("%s%c", lif_a.leda.lkfpa.Size, sep);
+    printf("%s%c", lif_a.leda.lkfpa.sig, sep);
+    printf("%s%c", lif_a.leda.lkfpa.KFGUID.UUID, sep);
+    printf("%s%c", lif_a.leda.lkfpa.KFOffset, sep);
+  }
   // S2.5.7 PropertyStoreDataBlock
   if (less == 0)
   {
@@ -1118,6 +1132,19 @@ void text_out(FILE* fp, char* fname, int less)
     }
   }
   // TODO S2.5.6 Here
+  if (lif.led.edtypes & KNOWN_FOLDER_PROPS)
+  {
+    printf("    {S_2.5.6 - ExtraData - KnownFolderDataBlock}\n");
+    if (less == 0)
+    {
+      printf("      File Offset:       %s bytes\n", lif_a.leda.lkfpa.Posn);
+      printf("      BlockSize:         %s bytes\n", lif_a.leda.lkfpa.Size);
+      printf("      BlockSignature:    %s\n", lif_a.leda.lkfpa.sig);
+      printf("      KnownFolderID:     %s\n", lif_a.leda.lkfpa.KFGUID.UUID);
+      printf("      Offset:            %s\n", lif_a.leda.lkfpa.KFOffset);
+    }
+  }
+
   if (lif.led.edtypes & PROPERTY_STORE_PROPS)
   {
     printf("    {S_2.5.7 - ExtraData - PropertyStoreDataBlock}\n");
