@@ -131,8 +131,6 @@ extern int get_lif_a(struct LIF* lif, struct LIF_A* lif_a)
   {
     return -5;
   }
-
-  //TODO: get other parts of the LIF_A here
   return 0;
 }
 //

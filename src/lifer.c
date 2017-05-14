@@ -1131,7 +1131,6 @@ void text_out(FILE* fp, char* fname, int less)
       printf("      TargetUnicode:     %s\n", lif_a.leda.liepa.TargetUnicode);
     }
   }
-  // TODO S2.5.6 Here
   if (lif.led.edtypes & KNOWN_FOLDER_PROPS)
   {
     printf("    {S_2.5.6 - ExtraData - KnownFolderDataBlock}\n");
@@ -1144,7 +1143,6 @@ void text_out(FILE* fp, char* fname, int less)
       printf("      Offset:            %s\n", lif_a.leda.lkfpa.KFOffset);
     }
   }
-
   if (lif.led.edtypes & PROPERTY_STORE_PROPS)
   {
     printf("    {S_2.5.7 - ExtraData - PropertyStoreDataBlock}\n");
@@ -1153,7 +1151,19 @@ void text_out(FILE* fp, char* fname, int less)
       printf("      File Offset:       %s bytes\n", lif_a.leda.lpspa.Posn);
       printf("      BlockSize:         %s bytes\n", lif_a.leda.lpspa.Size);
       printf("      BlockSignature:    %s\n", lif_a.leda.lpspa.sig);
+      //TODO Proper Data here
       printf("      Number of Stores:  %s\n", lif_a.leda.lpspa.NumStores);
+    }
+  }
+  if (lif.led.edtypes & SHIM_PROPS)
+  {
+    printf("    {S_2.5.7 - ExtraData - ShimDataBlock}\n");
+    if (less == 0)
+    {
+      printf("      File Offset:       %s bytes\n", lif_a.leda.lspa.Posn);
+      printf("      BlockSize:         %s bytes\n", lif_a.leda.lspa.Size);
+      printf("      BlockSignature:    %s\n", lif_a.leda.lspa.sig);
+      printf("      Number of Stores:  %s\n", lif_a.leda.lspa.LayerName);
     }
   }
   if (lif.led.edtypes & SPECIAL_FOLDER_PROPS)
