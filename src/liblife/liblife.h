@@ -59,23 +59,67 @@ https://msdn.microsoft.com/en-us/library/dd871305.aspx )
 #include <wchar.h>
 
 /******************************************************************************/
-//Minor Structure Definitions
+//Minor Definitions & Structures
+#define PROPSTORES 5  // The number of LIF_SER_PROPSTORE in a LIF_PROPERTY_STORE_PROPS structure
+#define PROPVALUES 5  // The number of LIF_SER_PROPVALUE in each LIF_SER_PROPSTORE structure
 
 // extradata types
 enum EDTYPES
 {
-  EMPTY = 0,
-  CONSOLE_PROPS = 1,
-  CONSOLE_FE_PROPS = 2,
-  DARWIN_PROPS = 4,
-  ENVIRONMENT_PROPS = 8,
-  ICON_ENVIRONMENT_PROPS = 16,
-  KNOWN_FOLDER_PROPS = 32,
-  PROPERTY_STORE_PROPS = 64,
-  SHIM_PROPS = 128,
-  SPECIAL_FOLDER_PROPS = 256,
-  TRACKER_PROPS = 512,
-  VISTA_AND_ABOVE_IDLIST_PROPS = 1024
+  EMPTY                         = 0,
+  CONSOLE_PROPS                 = 1,
+  CONSOLE_FE_PROPS              = 2,
+  DARWIN_PROPS                  = 4,
+  ENVIRONMENT_PROPS             = 8,
+  ICON_ENVIRONMENT_PROPS        = 16,
+  KNOWN_FOLDER_PROPS            = 32,
+  PROPERTY_STORE_PROPS          = 64,
+  SHIM_PROPS                    = 128,
+  SPECIAL_FOLDER_PROPS          = 256,
+  TRACKER_PROPS                 = 512,
+  VISTA_AND_ABOVE_IDLIST_PROPS  = 1024
+};
+
+enum PROPERTY_TYPE // From MS-OLEPS https://msdn.microsoft.com/en-us/library/dd942532.aspx
+{
+  VT_EMPTY              = 0x0000, // 0 bytes
+  VT_NULL               = 0x0001, // 0 bytes
+  VT_I2                 = 0x0002, // 2 bytes + 2 padding bytes | VECTOR | ARRAY
+  VT_I4                 = 0x0003, // 4 bytes | VECTOR | ARRAY
+  VT_R4                 = 0x0004, // 4 bytes | VECTOR | ARRAY
+  VT_R8                 = 0x0005, // 8 bytes | VECTOR | ARRAY
+  VT_CY                 = 0x0006, // 8 bytes | VECTOR | ARRAY
+  VT_DATE               = 0x0007, // 8 bytes | VECTOR | ARRAY
+  VT_BSTR               = 0x0008, // Variable ANSI string - size is first 4 bytes | VECTOR | ARRAY
+  VT_ERROR              = 0x000A, // 4 bytes (Unsiged Int)  | VECTOR | ARRAY
+  VT_BOOL               = 0x000B, // 2 bytes + 2 padding bytes, 0xFFFF = VARIANT_TRUE, 0x0000 = VARIANT_FALSE | VECTOR | ARRAY
+  VT_VARIANT            = 0x000C, // Not available on its own  | VECTOR | ARRAY
+  VT_DECIMAL            = 0x000E, // 16 bytes | ARRAY
+  VT_I1                 = 0x0010, // 1 byte + 3 padding | VECTOR | ARRAY
+  VT_UI1                = 0x0011, // 1 byte + 3 padding | VECTOR | ARRAY
+  VT_UI2                = 0x0012, // 2 bytes + 2 padding bytes | VECTOR | ARRAY
+  VT_UI4                = 0x0013, // 4 bytes | VECTOR | ARRAY
+  VT_I8                 = 0x0014, // 8 bytes | VECTOR
+  VT_UI8                = 0x0015, // 8 bytes | VECTOR
+  VT_INT                = 0x0016, // 4 bytes | VECTOR | ARRAY
+  VT_UINT               = 0x0017, // 4 bytes | VECTOR | ARRAY
+  VT_LPSTR              = 0x001E, // Variable ANSI string - size is first 4 bytes | VECTOR
+  VT_LPWSTR             = 0x001F, // Variable UNI string - length is first 4 bytes | VECTOR
+  VT_FILETIME           = 0x0040, // 8 bytes | VECTOR
+  VT_BLOB               = 0x0041, // Variable - size is first 4 bytes
+  VT_STREAM             = 0x0042, // Variable ANSI string - size is first 4 bytes
+  VT_STORAGE            = 0x0043, // Variable ANSI string - size is first 4 bytes
+  VT_STREAMED_OBJECT    = 0x0044, // Variable ANSI string - size is first 4 bytes
+  VT_STORED_OBJECT      = 0x0045, // Variable ANSI string - size is first 4 bytes
+  VT_BLOB_OBJECT        = 0x0046, // Variable byte array - size is first 4 bytes
+  VT_CF_OBJECT          = 0x0047, // Variable byte array - size is first 4 bytes (data includes a 'Format' field) | VECTOR
+  VT_CLSID              = 0x0048, // 16 bytes | VECTOR
+  VT_VERSIONED_STREAM   = 0x0049, // 16 bytes (CLSID) followed by: Variable ANSI string - size is first 4 bytes
+  /* The following are not strictly defined as this because there is a strict 
+  subset of the above that can be logically OR'ed with them but this can be 
+  dealt with later in the logic */
+  VT_VECTOR             = 0x1000, // Variable scalar of objects - length is the first 4 bytes
+  VT_ARRAY              = 0x2000  // Variable Dimension of objects - Type (4 bytes) * NumDimensions (next 4 bytes) * sizeof Type = (size - 8 bytes)
 };
 
 struct LIF_CLSID
@@ -96,6 +140,51 @@ struct LIF_CLSID_A
   unsigned char     Time_long[40];
   unsigned char     ClockSeq[10];
   unsigned char     Node[20];
+};
+
+// Following definition taken from MS-PROPSTORE and MS-OLEPS
+struct LIF_SER_PROPVALUE
+{
+  // MS-PROPSTORE S2.3.1 & S2.3.2
+  uint32_t            ValueSize;
+  uint32_t            NameSizeOrID;
+  uint8_t             Reserved;
+  unsigned char       Name[300];  // Will be "[N/A]" if an Integer Type
+  // MS-OLEPS S2.15
+  uint16_t            PropertyType; // From the PROPERTY_TYPE enumeration
+  uint16_t            Padding;
+  unsigned char       Value[400]; // Raw property content
+};
+struct LIF_SER_PROPVALUE_A
+{
+  unsigned char       ValueSize[12];
+  unsigned char       NameSizeOrID[12];
+  unsigned char       Reserved[5];
+  unsigned char       Name[300];  // Will be "[N/A]" if an Integer Type
+  unsigned char       PropertyType[40]; // Something like: "VT_VECTOR | VT_FILETIME"
+  unsigned char       Padding[7]; // Should be "0x0000"
+  unsigned char       Value[400]; // Interpreted property content
+};
+
+struct LIF_SER_PROPSTORE
+{
+  // MS-PROPSTORE S2.1 & S2.2
+  uint32_t                  StorageSize;
+  uint32_t                  Version;  // According to the spec, should equal 0x53505331
+  struct LIF_CLSID          FormatID; // A GUID
+  unsigned char             NameType; // Not in spec: '> 0' = "Integer" name type & '== 0' = "String" name type
+  uint16_t                  NumValues; // Not in spec but used to report the number of values in this store.
+  struct LIF_SER_PROPVALUE  PropValues[PROPVALUES]; 
+};
+
+struct LIF_SER_PROPSTORE_A
+{
+  unsigned char               StorageSize[12];
+  unsigned char               Version[12];
+  struct LIF_CLSID_A          FormatID;
+  unsigned char               NameType[8]; // Not in spec but will specify "Integer" or "String"
+  unsigned char               NumValues[7];
+  struct LIF_SER_PROPVALUE_A  PropValues[PROPVALUES];
 };
 
 struct LIF_CONSOLE_PROPS
@@ -248,18 +337,20 @@ struct LIF_KNOWN_FOLDER_PROPS_A
 
 struct LIF_PROPERTY_STORE_PROPS
 {
-  uint16_t           Posn;	// Not in the spec but included to assist in forensic analysis and authentication of results
-  uint32_t           Size;
-  uint32_t           sig;
-  uint32_t           NumStores;
+  uint16_t                  Posn;	// Not in the spec but included to assist in forensic analysis and authentication of results
+  uint32_t                  Size;
+  uint32_t                  sig;
+  int32_t                   NumStores;
+  struct LIF_SER_PROPSTORE  Stores[PROPSTORES];
 };
 
 struct LIF_PROPERTY_STORE_PROPS_A
 {
-  unsigned char      Posn[8];
-  unsigned char      Size[10];
-  unsigned char      sig[12];
-  unsigned char      NumStores[10];
+  unsigned char               Posn[8];
+  unsigned char               Size[10];
+  unsigned char               sig[12];
+  unsigned char               NumStores[10];
+  struct LIF_SER_PROPSTORE_A  Stores[PROPSTORES]; 
 };
 
 struct LIF_SHIM_PROPS
@@ -384,11 +475,9 @@ struct LIF_EXTRA_DATA_A
 
 struct LIF_STRINGDATA
 {
-  uint32_t           Size;          //This isn't in the specification but I've
-  //included it to help calculate the position
+  uint32_t           Size;          //This isn't in the specification but I've included it to help calculate the position
   uint16_t           CountChars[5];
-  unsigned char      Data[5][300]; //StringData can be any length but I've
-  //restricted it to returning just 300 chars
+  unsigned char      Data[5][300]; //StringData can be any length but I've restricted it to returning just 300 chars
 };
 
 struct LIF_STRINGDATA_A
@@ -581,8 +670,6 @@ extern int test_link(FILE *);
 //FILE* is an opened FILE pointer
 
 //fills the LIF structure with data (0 if successful < -1 if not)
-//USING THIS FUNCTION REQUIRES THE USE OF free_lif() TO FREE THE MEMORY ONCE
-//THE LIF IS NO LONGER REQUIRED
 extern int get_lif(FILE *, int, struct LIF *);
 //FILE* is an opened FILE pointer
 //int is the size of the opened file

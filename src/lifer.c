@@ -1151,8 +1151,15 @@ void text_out(FILE* fp, char* fname, int less)
       printf("      File Offset:       %s bytes\n", lif_a.leda.lpspa.Posn);
       printf("      BlockSize:         %s bytes\n", lif_a.leda.lpspa.Size);
       printf("      BlockSignature:    %s\n", lif_a.leda.lpspa.sig);
-      //TODO Proper Data here
       printf("      Number of Stores:  %s\n", lif_a.leda.lpspa.NumStores);
+      for (i = 0; i < lif.led.lpsp.NumStores; i++)
+      {
+        printf("      {Property Store %i}\n", i+1);
+        printf("        Store Size:       %s bytes\n", lif_a.leda.lpspa.Stores[i].StorageSize);
+        printf("        Version:          %s\n", lif_a.leda.lpspa.Stores[i].Version);
+        printf("        Format ID:        %s\n", lif_a.leda.lpspa.Stores[i].FormatID.UUID);
+      }
+      //TODO More Data here
     }
   }
   if (lif.led.edtypes & SHIM_PROPS)

@@ -1078,8 +1078,8 @@ int get_stringdata_a(struct LIF_STRINGDATA * lsd, struct LIF_STRINGDATA_A * lsda
 //Unicode strings to ASCII if necessary)
 int get_extradata(FILE * fp, int pos, struct LIF * lif)
 {
-  int                i, j, posn = 0, offset = pos;
-  uint32_t           blocksize, blocksig, datasize;
+  int                i = 0, j = 0, p, posn = 0, offset = pos;
+  uint32_t           blocksize, blocksig, datasize, propstoresize = 1;
   unsigned char      size_buf[4];   //A small buffer to hold the size element
   unsigned char      sig_buf[4];
   unsigned char      data_buf[4096];
@@ -1109,6 +1109,7 @@ int get_extradata(FILE * fp, int pos, struct LIF * lif)
     blocksig = get_le_uint32(sig_buf, 0);
     for (i = 0; i < datasize; i++)
     {
+      // data_buf holds just the data for this ExtraData Block
       data_buf[i] = getc(fp);
     }
     switch (blocksig)
@@ -1223,9 +1224,33 @@ int get_extradata(FILE * fp, int pos, struct LIF * lif)
       lif->led.lpsp.Size = blocksize;
       lif->led.lpsp.sig = blocksig;
       lif->led.edtypes += PROPERTY_STORE_PROPS;
-      lif->led.lpsp.NumStores = 0;
-      i = 0;
-      //TODO Fill This
+      for (i = 0; i < PROPSTORES ; i++ )
+      {
+        lif->led.lpsp.Stores[i].StorageSize = get_le_uint32(data_buf, posn);
+        if (lif->led.lpsp.Stores[i].StorageSize == 0) // An empty property store
+        {
+          break;
+        }
+        p = posn + 4;
+        lif->led.lpsp.Stores[i].Version = get_le_uint32(data_buf, p);
+        p += 4;
+        lif->led.lpsp.Stores[i].FormatID.Data1 = get_le_uint32(data_buf, p);
+        p += 4;
+        lif->led.lpsp.Stores[i].FormatID.Data2 = get_le_uint16(data_buf, p);
+        p += 2;
+        lif->led.lpsp.Stores[i].FormatID.Data3 = get_le_uint16(data_buf, p);
+        p += 2;
+        get_chars(data_buf, p , 2, lif->led.lpsp.Stores[i].FormatID.Data4hi);
+        p += 2;
+        get_chars(data_buf, p, 6, lif->led.lpsp.Stores[i].FormatID.Data4lo);
+        p += 6;
+
+
+        posn += lif->led.lpsp.Stores[i].StorageSize; // Move to the next propertystore
+        lif->led.lpsp.NumStores++;
+      }
+
+      //TODO Fill This (ongoing)
       break;
     case 0xA000000A: // Signature for a VistaAndAboveIDListDataBlock S2.5.11
       lif->led.lvidlp.Posn = (uint16_t)offset;
@@ -1454,7 +1479,13 @@ int get_extradata_a(struct LIF_EXTRA_DATA * led, struct LIF_EXTRA_DATA_A * leda)
     snprintf((char *)leda->lpspa.Posn, 8, "%"PRIu16, led->lpsp.Posn);
     snprintf((char *)leda->lpspa.Size, 10, "%"PRIu32, led->lpsp.Size);
     snprintf((char *)leda->lpspa.sig, 12, "0x%.8"PRIX32, led->lpsp.sig);
-    snprintf((char *)leda->lpspa.NumStores, 10, "%"PRIu32, led->lpsp.NumStores);
+    snprintf((char *)leda->lpspa.NumStores, 10, "%"PRIi32, led->lpsp.NumStores);
+    for (i = 0; i < led->lpsp.NumStores; i++)
+    {
+      snprintf((char *)leda->lpspa.Stores[i].StorageSize, 12, "%"PRIu32, led->lpsp.Stores[i].StorageSize);
+      snprintf((char *)leda->lpspa.Stores[i].Version, 12, "0x%.8"PRIX32, led->lpsp.Stores[i].Version);
+      get_droid_a(&led->lpsp.Stores[i].FormatID, &leda->lpspa.Stores[i].FormatID);
+    }
   }
   else
   {
@@ -2070,39 +2101,61 @@ void get_droid_a(struct LIF_CLSID * droid, struct LIF_CLSID_A * droid_a)
 //structures to 0
 void led_setnull(struct LIF_EXTRA_DATA * led)
 {
+  int i,j;
+
   led->Size = 0;
   led->lcp.Size = 0;
   led->lcp.sig = 0;
+  led->lcp.Posn = 0;
 
   led->lcfep.Size = 0;
   led->lcfep.sig = 0;
+  led->lcfep.Posn = 0;
 
   led->ldp.Size = 0;
   led->ldp.sig = 0;
+  led->ldp.Posn = 0;
 
   led->lep.Size = 0;
   led->lep.sig = 0;
+  led->lep.Posn = 0;
 
   led->liep.Size = 0;
   led->liep.sig = 0;
+  led->liep.Posn = 0;
 
   led->lkfp.Size = 0;
   led->lkfp.sig = 0;
+  led->lkfp.Posn = 0;
 
   led->lpsp.Size = 0;
   led->lpsp.sig = 0;
+  led->lpsp.Posn = 0;
+  led->lpsp.NumStores = 0;
+  for (i = 0; i < PROPSTORES; i++)
+  {
+    led->lpsp.Stores[i].StorageSize = 0;
+    for (j = 0; j < PROPVALUES; j++)
+    {
+      led->lpsp.Stores[i].PropValues[j].ValueSize = 0;
+    }
+  }
 
   led->lsp.Size = 0;
   led->lsp.sig = 0;
+  led->lsp.Posn = 0;
 
   led->lsfp.Size = 0;
   led->lsfp.sig = 0;
+  led->lsfp.Posn = 0;
 
   led->ltp.Size = 0;
   led->ltp.sig = 0;
+  led->ltp.Posn = 0;
 
   led->lvidlp.Size = 0;
   led->lvidlp.sig = 0;
+  led->lvidlp.Posn = 0;
 
   led->terminal = 0;
 }
