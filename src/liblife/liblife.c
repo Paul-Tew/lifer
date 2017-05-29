@@ -1078,8 +1078,8 @@ int get_stringdata_a(struct LIF_STRINGDATA * lsd, struct LIF_STRINGDATA_A * lsda
 //Unicode strings to ASCII if necessary)
 int get_extradata(FILE * fp, int pos, struct LIF * lif)
 {
-  int                i = 0, j = 0, p, posn = 0, offset = pos;
-  uint32_t           blocksize, blocksig, datasize, propstoresize = 1;
+  int                i = 0, j = 0, p = 0, vp = 0, posn = 0, offset = pos;
+  uint32_t           blocksize, blocksig, datasize;
   unsigned char      size_buf[4];   //A small buffer to hold the size element
   unsigned char      sig_buf[4];
   unsigned char      data_buf[4096];
@@ -1224,8 +1224,9 @@ int get_extradata(FILE * fp, int pos, struct LIF * lif)
       lif->led.lpsp.Size = blocksize;
       lif->led.lpsp.sig = blocksig;
       lif->led.edtypes += PROPERTY_STORE_PROPS;
-      for (i = 0; i < PROPSTORES ; i++ )
+      for (i = 0; i < PROPSTORES; i++) // Cycle through all the valid property stores
       {
+        lif->led.lpsp.Stores[i].NumValues = 0;
         lif->led.lpsp.Stores[i].StorageSize = get_le_uint32(data_buf, posn);
         if (lif->led.lpsp.Stores[i].StorageSize == 0) // An empty property store
         {
@@ -1240,17 +1241,54 @@ int get_extradata(FILE * fp, int pos, struct LIF * lif)
         p += 2;
         lif->led.lpsp.Stores[i].FormatID.Data3 = get_le_uint16(data_buf, p);
         p += 2;
-        get_chars(data_buf, p , 2, lif->led.lpsp.Stores[i].FormatID.Data4hi);
+        get_chars(data_buf, p, 2, lif->led.lpsp.Stores[i].FormatID.Data4hi);
         p += 2;
         get_chars(data_buf, p, 6, lif->led.lpsp.Stores[i].FormatID.Data4lo);
         p += 6;
-
-
+        if((lif->led.lpsp.Stores[i].FormatID.Data1 == 0xD5CDD505) &&
+          (lif->led.lpsp.Stores[i].FormatID.Data2 == 0x2E9C) &&
+          (lif->led.lpsp.Stores[i].FormatID.Data3 == 0x101B) &&
+          (lif->led.lpsp.Stores[i].FormatID.Data4hi[0] == 0x93) &&
+          (lif->led.lpsp.Stores[i].FormatID.Data4hi[1] == 0x97) &&
+          (lif->led.lpsp.Stores[i].FormatID.Data4hi[0] == 0x08) &&
+          (lif->led.lpsp.Stores[i].FormatID.Data4hi[1] == 0x00) &&
+          (lif->led.lpsp.Stores[i].FormatID.Data4hi[2] == 0x2B) &&
+          (lif->led.lpsp.Stores[i].FormatID.Data4hi[3] == 0x2C) &&
+          (lif->led.lpsp.Stores[i].FormatID.Data4hi[4] == 0xF9) &&
+          (lif->led.lpsp.Stores[i].FormatID.Data4hi[5] == 0xAE)
+          )
+        {
+          lif->led.lpsp.Stores[i].NameType = 0x00;
+        }
+        else
+        {
+          lif->led.lpsp.Stores[i].NameType = 0xFF;
+        }
+        for (j = 0; j < PROPVALUES; j++) // Cycle through all the valid property values
+        {
+          vp = p; // Save the position of the start of this value
+          lif->led.lpsp.Stores[i].PropValues[j].ValueSize = get_le_uint32(data_buf, vp);
+          p += (int)lif->led.lpsp.Stores[i].PropValues[j].ValueSize;// Move p to the next value store
+          if (lif->led.lpsp.Stores[i].PropValues[j].ValueSize == 0)
+          {
+            lif->led.lpsp.Stores[i].NumValues++; // Unlike a Property Store, an empty Value Store is counted
+            break;
+          }
+          lif->led.lpsp.Stores[i].PropValues[j].NameSizeOrID = get_le_uint32(data_buf, vp + 4);
+          lif->led.lpsp.Stores[i].PropValues[j].Reserved = (uint8_t)data_buf[vp + 8];
+          if (lif->led.lpsp.Stores[i].NameType == 0)
+          {
+            get_chars(data_buf, vp + 9, lif->led.lpsp.Stores[i].PropValues[j].NameSizeOrID, lif->led.lpsp.Stores[i].PropValues[j].Name);
+            vp += lif->led.lpsp.Stores[i].PropValues[j].NameSizeOrID; // In the Case of a name type, offset the value pointer
+          }
+          lif->led.lpsp.Stores[i].PropValues[j].PropertyType = get_le_uint16(data_buf, vp + 9);
+          lif->led.lpsp.Stores[i].PropValues[j].Padding = get_le_uint16(data_buf, vp + 11);
+          get_chars(data_buf, vp + 13, (lif->led.lpsp.Stores[i].PropValues[j].ValueSize), lif->led.lpsp.Stores[i].PropValues[j].Value);
+          lif->led.lpsp.Stores[i].NumValues++;
+        }
         posn += lif->led.lpsp.Stores[i].StorageSize; // Move to the next propertystore
         lif->led.lpsp.NumStores++;
-      }
-
-      //TODO Fill This (ongoing)
+      } //Cycle through the Propstores
       break;
     case 0xA000000A: // Signature for a VistaAndAboveIDListDataBlock S2.5.11
       lif->led.lvidlp.Posn = (uint16_t)offset;
@@ -1309,7 +1347,14 @@ int get_extradata(FILE * fp, int pos, struct LIF * lif)
 //copies the strings and creates an ASCII representation of the data.
 int get_extradata_a(struct LIF_EXTRA_DATA * led, struct LIF_EXTRA_DATA_A * leda)
 {
-  int i;
+  uint16_t  boolean;
+  int16_t   integer16;
+  uint64_t  uinteger64;
+  int       i, j, len;
+  uint64_t   filetime;
+  wchar_t   lp_buf[300];
+  struct LIF_CLSID    guid;
+  struct LIF_CLSID_A  guida;
 
   snprintf((char *)leda->Size, 10, "%"PRIu32, led->Size);
   leda->edtypes[0] = (char)0;
@@ -1485,6 +1530,95 @@ int get_extradata_a(struct LIF_EXTRA_DATA * led, struct LIF_EXTRA_DATA_A * leda)
       snprintf((char *)leda->lpspa.Stores[i].StorageSize, 12, "%"PRIu32, led->lpsp.Stores[i].StorageSize);
       snprintf((char *)leda->lpspa.Stores[i].Version, 12, "0x%.8"PRIX32, led->lpsp.Stores[i].Version);
       get_droid_a(&led->lpsp.Stores[i].FormatID, &leda->lpspa.Stores[i].FormatID);
+      if (led->lpsp.Stores->NameType == 0x00)
+      {
+        snprintf((char *)leda->lpspa.Stores[i].NameType, 13, "String Name");
+      }
+      else
+      {
+        snprintf((char *)leda->lpspa.Stores[i].NameType, 13, "Integer Name");
+      }
+      snprintf((char *)leda->lpspa.Stores[i].NumValues, 7, "%"PRIu16, led->lpsp.Stores[i].NumValues);
+      for (j = 0; j < led->lpsp.Stores[i].NumValues; j++) // Cycle through the property values
+      {
+        snprintf((char *)leda->lpspa.Stores[i].PropValues[j].ValueSize, 12, "%"PRIu32, led->lpsp.Stores[i].PropValues[j].ValueSize);
+        if (led->lpsp.Stores[i].PropValues[j].ValueSize > 0)
+        {
+          // Print No of bytes (Name type) or ID (Integer Type)
+          if (led->lpsp.Stores[i].NameType == 0) // Name
+          {
+            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].NameSizeOrID, 12, "%"PRIu32, led->lpsp.Stores[i].PropValues[j].NameSizeOrID);
+            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Name, led->lpsp.Stores[i].PropValues[j].NameSizeOrID, "%s", led->lpsp.Stores[i].PropValues[j].Name);
+          }
+          else // Integer
+          {
+            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].NameSizeOrID, 12, "0x%.8"PRIX32, led->lpsp.Stores[i].PropValues[j].NameSizeOrID);
+            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Name, 6, "[N/A]");
+          }
+          snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Reserved, 6, "0x%.2"PRIX8, led->lpsp.Stores[i].PropValues[j].Reserved);
+          snprintf((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, 12, "0x%.4"PRIX16, led->lpsp.Stores[i].PropValues[j].PropertyType);
+          snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Padding, 12, "0x%.4"PRIX16, led->lpsp.Stores[i].PropValues[j].Padding);
+          switch (led->lpsp.Stores[i].PropValues[j].PropertyType)
+          {
+          case VT_I2:
+            strcat(leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_I2");
+            integer16 = get_le_uint16(led->lpsp.Stores[i].PropValues[j].Value, 0);
+            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 20, "0x%.4"PRIX16, integer16);
+            break;
+          case VT_BOOL:
+            strcat(leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_BOOL");
+            boolean = get_le_uint16(led->lpsp.Stores[i].PropValues[j].Value, 0);
+            if (boolean == 0x0000)
+            {
+              snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 20, "0x0000 (FALSE)");
+            }
+            else
+            {
+              snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 20, "0x%.4"PRIX16" (TRUE)", boolean);
+            }
+            break;
+          case VT_UI8:
+            strcat(leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_UI8");
+            uinteger64 = get_le_uint64(led->lpsp.Stores[i].PropValues[j].Value, 0);
+            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 20, "0x%.16"PRIX64, uinteger64);
+            break;
+          case VT_LPWSTR:
+            strcat(leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_LPWSTR");
+            len = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
+            get_le_unistr(led->lpsp.Stores[i].PropValues[j].Value, 4, len, lp_buf);
+            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, len, "%ls", lp_buf);
+            break;
+          case VT_FILETIME:
+            strcat(leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_FILETIME");
+            filetime = get_le_uint64(led->lpsp.Stores[i].PropValues[j].Value, 0);
+            get_filetime_a_long(filetime, leda->lpspa.Stores[i].PropValues[j].Value);
+            break;
+          case VT_CLSID:
+            strcat(leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_CLSID");
+            guid.Data1 = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
+            guid.Data2 = get_le_uint16(led->lpsp.Stores[i].PropValues[j].Value, 4);
+            guid.Data3 = get_le_uint16(led->lpsp.Stores[i].PropValues[j].Value, 6);
+            get_chars(led->lpsp.Stores[i].PropValues[j].Value, 8, 2, guid.Data4hi);
+            get_chars(led->lpsp.Stores[i].PropValues[j].Value, 10, 6, guid.Data4lo);
+            get_droid_a(&guid, &guida);
+            // For now just print out the GUID and (if available) the time
+            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, (strlen(guida.UUID) + strlen(guida.Time_long) + 15), "UUID: %s, Time: %s", guida.UUID, guida.Time_long);
+            break;
+          default:
+            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 43, "[Sorry, interpretation is not implemented]");
+          }
+          //TODO Create more interpreted values for leda->lpspa.Stores[i].PropValues[j].Value
+        }
+        else
+        {
+          snprintf((char *)leda->lpspa.Stores[i].PropValues[j].NameSizeOrID, 6, "[N/A]");
+          snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Reserved, 6, "[N/A]");
+          snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Name, 6, "[N/A]");
+          snprintf((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, 6, "[N/A]");
+          snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Padding, 6, "[N/A]");
+          snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 6, "[N/A]");
+        }
+      }
     }
   }
   else

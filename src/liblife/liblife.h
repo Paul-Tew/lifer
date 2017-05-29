@@ -60,8 +60,8 @@ https://msdn.microsoft.com/en-us/library/dd871305.aspx )
 
 /******************************************************************************/
 //Minor Definitions & Structures
-#define PROPSTORES 5  // The number of LIF_SER_PROPSTORE in a LIF_PROPERTY_STORE_PROPS structure
-#define PROPVALUES 5  // The number of LIF_SER_PROPVALUE in each LIF_SER_PROPSTORE structure
+#define PROPSTORES 10  // The number of LIF_SER_PROPSTORE in a LIF_PROPERTY_STORE_PROPS structure
+#define PROPVALUES 10  // The number of LIF_SER_PROPVALUE in each LIF_SER_PROPSTORE structure
 
 // extradata types
 enum EDTYPES
@@ -159,7 +159,7 @@ struct LIF_SER_PROPVALUE_A
 {
   unsigned char       ValueSize[12];
   unsigned char       NameSizeOrID[12];
-  unsigned char       Reserved[5];
+  unsigned char       Reserved[6];
   unsigned char       Name[300];  // Will be "[N/A]" if an Integer Type
   unsigned char       PropertyType[40]; // Something like: "VT_VECTOR | VT_FILETIME"
   unsigned char       Padding[7]; // Should be "0x0000"
@@ -182,7 +182,7 @@ struct LIF_SER_PROPSTORE_A
   unsigned char               StorageSize[12];
   unsigned char               Version[12];
   struct LIF_CLSID_A          FormatID;
-  unsigned char               NameType[8]; // Not in spec but will specify "Integer" or "String"
+  unsigned char               NameType[13]; // Not in spec but will specify "Integer Name" or "String Name"
   unsigned char               NumValues[7];
   struct LIF_SER_PROPVALUE_A  PropValues[PROPVALUES];
 };

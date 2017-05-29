@@ -20,7 +20,8 @@ will not change the value of this string, however, if the command:
 is used then the comma in the string is changed to a semi-colon.
 
 FILE 'Test3.lnk'
-This is a shortcut file with an ExtraData ConsoleDataBlock
+This is a shortcut file with an ExtraData ConsoleDataBlock and an extensive Extradata 
+PropertyStoreDataBlock 
 
 FILE 'Test4.lnk'
 This is a shortcut file with an ExtraData DarwinDataBlock
@@ -29,7 +30,7 @@ DIRECTORY 'WinXP'
 This file contains all the shortcut files extracted from an old (very old) virtual machine that I
 created to teach students some computer forensic principles. To see how lifer can parse all of these
 files (444 of them) then issue the command:
-    (pathto\)lifer.exe .\WinXP
+    (pathto\)lifer.exe .\Test\WinXP
 You will see masses of text fly past. This output is not very useful for lots of files. You could
 of course sent the output to a file quite easily:
 	(pathto\)lifer.exe .\WinXP > WinXP.txt

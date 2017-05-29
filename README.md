@@ -15,13 +15,13 @@ At the time of writing only parts of specification version 3.0 are implemented. 
 ## EXAMPLE USAGE
 Details of the files to be found in the Test directory and how to use them is given in the '.\Test\Tests.txt' file. What follows is a brief outline...
 
-Once you have installed the tool open a command-line shell (e.g. bash or Powershell). Type:
+Once you have installed the tool, open a command-line shell (e.g. bash or Powershell) and from the './lifer/src' directory type:
 ```
-lifer -s ./Test/Test.lnk
+lifer -s ./Test/Test1.lnk
 ```
 This should give the output:
 ```
-LINK FILE -------------- .\src\Test\Test1.lnk
+LINK FILE -------------- .\Test\Test1.lnk
 {**OPERATING SYSTEM (stat) DATA**}
   Last Accessed:       2017-04-18 20:28:19 (UTC)
   Last Modified:       2017-04-18 20:28:19 (UTC)

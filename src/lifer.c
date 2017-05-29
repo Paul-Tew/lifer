@@ -65,28 +65,22 @@ int filecount;
 //Function help_message() prints a help message to stdout
 void help_message()
 {
-  printf("*********************************************************************\
-***********\n");
+  printf("********************************************************************************\n");
   printf("\nlifer - A Windows link file analyser\n");
   printf("lifer - A Windows link file analyser\n");
   printf("Version: %u.%u.%u\n", _MAJOR, _MINOR, _BUILD);
-  printf("Usage: lifer  [-vhs] [-o csv|tsv|txt] file(s)|directory\
-\n\n");
+  printf("Usage: lifer  [-vhs] [-o csv|tsv|txt] file(s)|directory\n\n");
   printf("Options:\n  -v    print version number\n  -h    print this help\n");
   printf("  -s    shortened output (default is to output all fields)\n");
   printf("  -o    output type (choose from csv, tsv or txt). \n");
   printf("        The default is txt.\n\n");
-  printf("Output is to standard output, to send to a file, use the \
-redirection\n");
+  printf("Output is to standard output, to send to a file, use the redirection\n");
   printf("operator '>'.\n\n");
-  printf("Example:\n  lifer -o csv *.* > Links.csv\n\n");
-  printf("This will create a comma seperated file named Links.csv in the \
-current\n");
-  printf("directory. The file can be viewed in a spreadsheet and will \
-contain details\n");
-  printf("of all the link files found in the current directory.\n\n");
-  printf("*********************************************************************\
-***********\n");
+  printf("Example:\n  lifer -o csv {DIRECTORY} > Links.csv\n\n");
+  printf("This will create a comma seperated file named Links.csv in the current\n");
+  printf("directory. The file can be viewed in a spreadsheet and will contain details\n");
+  printf("of all the link files found in the named directory.\n\n");
+  printf("********************************************************************************\n");
 }
 
 //
@@ -681,7 +675,7 @@ void text_out(FILE* fp, char* fname, int less)
   struct LIF_A   lif_a;
   struct stat    statbuf;
   char           buf[200];
-  int            i;
+  int            i, j;
 
   // Get the stat info for the file itself
   stat(fname, &statbuf);
@@ -1158,8 +1152,27 @@ void text_out(FILE* fp, char* fname, int less)
         printf("        Store Size:       %s bytes\n", lif_a.leda.lpspa.Stores[i].StorageSize);
         printf("        Version:          %s\n", lif_a.leda.lpspa.Stores[i].Version);
         printf("        Format ID:        %s\n", lif_a.leda.lpspa.Stores[i].FormatID.UUID);
+        printf("        Name Type:        %s\n", lif_a.leda.lpspa.Stores[i].NameType);
+        printf("        Number of Values: %s\n", lif_a.leda.lpspa.Stores[i].NumValues);
+        for (j = 0; j < lif.led.lpsp.Stores[i].NumValues; j++)
+        {
+          printf("        {Property Store %i Property Value %i}\n", i + 1, j + 1);
+          printf("          Value Size:      %s bytes\n", lif_a.leda.lpspa.Stores[i].PropValues[j].ValueSize);
+          if (lif.led.lpsp.Stores[i].PropValues[j].ValueSize > 0)
+          {
+            if (lif.led.lpsp.Stores[i].NameType == 0)
+              printf("          Name Size:       %s bytes\n", lif_a.leda.lpspa.Stores[i].PropValues[j].NameSizeOrID);
+            else
+              printf("          ID:              %s\n", lif_a.leda.lpspa.Stores[i].PropValues[j].NameSizeOrID);
+            printf("          Reserved:        %s\n", lif_a.leda.lpspa.Stores[i].PropValues[j].Reserved);
+            printf("          Name:            %s\n", lif_a.leda.lpspa.Stores[i].PropValues[j].Name);
+            printf("          Property Type:   %s\n", lif_a.leda.lpspa.Stores[i].PropValues[j].PropertyType);
+            printf("          Padding:         %s\n", lif_a.leda.lpspa.Stores[i].PropValues[j].Padding);
+            printf("          Value:           %s\n", lif_a.leda.lpspa.Stores[i].PropValues[j].Value);
+
+          }
+        }
       }
-      //TODO More Data here
     }
   }
   if (lif.led.edtypes & SHIM_PROPS)
