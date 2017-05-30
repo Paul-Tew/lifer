@@ -1561,12 +1561,12 @@ int get_extradata_a(struct LIF_EXTRA_DATA * led, struct LIF_EXTRA_DATA_A * leda)
           switch (led->lpsp.Stores[i].PropValues[j].PropertyType)
           {
           case VT_I2:
-            strcat(leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_I2");
+            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_I2");
             integer16 = get_le_uint16(led->lpsp.Stores[i].PropValues[j].Value, 0);
             snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 20, "0x%.4"PRIX16, integer16);
             break;
           case VT_BOOL:
-            strcat(leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_BOOL");
+            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_BOOL");
             boolean = get_le_uint16(led->lpsp.Stores[i].PropValues[j].Value, 0);
             if (boolean == 0x0000)
             {
@@ -1578,23 +1578,23 @@ int get_extradata_a(struct LIF_EXTRA_DATA * led, struct LIF_EXTRA_DATA_A * leda)
             }
             break;
           case VT_UI8:
-            strcat(leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_UI8");
+            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_UI8");
             uinteger64 = get_le_uint64(led->lpsp.Stores[i].PropValues[j].Value, 0);
             snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 20, "0x%.16"PRIX64, uinteger64);
             break;
           case VT_LPWSTR:
-            strcat(leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_LPWSTR");
+            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_LPWSTR");
             len = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
             get_le_unistr(led->lpsp.Stores[i].PropValues[j].Value, 4, len, lp_buf);
             snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, len, "%ls", lp_buf);
             break;
           case VT_FILETIME:
-            strcat(leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_FILETIME");
+            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_FILETIME");
             filetime = get_le_uint64(led->lpsp.Stores[i].PropValues[j].Value, 0);
             get_filetime_a_long(filetime, leda->lpspa.Stores[i].PropValues[j].Value);
             break;
           case VT_CLSID:
-            strcat(leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_CLSID");
+            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_CLSID");
             guid.Data1 = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
             guid.Data2 = get_le_uint16(led->lpsp.Stores[i].PropValues[j].Value, 4);
             guid.Data3 = get_le_uint16(led->lpsp.Stores[i].PropValues[j].Value, 6);
@@ -1602,7 +1602,7 @@ int get_extradata_a(struct LIF_EXTRA_DATA * led, struct LIF_EXTRA_DATA_A * leda)
             get_chars(led->lpsp.Stores[i].PropValues[j].Value, 10, 6, guid.Data4lo);
             get_droid_a(&guid, &guida);
             // For now just print out the GUID and (if available) the time
-            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, (strlen(guida.UUID) + strlen(guida.Time_long) + 15), "UUID: %s, Time: %s", guida.UUID, guida.Time_long);
+            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, (strlen((char *)guida.UUID) + strlen((char *)guida.Time_long) + 15), "UUID: %s, Time: %s", guida.UUID, guida.Time_long);
             break;
           default:
             snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 43, "[Sorry, interpretation is not implemented]");
