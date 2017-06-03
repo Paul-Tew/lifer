@@ -5,42 +5,42 @@ Please note that in Windows File Explorer the extension 'lnk' for shortcut files
 if you have chosen to not hide extensions in the view options. In powershell the 'dir' (or 
 'Get-ChildItem') commands do show the full file name however.
 
-FILE 'Test1.lnk'
+FILE '.\src\Test\Test1.lnk'
 This file contains the same data as outlined in section 3.1 of the MS-SHLLINK document and 
 represents a simple link file.
 
-FILE 'Test2.lnk'
+FILE '.\src\Test\Test2.lnk'
 This is a renamed shortcut from the WinXP directory. This file was chosen because one of the 
 StringData strings (StringData - NAME_STRING) contains a comma. Using the command:
-    (pathto\)lifer.exe -o txt .\Test2.lnk
+    (pathto\)lifer.exe -o txt .\src\Test\Test2.lnk
 or
-    (pathto\)lifer.exe -o tsv .\Test2.lnk
+    (pathto\)lifer.exe -o tsv .\src\Test\Test2.lnk
 will not change the value of this string, however, if the command:
-    (pathto\)lifer.exe -o csv .\Test2.lnk
+    (pathto\)lifer.exe -o csv .\src\Test\Test2.lnk
 is used then the comma in the string is changed to a semi-colon.
 
-FILE 'Test3.lnk'
+FILE '.\src\Test\Test3.lnk'
 This is a shortcut file with an ExtraData ConsoleDataBlock and an extensive Extradata 
 PropertyStoreDataBlock 
 
-FILE 'Test4.lnk'
+FILE '.\src\Test\Test4.lnk'
 This is a shortcut file with an ExtraData DarwinDataBlock
 
-DIRECTORY 'WinXP'
+DIRECTORY '.\src\Test\WinXP'
 This file contains all the shortcut files extracted from an old (very old) virtual machine that I
 created to teach students some computer forensic principles. To see how lifer can parse all of these
 files (441 of them) then issue the command:
-    (pathto\)lifer.exe .\Test\WinXP
+    (pathto\)lifer.exe .\src\Test\Test\WinXP
 You will see masses of text fly past. This output is not very useful for lots of files. You could
 of course sent the output to a file quite easily:
-	(pathto\)lifer.exe .\WinXP > WinXP.txt
+	(pathto\)lifer.exe .\src\Test\WinXP > .\src\Test\WinXP.txt
 Then you can browse the resulting 'WinXP.txt' file at your leisure. Even so, the output isn't very
 useful if you need to compare various values of different shortcut files. A better solution is to
 create a file that can easily be imported into a spreadsheet for comparative analysis. To do this
 issue the command:
-    <pathto>\lifer.exe -o tsv .\WinXP > WinXP.tsv
+    <pathto>\lifer.exe -o tsv .\src\Test\WinXP > .\src\Test\WinXP.tsv
 You then have a file that can be imported into a spreadsheet and where you can do some comparative
 analysis. 
 
-FILE 'WinXP.xlsx'
+FILE '.\src\Test\WinXP.xlsx'
 A sample Excel spreadsheet showing how the tsv data looks when in the course of being processed.
