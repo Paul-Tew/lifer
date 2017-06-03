@@ -58,10 +58,11 @@
     <None Include="..\_config.yml">
       <Filter>Resource Files</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="Test\Tests.txt">
+    <None Include="..\OUTPUT">
       <Filter>Resource Files</Filter>
-    </Text>
+    </None>
+    <None Include="..\TESTS">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

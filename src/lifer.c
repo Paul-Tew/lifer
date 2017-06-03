@@ -1161,13 +1161,15 @@ void text_out(FILE* fp, char* fname, int less)
           if (lif.led.lpsp.Stores[i].PropValues[j].ValueSize > 0)
           {
             if (lif.led.lpsp.Stores[i].NameType == 0)
+            {
               printf("          Name Size:       %s bytes\n", lif_a.leda.lpspa.Stores[i].PropValues[j].NameSizeOrID);
+              printf("          Name:            %s\n", lif_a.leda.lpspa.Stores[i].PropValues[j].Name);
+            }
             else
+            {
               printf("          ID:              %s\n", lif_a.leda.lpspa.Stores[i].PropValues[j].NameSizeOrID);
-            printf("          Reserved:        %s\n", lif_a.leda.lpspa.Stores[i].PropValues[j].Reserved);
-            printf("          Name:            %s\n", lif_a.leda.lpspa.Stores[i].PropValues[j].Name);
+            }
             printf("          Property Type:   %s\n", lif_a.leda.lpspa.Stores[i].PropValues[j].PropertyType);
-            printf("          Padding:         %s\n", lif_a.leda.lpspa.Stores[i].PropValues[j].Padding);
             printf("          Value:           %s\n", lif_a.leda.lpspa.Stores[i].PropValues[j].Value);
 
           }

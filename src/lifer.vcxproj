@@ -116,16 +116,13 @@
     <None Include="..\LICENSE">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="..\OUTPUT" />
     <None Include="..\README.md">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="..\TESTS" />
     <None Include="..\_config.yml" />
     <None Include="Test\WinXP.xlsx" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="Test\Tests.txt">
-      <DeploymentContent>true</DeploymentContent>
-    </Text>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

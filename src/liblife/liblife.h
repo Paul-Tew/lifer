@@ -112,7 +112,7 @@ enum PROPERTY_TYPE // From MS-OLEPS https://msdn.microsoft.com/en-us/library/dd9
   VT_STREAMED_OBJECT    = 0x0044, // Variable ANSI string - size is first 4 bytes
   VT_STORED_OBJECT      = 0x0045, // Variable ANSI string - size is first 4 bytes
   VT_BLOB_OBJECT        = 0x0046, // Variable byte array - size is first 4 bytes
-  VT_CF_OBJECT          = 0x0047, // Variable byte array - size is first 4 bytes (data includes a 'Format' field) | VECTOR
+  VT_CF                 = 0x0047, // Variable byte array - size is first 4 bytes (data includes a 'Format' field) | VECTOR
   VT_CLSID              = 0x0048, // 16 bytes | VECTOR
   VT_VERSIONED_STREAM   = 0x0049, // 16 bytes (CLSID) followed by: Variable ANSI string - size is first 4 bytes
   /* The following are not strictly defined as this because there is a strict 
