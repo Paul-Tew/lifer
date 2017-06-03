@@ -29,7 +29,7 @@ This is a shortcut file with an ExtraData DarwinDataBlock
 DIRECTORY 'WinXP'
 This file contains all the shortcut files extracted from an old (very old) virtual machine that I
 created to teach students some computer forensic principles. To see how lifer can parse all of these
-files (444 of them) then issue the command:
+files (441 of them) then issue the command:
     (pathto\)lifer.exe .\Test\WinXP
 You will see masses of text fly past. This output is not very useful for lots of files. You could
 of course sent the output to a file quite easily:
@@ -38,7 +38,7 @@ Then you can browse the resulting 'WinXP.txt' file at your leisure. Even so, the
 useful if you need to compare various values of different shortcut files. A better solution is to
 create a file that can easily be imported into a spreadsheet for comparative analysis. To do this
 issue the command:
-    pathto\)lifer.exe -o tsv .\WinXP > WinXP.tsv
+    <pathto>\lifer.exe -o tsv .\WinXP > WinXP.tsv
 You then have a file that can be imported into a spreadsheet and where you can do some comparative
 analysis. 
 
