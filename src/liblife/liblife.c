@@ -1358,7 +1358,7 @@ int get_extradata_a(struct LIF_EXTRA_DATA * led, struct LIF_EXTRA_DATA_A * leda)
   int32_t   integer32;
   uint64_t  uinteger64, filetime, decimalLo64;
   int64_t   integer64;
-  double    currency, date;
+  double    currency;
   char      decsign[9], lp_buf[300];
   wchar_t   lpw_buf[300];
   struct LIF_CLSID    guid;
@@ -1709,7 +1709,7 @@ int get_extradata_a(struct LIF_EXTRA_DATA * led, struct LIF_EXTRA_DATA_A * leda)
           case VT_LPSTR:  // Because the definition is CodePageString this could be Unicode
             strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_LPSTR");
             len = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
-            get_chars(led->lpsp.Stores[i].PropValues[j].Value, 4, len, lp_buf);
+            get_chars(led->lpsp.Stores[i].PropValues[j].Value, 4, len, (char *)lp_buf);
             if ((lp_buf[len - 1] == 0) && (lp_buf[len - 2] == 0)) // Is it unicode (2 byte string terminator)?
             {
               get_le_unistr(led->lpsp.Stores[i].PropValues[j].Value, 4, len / 2, lpw_buf);
@@ -1739,7 +1739,7 @@ int get_extradata_a(struct LIF_EXTRA_DATA * led, struct LIF_EXTRA_DATA_A * leda)
           case VT_STREAM: //Not Tested
             strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_STREAM");
             len = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
-            get_chars(led->lpsp.Stores[i].PropValues[j].Value, 4, len, lp_buf);
+            get_chars(led->lpsp.Stores[i].PropValues[j].Value, 4, len, (char *)lp_buf);
             if ((lp_buf[len - 1] == 0) && (lp_buf[len - 2] == 0)) // Is it unicode (2 byte string terminator)?
             {
               get_le_unistr(led->lpsp.Stores[i].PropValues[j].Value, 4, len / 2, lpw_buf);
@@ -1753,7 +1753,7 @@ int get_extradata_a(struct LIF_EXTRA_DATA * led, struct LIF_EXTRA_DATA_A * leda)
           case VT_STORAGE: //Not Tested
             strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_STORAGE");
             len = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
-            get_chars(led->lpsp.Stores[i].PropValues[j].Value, 4, len, lp_buf);
+            get_chars(led->lpsp.Stores[i].PropValues[j].Value, 4, len, (char *)lp_buf);
             if ((lp_buf[len - 1] == 0) && (lp_buf[len - 2] == 0)) // Is it unicode (2 byte string terminator)?
             {
               get_le_unistr(led->lpsp.Stores[i].PropValues[j].Value, 4, len / 2, lpw_buf);
@@ -1767,7 +1767,7 @@ int get_extradata_a(struct LIF_EXTRA_DATA * led, struct LIF_EXTRA_DATA_A * leda)
           case VT_STREAMED_OBJECT: //Not Tested
             strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_STREAMED_OBJECT");
             len = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
-            get_chars(led->lpsp.Stores[i].PropValues[j].Value, 4, len, lp_buf);
+            get_chars(led->lpsp.Stores[i].PropValues[j].Value, 4, len, (char *)lp_buf);
             if ((lp_buf[len - 1] == 0) && (lp_buf[len - 2] == 0)) // Is it unicode (2 byte string terminator)?
             {
               get_le_unistr(led->lpsp.Stores[i].PropValues[j].Value, 4, len / 2, lpw_buf);
@@ -1781,7 +1781,7 @@ int get_extradata_a(struct LIF_EXTRA_DATA * led, struct LIF_EXTRA_DATA_A * leda)
           case VT_STORED_OBJECT: //Not Tested
             strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_STORED_OBJECT");
             len = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
-            get_chars(led->lpsp.Stores[i].PropValues[j].Value, 4, len, lp_buf);
+            get_chars(led->lpsp.Stores[i].PropValues[j].Value, 4, len, (char *)lp_buf);
             if ((lp_buf[len - 1] == 0) && (lp_buf[len - 2] == 0)) // Is it unicode (2 byte string terminator)?
             {
               get_le_unistr(led->lpsp.Stores[i].PropValues[j].Value, 4, len / 2, lpw_buf);
@@ -1816,7 +1816,7 @@ int get_extradata_a(struct LIF_EXTRA_DATA * led, struct LIF_EXTRA_DATA_A * leda)
           case VT_VERSIONED_STREAM: //Not Tested
             strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_VERSIONED_STREAM");
             len = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
-            get_chars(led->lpsp.Stores[i].PropValues[j].Value, 4, len, lp_buf);
+            get_chars(led->lpsp.Stores[i].PropValues[j].Value, 4, len, (char *)lp_buf);
             if ((lp_buf[len - 1] == 0) && (lp_buf[len - 2] == 0)) // Is it unicode (2 byte string terminator)?
             {
               get_le_unistr(led->lpsp.Stores[i].PropValues[j].Value, 4, len / 2, lpw_buf);
