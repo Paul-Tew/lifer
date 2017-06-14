@@ -2095,7 +2095,16 @@ void get_attr_a(unsigned char *attr_str, struct LIF_HDR *lh)
     strcat((char *)attr_str, "FILE_ATTRIBUTE_NOT_CONTENT_INDEXED | ");
   if (lh->Attr & 0x4000)
     strcat((char *)attr_str, "FILE_ATTRIBUTE_ENCRYPTED | ");
-  attr_str[strlen((char *)attr_str) - 3] = (unsigned char)0;
+  if (strlen((char *)attr_str) > 3)
+  {
+    // Remove the last space,pipe,space combination
+    attr_str[strlen((char *)attr_str) - 3] = (unsigned char)0;
+  }
+  else
+  {
+    //The only way to get here is to have an unrecognised file attribute
+    sprintf((char *)attr_str, "[UNKNOWN FILE ATTRIBUTE]");
+  }
   return;
 }
 //
