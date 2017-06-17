@@ -27,7 +27,7 @@ This file is part of Lifer, a Windows link file analyser.
     along with Lifer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-// These are equivalent to the protocol revision for MS-SHLLNK
+// These are equivalent to the protocol revision for MS-SHLLINK
 #define _MAJOR  3
 #define _MINOR  0
 // This is my revision number
@@ -48,6 +48,81 @@ This file is part of Lifer, a Windows link file analyser.
     is hazy (because I only developed the tool for my own use). After
     initiating git and posting the tool to github there is obviously a much
     better recollection ;)
+	
+	v3.0.12
+	Linux integration tweaks and fix for issue 0001
+	
+	v3.0.11
+	ED PropertyStoreDataBlock fully implemented
+	
+	v3.0.9_1
+	ED PropertyStoreDataBlock partially implemented
+	
+	v3.0.8
+	ED ShimDataBlock added
+	
+	v3.0.7
+	ED KnownFolderDataBlock added
+	
+	v3.0.6
+	ED IconEnvironmentDataBlock added
+	
+	v3.0.5
+	ED EnvironmentVariableDataBlock added
+	
+	v3.0.4
+	ED DarwinDataBlock info added
+	
+	v3.0.3
+	ED ConsoleDataBlock info added
+	
+	v3.0.2
+	Just a version bump as a test.
+	
+	v3.0.1
+    The first attempt to bring lifer (as it stands) in line with the current
+    version of MS-SHLLINK. Actually not much changes except some of the names
+	of previously capitalized constants are slightly changed and made
+	mixed-case.
+	
+	v1.2.31
+	README.md gets an update because I've started to figure out how github
+	works.
+
+    v1.2.30
+    The first git commit to github. The first two integers in the version (1.2)
+    just happen to align with the version of MS-SHLLINK that I had been working
+    from, at this point I decide that these first two version numbers should
+    always align with the MS-SHLLINK version number so that folks can see which
+    version of that document we are working from (the obvious thing is that
+    from this point I need to align with the then current version of 3.0) but I
+	hadn't updated the code to this version.
+	In truth, I	had made a number of versions that were significantly different
+	but with the same version number (poor, I know!) This was a version bump to
+	supercede all previous versions.
+
+    2016 Q4 & 2017 Q1 v1.2.5
+    Just tidying up the code so that it is fit to be viewed by the world at
+    large. At this stage it is almost exclusively a Linux application. but has
+    pretentions of moving to Windows too.
+
+    2016 v1.1.0
+    OK, so I've been employed by a US forensic software company, got tired of
+    being pushed around by an overbearing CEO who has no concept of people
+    skills (other than being a 'pushy salesperson') (My heart goes out to you
+    US employees with dickheads as bosses, in fact I don't think the US has a
+    monopoly on this, I feel for everyone who has a dickhead as a boss). The
+    upshot is that I finally retire, properly, and start doing things I want
+    to do! *One* of these is engaging brain and implementing some of the
+    neglected parts of lifer. Mission 1: - learn git because it was written by
+    my hero Linus Torvalds as a result of not having a suitable versioning
+    system for the Linux kernel code. Result of mission: - Linus is WAY
+    cleverer than me :(
+    Some basic versioning is implemented
+
+    2012 v1.0.2
+    Development continued until Oct 2012 at which point I retired from the UK
+    Police The tool lies dormant on my systems at this point.
 
     2011 Q4? v1.0.0
     You may have gathered that I hadn't incorporated versioning at this stage,
