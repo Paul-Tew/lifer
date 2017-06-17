@@ -1406,12 +1406,7 @@ void read_dir(char* dirname, int less)
     fprintf(stderr, "whilst processing directory: \'%s\'\n", dirname);
     return;
   }
-  //Preserve the old directory and move to the new one
-  returnbuf = _getcwd(olddir, strlen(olddir));
-  if (returnbuf == NULL)
-    fprintf(stderr, "Could not get current directory name\n");
-  if (_chdir(dirname) != 0)
-    fprintf(stderr, "Unable to preserve old directory name\n");
+  _chdir(dirname) != 0;
   //Iterate through the directory entries
   while ((entry = readdir(dp)) != NULL)
   {
@@ -1422,9 +1417,6 @@ void read_dir(char* dirname, int less)
       proc_file(entry->d_name, less);
     }
   }//End of iterating through directory entry
-// All entries done, restore the old directory
-  if (_chdir(olddir) != 0)
-    fprintf(stderr, "Unable to restore old directory\n");
 }
 
 //

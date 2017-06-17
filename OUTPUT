@@ -63,7 +63,7 @@ EXPLANATION OF 'lifer' OUTPUT
   the start of the file to the structure so that anyone can identify the
   particular Extradata section in question.
 
-  {**OPERATING SYSTEM (stat) DATA**}
+  TEXT SECTION LABELLED "{**OPERATING SYSTEM (stat) DATA**}"
   The very first part of lifer output however is nothing to do with the internal
   structure of the link file but rather, shows data relating to the link file
   itself from the perspective of the file system where the link file is located.
@@ -75,36 +75,101 @@ EXPLANATION OF 'lifer' OUTPUT
                         had been modified)
     •  Last Changed    (Not he same as Last Modified time!)
 
-
     *A SIDE NOTE ABOUT TIMES...*
-
     Modern Windows file systems record these three times and in addition record 
     the 'Created' time. some of the older FAT systems may not record them all
-    though. Conversely, *nix file systems have only recently moved to record the
-    'Created' (or 'Birth' in *nix parlance) time and even then, require the option
-    to be turned on explicitly.
-    As lifer was originally a Linux tool I voted to keep the three times I could
-    most easily capture in that particular operating system. Incidentally, for
-    forensic purposes I have found the 'created' time to be VERY troublesome and
-    inconsistent; I tend to avoid relying on it anyway.
+    though. Conversely, *nix file systems have only recently moved to record
+    the 'Created' (or 'Birth' in *nix parlance) time and even then, require the
+    option to be turned on explicitly.
+    As lifer was originally a Linux tool I voted to keep the three times I
+    could most easily capture in that particular operating system.
+    Incidentally, for forensic purposes I have found the 'created' time to be
+    VERY troublesome and inconsistent; I tend to avoid relying on it anyway.
 
     All times output by lifer are in UTC. This is a common forensic process
     whereby all times from disparate machines that are separated by time zones
     can be compared together using a single common time zone.
 
-  {**LINK FILE EMBEDDED DATA**}
+  TEXT SECTION LABELLED "{**LINK FILE EMBEDDED DATA**}"
   The data in this section is the information and printed values contained in
   the body of the link file. The printed data follows the rules set out above.
   Any sections from the specification that are missing in the output are
   probably optional and are missing from within the link file itself.
 
 
-**SHORTENED TEXT OUTPUT (option: '-so txt' or '-s')**
+**SHORTENED TEXT OUTPUT (option: '-so txt' or just '-s')**
 
   With this type of output I have sought to resrict the amount of data and
   instead of printing everything, just keep it restricted to the kind of data
-  I was interested in whilst working as a forensic analyst.
+  I was interested in whilst working as a forensic analyst. If you think I need
+  to adjust what is output here then raise it with me in github (preferably as
+  a pull request)
 
+
+**TAB SEPARATED VALUES OUTPUT (option: '-o tsv')**
+  
+  This output type is designed for import into a spreadsheet. It is the
+  recommended option if you are going to import into a spreadsheet because the
+  output has not been tampered with (see CSV output post.)
+  The first row (line) contains the column header names and each subsequent
+  row are the values from each link file that has been parsed (one row [line]
+  for each link file). Each value is separated by an ANSI tab character (0x09)
+  from any subsequent values. 
+  In order to align the values under the correct columns, any values that are
+  not applicable are denoted by "[N/A]", this would normally signify that the
+  value does not exist in the context of this particular link file.
+  It should be noted that individual Extradata-PropertyStoreDataBlock-Property
+  Stores and their values are NOT included in any TSV output. The reason for 
+  this is that there can be a variable number of property stores containing a
+  variable number of values, the dynamic nature of this data means that it is
+  difficult to render in a flat file database such as a spreadsheet. I am
+  hoping at some stage, to introduce an XML output option which will address
+  some of these shortcomings.
+  If it is essential that PropertyStoreDataBlock items are parsed, then for
+  the moment, I suggest that you use text output and use tools like sed and
+  awk to fish out the data you need.
+  At the time of writing (lifer version 3.0.11) IDlists (MS-SHLLINK SS. 2.2.1
+  and 2.5.11) are not parsed and ItemID values are only counted. In the
+  fullness of time I will include some parsing but the same issue as with
+  property stores exists in that, there can be a variable number of such
+  values. Until I implement XML output you will have to rely on text output to
+  get as full a picture of the content as is currently available.
+
+
+**SHORTENED TAB SEPARATED VALUES OUTPUT (option: '-so tsv')**
+
+  This is similar to shortened text output in that, some data I consider to be
+  irrelevant for forensic investigations has been omitted.
+
+
+**TAB SEPARATED VALUES OUTPUT (option: '-o csv')** and
+**SHORTENED TAB SEPARATED VALUES OUTPUT (option: '-so csv')**
+
+  This output is exactly the same as TSV output. Some spreadsheet and database
+  programs balk at importing tab separated values and only properly accept
+  comma separated values. The problem with this is that some of the strings
+  embedded in link files contain commas, a csv file containing values which
+  themselves contain commas can cause havoc with data field alignment.
+  In order to solve this problem I have tried to identify strings that may
+  contain commas and I then check those strings for commas ',' and replace them
+  with semi-colons ';'.
+  The upshot is that if you are going to rely on a string that was output by
+  lifer as having a semi-colon then be aware that the actual character may be a
+  comma. Test2.lnk in the ./Test/ directory is a sample file with this error
+  whereby the string:
+  "@%windir%\system32\wucltux.dll,-2"
+  is changed to:
+  "@%windir%\system32\wucltux.dll;-2"
+  by changing the output to csv
+
+  Incidentally there is nothing to stop Microsoft (or anyone else) from 
+  inserting a TAB character into a string and messing up the formatting of any
+  tsv output, in my experience I have never seen it, but it COULD happen!
+
+
+**XML OUTPUT (option: '-o xml')**
+
+  Not yet implemented but on my 'TODO' list
 
 Paul Tew
 June 2017
