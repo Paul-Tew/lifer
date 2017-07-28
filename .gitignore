@@ -236,3 +236,6 @@ __pycache__/
 *.xsd.cs
 # Any VSCode settings
 .vscode/
+/src/Test/Test5.lnk
+/src/Test/Test6.lnk
+/src/Test/Test5.lnk

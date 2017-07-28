@@ -124,6 +124,9 @@
     <None Include="..\_config.yml" />
     <None Include="Test\WinXP.xlsx" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="IDLIST.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

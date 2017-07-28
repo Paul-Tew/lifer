@@ -1,0 +1,22 @@
+IDLIST
+
+What we know about IDList structures...
+
+Feel free to contact Paul dot Tew at outlook dot com for me to acknowledge 
+anyone else's (presumably awesome) work and incorporate your hacking (reverse
+engineering) into this body of work...
+
+ï For most link files there seems to be a common IDList[0] structure it is:
+  unsigned AnsiChar data[20] = {
+  0x14, 0x00, 0x1F, 0x50, 0xE0, 0x4F, 0xD0, 0x20, 0xEA, 0x3A, 0x69, 0x10, 0xA2,
+  0xD8, 0x08, 0x00, 0x2B, 0x30, 0x30, 0x9D
+  };
+  Which in ANSII (en-gb) looks like:
+  ' P‡O– Í:i ¢ÿ  +00 '
+  The first two bytes are undoubtably a 16 bit integer representing the size of
+  the initial IDList object but the next 18 are a mystery (some sort of unique
+  IDList identifier?)
+
+ï Some (older?) link files don't have this usual IDList[0] structure
+
+ï 

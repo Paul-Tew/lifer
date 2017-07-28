@@ -79,7 +79,7 @@ extern int get_lif(FILE* fp, int size, struct LIF* lif)
   {
     return -2;
   }
-  pos += (lif->lidl.IDL_size);
+  pos += (lif->lidl.IDListSize + 2);
 
   if (get_linkinfo(fp, size, pos, lif) < 0)
   {
@@ -331,42 +331,48 @@ int get_lhdr_a(struct LIF_HDR* lh, struct LIF_HDR_A* lha)
 //
 // Function 'get_idlist()' fills a LIF_IDLIST structure with data from the
 // opened file fp
-int get_idlist(FILE * fp, int size, int pos, struct LIF * lif)
+int get_idlist(FILE * fp, int size, int loc, struct LIF * lif)
 {
   unsigned char   size_buf[2];   //A small buffer to hold the size element
-  int             numItems = 0, posn = pos + 2;
+  int             numItems = 0, posn = loc + 2, i, datasize;
   uint16_t        u16;
 
   if (lif->lh.Flags & 0x00000001)
   {
-    fseek(fp, pos, SEEK_SET);
+    fseek(fp, loc, SEEK_SET);
     size_buf[0] = getc(fp);
     size_buf[1] = getc(fp);
-    lif->lidl.IDL_size = get_le_uint16(size_buf, 0);
-    if (lif->lidl.IDL_size > 0)
+    lif->lidl.IDListSize = get_le_uint16(size_buf, 0);
+    if (lif->lidl.IDListSize > 0)
     {
       //posn points to the first ItemID relative to the start of TargetIDList
-      while (posn < (pos + 2 + lif->lidl.IDL_size))
+      while (posn < (loc + 2 + lif->lidl.IDListSize))
       {
         fseek(fp, posn, SEEK_SET);
         size_buf[0] = getc(fp);
         size_buf[1] = getc(fp);
-        u16 = get_le_uint16(size_buf, 0);
-        if (u16 == 0)
+        lif->lidl.Items[numItems].ItemIDSize = get_le_uint16(size_buf, 0);
+        datasize = lif->lidl.Items[numItems].ItemIDSize - 2;
+        if (lif->lidl.Items[numItems].ItemIDSize == 0)
         {
           break;
         }
+        else
+        {
+          for (i = 0; (i < datasize) && (i <= MAXITEMIDSIZE); i++)
+          {
+            lif->lidl.Items[numItems].Data[i] = getc(fp);
+          }
+        }
+        posn = posn + lif->lidl.Items[numItems].ItemIDSize;
         numItems++;
-        posn = posn + u16;
       }
       lif->lidl.NumItemIDs = numItems;
-      //      lif->lidl.Items = NULL; //Not filled in this version - sorry
-      lif->lidl.IDL_size += 2;
     }
   }
   else //No ID List
   {
-    lif->lidl.IDL_size = 0;
+    lif->lidl.IDListSize = 0;
     lif->lidl.NumItemIDs = 0;
     //    lif->lidl.Items = NULL;
   }
@@ -377,14 +383,14 @@ int get_idlist(FILE * fp, int size, int pos, struct LIF * lif)
 // Converts the data in a LIF_IDLIST into its ASCII representation
 int get_idlist_a(struct LIF_IDLIST * lidl, struct LIF_IDLIST_A * lidla)
 {
-  if (!(lidl->IDL_size == 0))
+  if (!(lidl->IDListSize == 0))
   {
-    snprintf((char *)lidla->IDL_size, 10, "%"PRIu16, lidl->IDL_size);
+    snprintf((char *)lidla->IDListSize, 10, "%"PRIu16, lidl->IDListSize);
     snprintf((char *)lidla->NumItemIDs, 10, "%"PRIu16, lidl->NumItemIDs);
   }
   else
   {
-    snprintf((char *)lidla->IDL_size, 10, "[N/A]");
+    snprintf((char *)lidla->IDListSize, 10, "[N/A]");
     snprintf((char *)lidla->NumItemIDs, 10, "[N/A]");
   }
 

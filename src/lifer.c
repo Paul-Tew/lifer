@@ -92,8 +92,8 @@ void help_message()
 //          up the formatting
 int replace_comma(unsigned char * str, uint16_t len)
 {
-  int result = 0;
-  for (int i = 0; (i < len); i++)
+  int result = 0, i;
+  for (i = 0; (i < len); i++)
   {
     if (str[i] == ',')
     {
@@ -410,7 +410,7 @@ void sv_out(FILE* fp, char* fname, int less, char sep)
     printf("%s%c%s%c", lif_a.lha.IconIndex, sep, lif_a.lha.ShowState, sep);
     printf("%s%c%s%c", lif_a.lha.Hotkey, sep, lif_a.lha.Reserved1, sep);
     printf("%s%c%s%c", lif_a.lha.Reserved2, sep, lif_a.lha.Reserved3, sep);
-    printf("%s%c", lif_a.lidla.IDL_size, sep);
+    printf("%s%c", lif_a.lidla.IDListSize, sep);
     printf("%s%c", lif_a.lidla.NumItemIDs, sep);
     printf("%s%c", lif_a.lia.Size, sep);
     printf("%s%c", lif_a.lia.HeaderSize, sep);
@@ -742,7 +742,8 @@ void text_out(FILE* fp, char* fname, int less)
     {
       printf("  {S_2.2 - LinkTargetIDList}\n");
       printf("    IDList Size:         %s bytes\n",
-        lif_a.lidla.IDL_size);
+        lif_a.lidla.IDListSize);
+      printf("      (Add 2 bytes to include LinkTargetIDList header)\n");
       printf("    Number of Items:     %s\n", lif_a.lidla.NumItemIDs);
     }
   }
@@ -1398,7 +1399,6 @@ void read_dir(char* dirname, int less)
   DIR *dp;
   struct dirent *entry;
   struct stat statbuf;
-  char olddir[PATH_MAX], *returnbuf;
 
   if ((dp = opendir(dirname)) == NULL)
   {
@@ -1406,7 +1406,7 @@ void read_dir(char* dirname, int less)
     fprintf(stderr, "whilst processing directory: \'%s\'\n", dirname);
     return;
   }
-  _chdir(dirname) != 0;
+  _chdir(dirname);
   //Iterate through the directory entries
   while ((entry = readdir(dp)) != NULL)
   {

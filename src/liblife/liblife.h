@@ -60,8 +60,10 @@ https://msdn.microsoft.com/en-us/library/dd871305.aspx )
 
 /******************************************************************************/
 //Minor Definitions & Structures
-#define PROPSTORES 10  // The number of LIF_SER_PROPSTORE in a LIF_PROPERTY_STORE_PROPS structure
-#define PROPVALUES 10  // The number of LIF_SER_PROPVALUE in each LIF_SER_PROPSTORE structure
+#define PROPSTORES    10    // The number of LIF_SER_PROPSTORE in a LIF_PROPERTY_STORE_PROPS structure
+#define PROPVALUES    10    // The number of LIF_SER_PROPVALUE in each LIF_SER_PROPSTORE structure
+#define ITEMIDS       10    // The number of LIF_ITEMID items in a LIF_IDLIST
+#define MAXITEMIDSIZE 4096  // The maximum number of raw bytes in an ItemID
 
 // extradata types
 enum EDTYPES
@@ -189,32 +191,32 @@ struct LIF_SER_PROPSTORE_A
 
 struct LIF_CONSOLE_PROPS
 {
-  uint16_t       Posn;	// Not in the spec but included to assist in forensic analysis and authentication of results
+  uint16_t       Posn;  // Not in the spec but included to assist in forensic analysis and authentication of results
   uint32_t       Size;
   uint32_t       sig;
   uint16_t       FillAttributes;
   uint16_t       PopupFillAttributes;
   uint16_t       ScreenBufferSizeX;
   uint16_t       ScreenBufferSizeY;
-  uint16_t			 WindowSizeX;
-  uint16_t			 WindowSizeY;
-  uint16_t			 WindowOriginX;
-  uint16_t			 WindowOriginY;
-  uint32_t			 Unused1;
-  uint32_t			 Unused2;
-  uint32_t			 FontSize;
-  uint32_t			 FontFamily;
-  uint32_t			 FontWeight;
-  wchar_t				 FaceName[32];
-  uint32_t			 CursorSize;
-  uint32_t			 FullScreen;
-  uint32_t			 QuickEdit;
-  uint32_t			 InsertMode;
-  uint32_t			 AutoPosition;
-  uint32_t			 HistoryBufferSize;
-  uint32_t			 NumberOfHistoryBuffers;
-  uint32_t			 HistoryNoDup;
-  uint32_t			 ColorTable[16];
+  uint16_t       WindowSizeX;
+  uint16_t       WindowSizeY;
+  uint16_t       WindowOriginX;
+  uint16_t       WindowOriginY;
+  uint32_t       Unused1;
+  uint32_t       Unused2;
+  uint32_t       FontSize;
+  uint32_t       FontFamily;
+  uint32_t       FontWeight;
+  wchar_t        FaceName[32];
+  uint32_t       CursorSize;
+  uint32_t       FullScreen;
+  uint32_t       QuickEdit;
+  uint32_t       InsertMode;
+  uint32_t       AutoPosition;
+  uint32_t       HistoryBufferSize;
+  uint32_t       NumberOfHistoryBuffers;
+  uint32_t       HistoryNoDup;
+  uint32_t       ColorTable[16];
 };
 
 struct LIF_CONSOLE_PROPS_A
@@ -226,25 +228,25 @@ struct LIF_CONSOLE_PROPS_A
   unsigned char      PopupFillAttributes[8];
   unsigned char      ScreenBufferSizeX[8];
   unsigned char      ScreenBufferSizeY[8];
-  unsigned char			 WindowSizeX[8];
-  unsigned char			 WindowSizeY[8];
-  unsigned char			 WindowOriginX[8];
-  unsigned char			 WindowOriginY[8];
-  unsigned char			 Unused1[12];
-  unsigned char			 Unused2[12];
-  unsigned char			 FontSize[12];
-  unsigned char			 FontFamily[12];
-  unsigned char			 FontWeight[12];
-  unsigned char			 FaceName[64];
-  unsigned char			 CursorSize[12];
-  unsigned char			 FullScreen[12];
-  unsigned char			 QuickEdit[12];
-  unsigned char			 InsertMode[12];
-  unsigned char			 AutoPosition[12];
-  unsigned char			 HistoryBufferSize[12];
-  unsigned char			 NumberOfHistoryBuffers[12];
-  unsigned char			 HistoryNoDup[12];
-  unsigned char			 ColorTable[16][12];
+  unsigned char      WindowSizeX[8];
+  unsigned char      WindowSizeY[8];
+  unsigned char      WindowOriginX[8];
+  unsigned char      WindowOriginY[8];
+  unsigned char      Unused1[12];
+  unsigned char      Unused2[12];
+  unsigned char      FontSize[12];
+  unsigned char      FontFamily[12];
+  unsigned char      FontWeight[12];
+  unsigned char      FaceName[64];
+  unsigned char      CursorSize[12];
+  unsigned char      FullScreen[12];
+  unsigned char      QuickEdit[12];
+  unsigned char      InsertMode[12];
+  unsigned char      AutoPosition[12];
+  unsigned char      HistoryBufferSize[12];
+  unsigned char      NumberOfHistoryBuffers[12];
+  unsigned char      HistoryNoDup[12];
+  unsigned char      ColorTable[16][12];
 };
 
 struct LIF_CONSOLE_FE_PROPS
@@ -319,7 +321,7 @@ struct LIF_ICON_ENVIRONMENT_PROPS_A
 
 struct LIF_KNOWN_FOLDER_PROPS
 {
-  uint16_t           Posn;	// Not in the spec but included to assist in forensic analysis and authentication of results
+  uint16_t           Posn;  // Not in the spec but included to assist in forensic analysis and authentication of results
   uint32_t           Size;
   uint32_t           sig;
   struct LIF_CLSID   KFGUID;
@@ -337,7 +339,7 @@ struct LIF_KNOWN_FOLDER_PROPS_A
 
 struct LIF_PROPERTY_STORE_PROPS
 {
-  uint16_t                  Posn;	// Not in the spec but included to assist in forensic analysis and authentication of results
+  uint16_t                  Posn;  // Not in the spec but included to assist in forensic analysis and authentication of results
   uint32_t                  Size;
   uint32_t                  sig;
   int32_t                   NumStores;
@@ -355,7 +357,7 @@ struct LIF_PROPERTY_STORE_PROPS_A
 
 struct LIF_SHIM_PROPS
 {
-  uint16_t           Posn;	// Not in the spec but included to assist in forensic analysis and authentication of results
+  uint16_t           Posn;  // Not in the spec but included to assist in forensic analysis and authentication of results
   uint32_t           Size;
   uint32_t           sig;
   wchar_t            LayerName[600];
@@ -371,7 +373,7 @@ struct LIF_SHIM_PROPS_A
 
 struct LIF_SPECIAL_FOLDER_PROPS
 {
-  uint16_t           Posn;	// Not in the spec but included to assist in forensic analysis and authentication of results
+  uint16_t           Posn;  // Not in the spec but included to assist in forensic analysis and authentication of results
   uint32_t           Size;
   uint32_t           sig;
   uint32_t           SpecialFolderID;
@@ -389,7 +391,7 @@ struct LIF_SPECIAL_FOLDER_PROPS_A
 
 struct LIF_TRACKER_PROPS
 {
-  uint16_t           Posn;	// Not in the spec but included to assist in forensic analysis and authentication of results
+  uint16_t           Posn;  // Not in the spec but included to assist in forensic analysis and authentication of results
   uint32_t           Size;
   uint32_t           sig;
   uint32_t           Length;
@@ -417,7 +419,7 @@ struct LIF_TRACKER_PROPS_A
 
 struct LIF_VISTA_IDLIST_PROPS
 {
-  uint16_t           Posn;	// Not in the spec but included to assist in forensic analysis and authentication of results
+  uint16_t           Posn;  // Not in the spec but included to assist in forensic analysis and authentication of results
   uint32_t           Size;
   uint32_t           sig;
   //TODO Fix this!
@@ -477,7 +479,7 @@ struct LIF_STRINGDATA
 {
   uint32_t           Size;          //This isn't in the specification but I've included it to help calculate the position
   uint16_t           CountChars[5];
-  unsigned char      Data[5][300]; //StringData can be any length but I've restricted it to returning just 300 chars
+  unsigned char      Data[5][300];  //StringData can be any length but I've restricted it to returning just 300 chars
 };
 
 struct LIF_STRINGDATA_A
@@ -577,30 +579,39 @@ struct LIF_INFO_A
   unsigned char               CPSOffset[10];
   unsigned char               LBPOffsetU[10];
   unsigned char               CPSOffsetU[10];
-  struct LIF_VOLID_A		  VolID;
+  struct LIF_VOLID_A          VolID;
   unsigned char               LBP[300]; //Local Base Path
-  struct LIF_CNR_A			  CNR;
+  struct LIF_CNR_A            CNR;
   unsigned char               CPS[100]; //Common Path Suffix
   unsigned char               LBPU[300]; //Local Base Path, Unicode version
   unsigned char               CPSU[100]; //Common Path Suffix, Unicode
 };
 
-struct LIF_IDLIST //This is a considerable simplification of the data for IDLIST
-  // and ITEMID which are both contained in this structure.
+struct LIF_ITEMID
 {
-  uint16_t           IDL_size;
-  //  struct ITEMID**    Items;      //A variable number of variable length
-    //structures
-  uint16_t           NumItemIDs; //This isn't in the specification but it seemed
-  // like a good idea to include it.
+  uint16_t           ItemIDSize;
+  unsigned char      Data[MAXITEMIDSIZE];
+};
+
+struct LIF_ITEMID_A
+{
+  unsigned char               ItemIDSize[10];
+  unsigned char               Data[100];  // Room for some general notes about the data
+  struct LIF_SER_PROPSTORE_A  DataStores[PROPSTORES]; // Where the ID list contains property stores the interpretation can be held here
+};
+
+struct LIF_IDLIST
+{
+  struct LIF_ITEMID  Items[ITEMIDS];  //
+  uint16_t           IDListSize;
+  uint16_t           NumItemIDs; //This isn't in the specification but it seemed like a good idea to include it.
 };
 
 struct LIF_IDLIST_A
 {
-  unsigned char               IDL_size[10];
-  //  struct ITEMID_A**  Items;          //A variable number of variable length
-  //structures
-  unsigned char               NumItemIDs[10];
+  struct LIF_ITEMID_A  Items[ITEMIDS];
+  unsigned char        IDListSize[10];
+  unsigned char        NumItemIDs[10];
 };
 
 struct LIF_HDR
