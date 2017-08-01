@@ -7,10 +7,9 @@ A forensic tool for Windows link file examinations (i.e. Windows shortcuts)
 It started life as a lightweight tool that I wrote in order to extract certain information from link files to assist in enquiries I was making whilst working as a computer forensic analyst. Now I am retired but I am looking to expand it's usefulness and publish it so that others can benefit.
 
 The information extracted is in accordance with the Microsoft Open Specification Document 'MS-SHLLNK' which can be found online [**here**](https://msdn.microsoft.com/en-us/library/dd871305.aspx).
-At the time of writing only parts of specification version 3.0 are implemented. Over time however, I hope to bring the tool into line with the full current specification and also include other goodies such as:
-* A full output conforming to all of the sections in the MS-SHLLINK documentation.
-* Relevant output from IDList containers
-* Recognition of, and parsing of link file data within jump list containers.
+At the time of writing most parts of specification version 3.0 are implemented. Over time however, I hope to bring the tool into line with the full current specification and also include other goodies such as:
+* Relevant output from IDList containers (which need reverse engineering - see 'IDLIST.txt')
+* Recognition of, and parsing of link file data within jump list (OLE) containers.
 
 ## EXAMPLE USAGE
 Details of the files to be found in the Test directory and how to use them is given in the '.\Test\Tests.txt' file. What follows is a brief outline...
@@ -55,6 +54,8 @@ LINK FILE -------------- .\Test\Test1.lnk
         UUID Node (MAC):   00:13:72:16:87:4A
 ```
 A more fulsome output (including more accurate timestamps) can be obtained by omitting the '-s' option.
+
+The most detail about a link file can be gleaned by using the '-i' option which will print known details about any idlist objects too. This option is not compatible with the '-s' option.
 
 All the link files in a directory (folder) can be parsed by just passing the name of the directory:
 ```
@@ -125,7 +126,7 @@ cd "F:\\lifer\src\x64\Debug\"
 ```
 * I then test the executable using the command:
 ```
-.\lifer.exe ..\..\Test\Test.lnk
+.\lifer.exe ..\..\Test\Test1.lnk
 ```
 ---
 It is possible to make lifer in Windows without installing Visual Studio but you will still need to download and install the Visual C++ build tools available [here](http://landinghub.visualstudio.com/visual-cpp-build-tools)

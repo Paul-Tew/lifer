@@ -79,7 +79,10 @@ extern int get_lif(FILE* fp, int size, struct LIF* lif)
   {
     return -2;
   }
-  pos += (lif->lidl.IDListSize + 2);
+  if (lif->lidl.IDListSize > 0)
+  {
+    pos += (lif->lidl.IDListSize + 2);
+  }
 
   if (get_linkinfo(fp, size, pos, lif) < 0)
   {
@@ -374,7 +377,6 @@ int get_idlist(FILE * fp, int size, int loc, struct LIF * lif)
   {
     lif->lidl.IDListSize = 0;
     lif->lidl.NumItemIDs = 0;
-    //    lif->lidl.Items = NULL;
   }
 
   return 0;
@@ -383,6 +385,8 @@ int get_idlist(FILE * fp, int size, int loc, struct LIF * lif)
 // Converts the data in a LIF_IDLIST into its ASCII representation
 int get_idlist_a(struct LIF_IDLIST * lidl, struct LIF_IDLIST_A * lidla)
 {
+  int  i;
+
   if (!(lidl->IDListSize == 0))
   {
     snprintf((char *)lidla->IDListSize, 10, "%"PRIu16, lidl->IDListSize);
@@ -392,6 +396,10 @@ int get_idlist_a(struct LIF_IDLIST * lidl, struct LIF_IDLIST_A * lidla)
   {
     snprintf((char *)lidla->IDListSize, 10, "[N/A]");
     snprintf((char *)lidla->NumItemIDs, 10, "[N/A]");
+  }
+  for (i = 0; i < lidl->NumItemIDs; i++)
+  {
+    snprintf((char *)lidla->Items[i].ItemIDSize, 10, "%"PRIu16, lidl->Items[i].ItemIDSize);
   }
 
   return 0;

@@ -3,6 +3,9 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 # User-specific files
+/src/Test/Test5.lnk
+/src/Test/Test6.lnk
+/src/Test/Test7.lnk
 lifer
 lifer.exe
 *.suo
@@ -236,6 +239,3 @@ __pycache__/
 *.xsd.cs
 # Any VSCode settings
 .vscode/
-/src/Test/Test5.lnk
-/src/Test/Test6.lnk
-/src/Test/Test5.lnk

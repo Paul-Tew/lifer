@@ -72,6 +72,7 @@ void help_message()
   printf("Usage: lifer  [-vhs] [-o csv|tsv|txt] file(s)|directory\n\n");
   printf("Options:\n  -v    print version number\n  -h    print this help\n");
   printf("  -s    shortened output (default is to output all fields)\n");
+  printf("  -i    print idlist information (only compatible with output type: full 'txt')\n");
   printf("  -o    output type (choose from csv, tsv or txt). \n");
   printf("        The default is txt.\n\n");
   printf("Output is to standard output, to send to a file, use the redirection\n");
@@ -669,7 +670,7 @@ void sv_out(FILE* fp, char* fname, int less, char sep)
 //
 //Function: text_out(FILE * fp) processes the link file and outputs the text
 //          version of the decoded data.
-void text_out(FILE* fp, char* fname, int less)
+void text_out(FILE* fp, char* fname, int less, int itemid)
 {
   struct LIF     lif;
   struct LIF_A   lif_a;
@@ -741,10 +742,21 @@ void text_out(FILE* fp, char* fname, int less)
     if (less == 0)
     {
       printf("  {S_2.2 - LinkTargetIDList}\n");
-      printf("    IDList Size:         %s bytes\n",
-        lif_a.lidla.IDListSize);
-      printf("      (Add 2 bytes to include LinkTargetIDList header)\n");
-      printf("    Number of Items:     %s\n", lif_a.lidla.NumItemIDs);
+      printf("    Size:                %u bytes\n",
+        lif.lidl.IDListSize + 2);
+      if (itemid > 0)
+      {
+        printf("    IDList Size:         %s bytes\n",
+          lif_a.lidla.IDListSize);
+        printf("    Number of ItemIDs    %s\n", lif_a.lidla.NumItemIDs);
+        for (i = 0; i < lif.lidl.NumItemIDs; i++)
+        {
+          printf("    {ItemID %i}\n", i + 1);
+          printf("      Size:              %s bytes\n", lif_a.lidla.Items[i].ItemIDSize);
+        }
+        printf("    IDList Terminator    2 bytes\n");
+
+      }
     }
   }
   if (lif.lh.Flags & 0x00000002) //If there is a LinkInfo
@@ -1336,7 +1348,7 @@ void text_out(FILE* fp, char* fname, int less)
 
 //
 //Function: proc_file() processes regular files
-void proc_file(char* fname, int less)
+void proc_file(char* fname, int less, int idlist)
 {
   FILE *fp;
   struct stat statbuf;
@@ -1367,7 +1379,7 @@ void proc_file(char* fname, int less)
         case txt:
         default:       //Anything other than these 3 options should have been
           //trapped already - this is just belt & braces!
-          text_out(fp, fname, less); // Output to plain text
+          text_out(fp, fname, less, idlist); // Output to plain text
         }
         filecount++;
       }
@@ -1394,7 +1406,7 @@ void proc_file(char* fname, int less)
 //
 //Function: read_dir() iterates through the files in a directory and processes
 //them
-void read_dir(char* dirname, int less)
+void read_dir(char* dirname, int less, int idlist)
 {
   DIR *dp;
   struct dirent *entry;
@@ -1414,7 +1426,7 @@ void read_dir(char* dirname, int less)
     //Don't want anything but regular files
     if ((statbuf.st_mode & S_IFMT) == S_IFREG)
     {
-      proc_file(entry->d_name, less);
+      proc_file(entry->d_name, less, idlist);
     }
   }//End of iterating through directory entry
 }
@@ -1423,7 +1435,7 @@ void read_dir(char* dirname, int less)
 //Main function
 int main(int argc, char *argv[])
 {
-  int opt, process = 1, less = 0; // less is the flag for short info 
+  int opt, process = 1, less = 0, idlist = 0; // less is the flag for short info 
                 // (can't use short, it's a keyword)
   int proc_dir = 0;           // A flag to deal with processing just one directory
   struct stat statbuffer;     // File details buffer
@@ -1439,7 +1451,7 @@ int main(int argc, char *argv[])
   }
 
   //Parse the options
-  while ((opt = getopt(argc, argv, "vhso:")) != -1)
+  while ((opt = getopt(argc, argv, "vhsio:")) != -1)
   {
     // Parse supplied command line options
     switch (opt)
@@ -1454,11 +1466,14 @@ int main(int argc, char *argv[])
       process = 0;
       break;
     case '?':
-      printf("Usage: lifer [-vhs] [-o csv|tsv|txt] file(s)|directory\n");
+      printf("Usage: lifer [-vhsi] [-o csv|tsv|txt] file(s)|directory\n");
       process = 0;
       break;
     case 's':
       less++;
+      break;
+    case 'i':
+      idlist++;
       break;
     case 'o':
       if (strcmp(optarg, "csv") == 0)
@@ -1516,13 +1531,13 @@ int main(int argc, char *argv[])
         }
         else
         {
-          read_dir(argv[optind], less);
+          read_dir(argv[optind], less, idlist);
         }
       }
       //Process regular files
       else if (((statbuffer.st_mode & S_IFMT) == S_IFREG))
       {
-        proc_file(argv[optind], less);
+        proc_file(argv[optind], less, idlist);
       }
       proc_dir = 1; //Prevent processing of directories after first argument
       //(The default behaviour is to process 1 directory OR

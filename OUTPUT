@@ -106,6 +106,14 @@ EXPLANATION OF 'lifer' OUTPUT
   a pull request)
 
 
+**EXTENDED TEXT OUTPUT (IDLIST INFORMATION) (option: '-io txt' or just 'i')**
+
+  The interpretation of IDList information is currently experimental and 
+  therefore needs to be switched on explicitly by using the '-i' option.
+  Whilst this is in development the output may change as more data is 
+  interpreted.
+
+
 **TAB SEPARATED VALUES OUTPUT (option: '-o tsv')**
   
   This output type is designed for import into a spreadsheet. It is the
