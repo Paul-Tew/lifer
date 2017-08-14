@@ -31,7 +31,7 @@ This file is part of Lifer, a Windows link file analyser.
 #define _MAJOR  3
 #define _MINOR  0
 // This is my revision number
-#define _BUILD  14 // IDLists Pt1.1
+#define _BUILD  15 // IDLists Pt1.2 Extracting the Propstore_a functionality to an independant function
 // Just the current year
 #define _YEAR   2017
 

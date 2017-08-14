@@ -183,6 +183,354 @@ extern int test_link(FILE* fp)
     return -10;
   return 0;
 }
+// TODO - THIS FUNCTION IS EXPERIMENTAL!!!
+//Function get_propstores_a(struct LIF_PROPERTY_STORE_PROPS * psp, struct LIF_PROPERTY_STORE_PROPS_A * pspa)
+//Property Stores (MS-PROPSTORE S2) turn up in Link files in a number of places:
+//  • Extradata.PropertyStoreDataBlock
+//  • LinkTargetIDList.ItemID   and
+//  • VistaAndAboveIDListDataBlock.IDList.ItemID
+//Because there are so many different locations for this structure to appear, this function is 
+//used to provide a common process to extract the property store data and place the interpreted
+//ANSI string into the pspa structure (essentially a psp.ToString() function).
+// Entry Conditions:
+//   psp should be a filled 'struct LIF_PROPERTY_STORE_PROPS'
+//   pspa should be an EMPTY 'struct LIF_PROPERTY_STORE_PROPS_A'
+// Exit Conditions:
+//   int == 0 = success
+//   int != 0 = failure
+extern int get_propstore_a(struct LIF_SER_PROPSTORE * ps, struct LIF_SER_PROPSTORE_A * psa)
+{
+  int       j, len;
+  uint8_t   uinteger8, decimalscale, decimalsign;
+  int8_t    integer8;
+  uint16_t  uinteger16, boolean;
+  int16_t   integer16;
+  uint32_t  uinteger32, hresult, decimalHi32;
+  int32_t   integer32;
+  uint64_t  uinteger64, filetime, decimalLo64;
+  int64_t   integer64;
+  double    currency;
+  char      decsign[9], lp_buf[300];
+  wchar_t   lpw_buf[300];
+  struct LIF_CLSID    guid;
+  struct LIF_CLSID_A  guida;
+
+  snprintf((char *)psa->StorageSize, 12, "%"PRIu32, ps->StorageSize);
+  snprintf((char *)psa->Version, 12, "0x%.8"PRIX32, ps->Version);
+  get_droid_a(&ps->FormatID, &psa->FormatID);
+  if (ps->NameType == 0x00)
+  {
+    snprintf((char *)psa->NameType, 13, "String Name");
+  }
+  else
+  {
+    snprintf((char *)psa->NameType, 13, "Integer Name");
+  }
+  snprintf((char *)psa->NumValues, 7, "%"PRIu16, ps->NumValues);
+  for (j = 0; j < ps->NumValues; j++) // Cycle through the property values
+  {
+    snprintf((char *)psa->PropValues[j].ValueSize, 12, "%"PRIu32, ps->PropValues[j].ValueSize);
+    if (ps->PropValues[j].ValueSize > 0)
+    {
+      // Print No of bytes (Name type) or ID (Integer Type)
+      if (ps->NameType == 0) // Name
+      {
+        snprintf((char *)psa->PropValues[j].NameSizeOrID, 12, "%"PRIu32, ps->PropValues[j].NameSizeOrID);
+        snprintf((char *)psa->PropValues[j].Name, ps->PropValues[j].NameSizeOrID, "%s", ps->PropValues[j].Name);
+      }
+      else // Integer
+      {
+        snprintf((char *)psa->PropValues[j].NameSizeOrID, 12, "0x%.8"PRIX32, ps->PropValues[j].NameSizeOrID);
+        snprintf((char *)psa->PropValues[j].Name, 6, "[N/A]");
+      }
+      snprintf((char *)psa->PropValues[j].Reserved, 6, "0x%.2"PRIX8, ps->PropValues[j].Reserved);
+      snprintf((char *)psa->PropValues[j].PropertyType, 12, "0x%.4"PRIX16, ps->PropValues[j].PropertyType);
+      snprintf((char *)psa->PropValues[j].Padding, 12, "0x%.4"PRIX16, ps->PropValues[j].Padding);
+      switch (ps->PropValues[j].PropertyType)
+      {
+      case VT_EMPTY:  //  Not tested
+        strcat((char *)psa->PropValues[j].PropertyType, " VT_EMPTY");
+        snprintf((char *)psa->PropValues[j].Value, 6, "[N/A]");
+        break;
+      case VT_NULL:  //  Not tested
+        strcat((char *)psa->PropValues[j].PropertyType, " VT_NULL");
+        snprintf((char *)psa->PropValues[j].Value, 6, "[N/A]");
+        break;
+      case VT_I2:
+        strcat((char *)psa->PropValues[j].PropertyType, " VT_I2");
+        integer16 = get_le_int16(ps->PropValues[j].Value, 0);
+        snprintf((char *)psa->PropValues[j].Value, 50, "0x%.4"PRIX16" (%"PRIi16")", integer16, integer16);
+        break;
+      case VT_I4:
+        strcat((char *)psa->PropValues[j].PropertyType, " VT_I4");
+        integer32 = get_le_int32(ps->PropValues[j].Value, 0);
+        snprintf((char *)psa->PropValues[j].Value, 50, "0x%.8"PRIX32" (%"PRIi32")", integer32, integer32);
+        break;
+      case VT_R4:  //  Not tested
+                   // TODO Fully Implement this
+        strcat((char *)psa->PropValues[j].PropertyType, " VT_R4");
+        uinteger32 = get_le_uint32(ps->PropValues[j].Value, 0);
+        snprintf((char *)psa->PropValues[j].Value, 100, "0x%.8"PRIX32" [Conversion from binary to IEEE 32 bit floating point not implemented]", uinteger32);
+        break;
+      case VT_R8:  //  Not tested
+                   // TODO Fully Implement this
+        strcat((char *)psa->PropValues[j].PropertyType, " VT_R8");
+        uinteger64 = get_le_uint64(ps->PropValues[j].Value, 0);
+        snprintf((char *)psa->PropValues[j].Value, 100, "0x%.16"PRIX64" [Conversion from binary to IEEE 64 bit floating point not implemented]", uinteger64);
+        break;
+      case VT_CY:  //  Not tested
+        strcat((char *)psa->PropValues[j].PropertyType, " VT_CY");
+        integer64 = get_le_int64(ps->PropValues[j].Value, 0);
+        currency = (double)integer64 / 10000;
+        snprintf((char *)psa->PropValues[j].Value, 22, "%f.5 (Currency Units)", currency);
+        break;
+      case VT_DATE:  // Not tested
+                     // TODO Fully Implement this
+        strcat((char *)psa->PropValues[j].PropertyType, " VT_DATE");
+        integer64 = get_le_int64(ps->PropValues[j].Value, 0);
+        // An idea here is to convert the day using the integer part of the number (straight forward) 
+        // then calculate how many seconds are in the fractional part using 1 second = 1/86400
+        // the hours minutes and full seconds can be calculated from this. Whatever is left is 
+        // the fraction of a second.
+        snprintf((char *)psa->PropValues[j].Value, 100, "0x%.16"PRIX64" [Conversion from binary to DATE format not implemented]", uinteger64);
+        break;
+      case VT_BSTR:
+        strcat((char *)psa->PropValues[j].PropertyType, " VT_BSTR");
+        len = get_le_uint32(ps->PropValues[j].Value, 0);
+        get_chars(ps->PropValues[j].Value, 4, len, (unsigned char *)lp_buf);
+        if ((lp_buf[len - 1] == 0) && (lp_buf[len - 2] == 0)) // Is it unicode (2 byte string terminator)?
+        {
+          get_le_unistr(ps->PropValues[j].Value, 4, len / 2, lpw_buf);
+          snprintf((char *)psa->PropValues[j].Value, len, "%ls", lpw_buf);
+        }
+        else // Must be ANSI
+        {
+          snprintf((char *)psa->PropValues[j].Value, len, "%s", lp_buf);
+        }
+        break;
+      case VT_ERROR:  // Not tested
+        strcat((char *)psa->PropValues[j].PropertyType, " VT_ERROR");
+        hresult = get_le_uint32(ps->PropValues[j].Value, 0);
+        // TODO Fully Implement this
+        snprintf((char *)psa->PropValues[j].Value, 100, "0x%.16"PRIX32" [Conversion from HRESULT not fully implemented]", hresult);
+        break;
+      case VT_BOOL:
+        strcat((char *)psa->PropValues[j].PropertyType, " VT_BOOL");
+        boolean = get_le_uint16(ps->PropValues[j].Value, 0);
+        if (boolean == 0x0000)
+        {
+          snprintf((char *)psa->PropValues[j].Value, 20, "0x0000 (FALSE)");
+        }
+        else
+        {
+          snprintf((char *)psa->PropValues[j].Value, 20, "0x%.4"PRIX16" (TRUE)", boolean);
+        }
+        break;
+      case VT_DECIMAL:  // Not tested
+        strcat((char *)psa->PropValues[j].PropertyType, " VT_DECIMAL");
+        decimalscale = (uint8_t)psa->PropValues[j].Value[2]; // First two bytes are reserved
+        decimalsign = (uint8_t)psa->PropValues[j].Value[3];
+        decimalHi32 = get_le_uint32(ps->PropValues[j].Value, 4);
+        decimalLo64 = get_le_uint64(ps->PropValues[j].Value, 8);
+        if (decimalsign == 0)
+        {
+          strcat((char *)decsign, "POSITIVE");
+        }
+        else if (decimalsign == 0x80)
+        {
+          strcat((char *)decsign, "NEGATIVE");
+        }
+        else
+        {
+          strcat((char *)decsign, "ERROR");
+        }
+        snprintf((char *)psa->PropValues[j].Value, 200, "DECIMAL - scale: %"PRIu8", sign: %s, Hi32: %"PRIu32", Lo64: %"PRIu64, decimalscale, decsign, decimalHi32, decimalLo64);
+        break;
+      case VT_I1:  // Not tested
+        strcat((char *)psa->PropValues[j].PropertyType, " VT_I1");
+        integer8 = (int8_t)psa->PropValues[j].Value[0];
+        snprintf((char *)psa->PropValues[j].Value, 50, "0x%.2"PRIX8" (%"PRIi8")", integer8, integer8);
+        break;
+      case VT_UI1:  // Not tested
+        strcat((char *)psa->PropValues[j].PropertyType, " VT_UI1");
+        uinteger8 = (uint8_t)psa->PropValues[j].Value[0];
+        snprintf((char *)psa->PropValues[j].Value, 50, "0x%.2"PRIX8" (%"PRIu8")", uinteger8, uinteger8);
+        break;
+      case VT_UI2:  // Not tested
+        strcat((char *)psa->PropValues[j].PropertyType, " VT_UI2");
+        uinteger16 = get_le_uint16(psa->PropValues[j].Value, 0);
+        snprintf((char *)psa->PropValues[j].Value, 50, "0x%.4"PRIX16" (%"PRIu16")", uinteger16, uinteger16);
+        break;
+      case VT_UI4:
+        strcat((char *)psa->PropValues[j].PropertyType, " VT_UI4");
+        uinteger32 = get_le_uint32(psa->PropValues[j].Value, 0);
+        snprintf((char *)psa->PropValues[j].Value, 50, "0x%.8"PRIX32" (%"PRIu32")", uinteger32, uinteger32);
+        break;
+      case VT_I8:  // Not tested
+        strcat((char *)psa->PropValues[j].PropertyType, " VT_I8");
+        integer64 = get_le_uint64(ps->PropValues[j].Value, 0);
+        snprintf((char *)psa->PropValues[j].Value, 80, "0x%.16"PRIX64" (%"PRIi64")", integer64, integer64);
+        break;
+      case VT_UI8:
+        strcat((char *)psa->PropValues[j].PropertyType, " VT_UI8");
+        uinteger64 = get_le_uint64(ps->PropValues[j].Value, 0);
+        snprintf((char *)psa->PropValues[j].Value, 80, "0x%.16"PRIX64" (%"PRIu64")", uinteger64, uinteger64);
+        break;
+      case VT_INT:  // Not tested
+        strcat((char *)psa->PropValues[j].PropertyType, " VT_INT");
+        integer32 = get_le_int32(ps->PropValues[j].Value, 0);
+        snprintf((char *)psa->PropValues[j].Value, 50, "0x%.8"PRIX32" (%"PRIi32")", integer32, integer32);
+        break;
+      case VT_UINT:  // Not tested
+        strcat((char *)psa->PropValues[j].PropertyType, " VT_UINT");
+        uinteger32 = get_le_uint32(psa->PropValues[j].Value, 0);
+        snprintf((char *)psa->PropValues[j].Value, 50, "0x%.8"PRIX32" (%"PRIu32")", uinteger32, uinteger32);
+        break;
+      case VT_LPSTR:  // Because the definition is CodePageString this could be Unicode
+        strcat((char *)psa->PropValues[j].PropertyType, " VT_LPSTR");
+        len = get_le_uint32(ps->PropValues[j].Value, 0);
+        get_chars(ps->PropValues[j].Value, 4, len, (unsigned char *)lp_buf);
+        if ((lp_buf[len - 1] == 0) && (lp_buf[len - 2] == 0)) // Is it unicode (2 byte string terminator)?
+        {
+          get_le_unistr(ps->PropValues[j].Value, 4, len / 2, lpw_buf);
+          snprintf((char *)psa->PropValues[j].Value, len, "%ls", lpw_buf);
+        }
+        else // Must be ANSI
+        {
+          snprintf((char *)psa->PropValues[j].Value, len, "%s", lp_buf);
+        }
+        break;
+      case VT_LPWSTR: // Always Unicode
+        strcat((char *)psa->PropValues[j].PropertyType, " VT_LPWSTR");
+        len = get_le_uint32(ps->PropValues[j].Value, 0);
+        get_le_unistr(ps->PropValues[j].Value, 4, len, lpw_buf);
+        snprintf((char *)psa->PropValues[j].Value, len, "%ls", lpw_buf);
+        break;
+      case VT_FILETIME:
+        strcat((char *)psa->PropValues[j].PropertyType, " VT_FILETIME");
+        filetime = get_le_uint64(ps->PropValues[j].Value, 0);
+        get_filetime_a_long(filetime, psa->PropValues[j].Value);
+        break;
+      case VT_BLOB: //Not Tested
+        strcat((char *)psa->PropValues[j].PropertyType, " VT_BLOB");
+        uinteger32 = get_le_uint32(ps->PropValues[j].Value, 0);
+        snprintf((char *)psa->PropValues[j].Value, 50, "Size: %"PRIi32" bytes, [BLOB not shown]", uinteger32);
+        break;
+      case VT_STREAM: //Not Tested
+        strcat((char *)psa->PropValues[j].PropertyType, " VT_STREAM");
+        len = get_le_uint32(ps->PropValues[j].Value, 0);
+        get_chars(ps->PropValues[j].Value, 4, len, (unsigned char *)lp_buf);
+        if ((lp_buf[len - 1] == 0) && (lp_buf[len - 2] == 0)) // Is it unicode (2 byte string terminator)?
+        {
+          get_le_unistr(ps->PropValues[j].Value, 4, len / 2, lpw_buf);
+          snprintf((char *)psa->PropValues[j].Value, len, "%ls", lpw_buf);
+        }
+        else // Must be ANSI
+        {
+          snprintf((char *)psa->PropValues[j].Value, len, "%s", lp_buf);
+        }
+        break;
+      case VT_STORAGE: //Not Tested
+        strcat((char *)psa->PropValues[j].PropertyType, " VT_STORAGE");
+        len = get_le_uint32(ps->PropValues[j].Value, 0);
+        get_chars(ps->PropValues[j].Value, 4, len, (unsigned char *)lp_buf);
+        if ((lp_buf[len - 1] == 0) && (lp_buf[len - 2] == 0)) // Is it unicode (2 byte string terminator)?
+        {
+          get_le_unistr(ps->PropValues[j].Value, 4, len / 2, lpw_buf);
+          snprintf((char *)psa->PropValues[j].Value, len, "%ls", lpw_buf);
+        }
+        else // Must be ANSI
+        {
+          snprintf((char *)psa->PropValues[j].Value, len, "%s", lp_buf);
+        }
+        break;
+      case VT_STREAMED_OBJECT: //Not Tested
+        strcat((char *)psa->PropValues[j].PropertyType, " VT_STREAMED_OBJECT");
+        len = get_le_uint32(ps->PropValues[j].Value, 0);
+        get_chars(ps->PropValues[j].Value, 4, len, (unsigned char *)lp_buf);
+        if ((lp_buf[len - 1] == 0) && (lp_buf[len - 2] == 0)) // Is it unicode (2 byte string terminator)?
+        {
+          get_le_unistr(ps->PropValues[j].Value, 4, len / 2, lpw_buf);
+          snprintf((char *)psa->PropValues[j].Value, len, "%ls", lpw_buf);
+        }
+        else // Must be ANSI
+        {
+          snprintf((char *)psa->PropValues[j].Value, len, "%s", lp_buf);
+        }
+        break;
+      case VT_STORED_OBJECT: //Not Tested
+        strcat((char *)psa->PropValues[j].PropertyType, " VT_STORED_OBJECT");
+        len = get_le_uint32(ps->PropValues[j].Value, 0);
+        get_chars(ps->PropValues[j].Value, 4, len, (unsigned char *)lp_buf);
+        if ((lp_buf[len - 1] == 0) && (lp_buf[len - 2] == 0)) // Is it unicode (2 byte string terminator)?
+        {
+          get_le_unistr(ps->PropValues[j].Value, 4, len / 2, lpw_buf);
+          snprintf((char *)psa->PropValues[j].Value, len, "%ls", lpw_buf);
+        }
+        else // Must be ANSI
+        {
+          snprintf((char *)psa->PropValues[j].Value, len, "%s", lp_buf);
+        }
+        break;
+      case VT_BLOB_OBJECT: //Not Tested
+        strcat((char *)psa->PropValues[j].PropertyType, " VT_BLOB_OBJECT");
+        uinteger32 = get_le_uint32(ps->PropValues[j].Value, 0);
+        snprintf((char *)psa->PropValues[j].Value, 50, "Size: %"PRIi32" bytes, [BLOB not shown]", uinteger32);
+        break;
+      case VT_CF:  // Not tested
+        strcat((char *)psa->PropValues[j].PropertyType, " VT_CF");
+        uinteger32 = get_le_uint32(ps->PropValues[j].Value, 0);
+        snprintf((char *)psa->PropValues[j].Value, 50, "Size: %"PRIi32" bytes, [Clipboard Data not shown]", uinteger32);
+        break;
+      case VT_CLSID:
+        strcat((char *)psa->PropValues[j].PropertyType, " VT_CLSID");
+        guid.Data1 = get_le_uint32(ps->PropValues[j].Value, 0);
+        guid.Data2 = get_le_uint16(ps->PropValues[j].Value, 4);
+        guid.Data3 = get_le_uint16(ps->PropValues[j].Value, 6);
+        get_chars(ps->PropValues[j].Value, 8, 2, guid.Data4hi);
+        get_chars(ps->PropValues[j].Value, 10, 6, guid.Data4lo);
+        get_droid_a(&guid, &guida);
+        // For now just print out the GUID, and (if appropriate) the time and MAC address
+        snprintf((char *)psa->PropValues[j].Value, 150, "UUID: %s, Time: %s, Node (MAC addr): %s", guida.UUID, guida.Time_long, guida.Node);
+        break;
+      case VT_VERSIONED_STREAM: //Not Tested
+        strcat((char *)psa->PropValues[j].PropertyType, " VT_VERSIONED_STREAM");
+        len = get_le_uint32(ps->PropValues[j].Value, 0);
+        get_chars(ps->PropValues[j].Value, 4, len, (unsigned char *)lp_buf);
+        if ((lp_buf[len - 1] == 0) && (lp_buf[len - 2] == 0)) // Is it unicode (2 byte string terminator)?
+        {
+          get_le_unistr(ps->PropValues[j].Value, 4, len / 2, lpw_buf);
+          snprintf((char *)psa->PropValues[j].Value, len, "%ls", lpw_buf);
+        }
+        else // Must be ANSI
+        {
+          snprintf((char *)psa->PropValues[j].Value, len, "%s", lp_buf);
+        }
+        break;
+      default:
+        if (ps->PropValues[j].PropertyType || 0x1000)
+        {
+          strcat((char *)psa->PropValues[j].PropertyType, " VT_VECTOR | ?");
+        }
+        else if (ps->PropValues[j].PropertyType || 0x2000)
+        {
+          strcat((char *)psa->PropValues[j].PropertyType, " VT_ARRAY | ?");
+        }
+        snprintf((char *)psa->PropValues[j].Value, 43, "[Sorry, interpretation is not implemented]");
+      }
+    }
+    else
+    {
+      snprintf((char *)psa->PropValues[j].NameSizeOrID, 6, "[N/A]");
+      snprintf((char *)psa->PropValues[j].Reserved, 6, "[N/A]");
+      snprintf((char *)psa->PropValues[j].Name, 6, "[N/A]");
+      snprintf((char *)psa->PropValues[j].PropertyType, 6, "[N/A]");
+      snprintf((char *)psa->PropValues[j].Padding, 6, "[N/A]");
+      snprintf((char *)psa->PropValues[j].Value, 6, "[N/A]");
+    }
+  }
+  return 0;
+}
 //
 //Function get_lhdr(FILE *fp, struct LIF_HDR *lh) takes an open file pointer
 //and a pointer to a LIF_HDR structure.
@@ -338,7 +686,6 @@ int get_idlist(FILE * fp, int size, int loc, struct LIF * lif)
 {
   unsigned char   size_buf[2];   //A small buffer to hold the size element
   int             numItems = 0, posn = loc + 2, i, datasize;
-  uint16_t        u16;
 
   if (lif->lh.Flags & 0x00000001)
   {
@@ -1549,320 +1896,321 @@ int get_extradata_a(struct LIF_EXTRA_DATA * led, struct LIF_EXTRA_DATA_A * leda)
     snprintf((char *)leda->lpspa.NumStores, 10, "%"PRIi32, led->lpsp.NumStores);
     for (i = 0; i < led->lpsp.NumStores; i++)
     {
-      snprintf((char *)leda->lpspa.Stores[i].StorageSize, 12, "%"PRIu32, led->lpsp.Stores[i].StorageSize);
-      snprintf((char *)leda->lpspa.Stores[i].Version, 12, "0x%.8"PRIX32, led->lpsp.Stores[i].Version);
-      get_droid_a(&led->lpsp.Stores[i].FormatID, &leda->lpspa.Stores[i].FormatID);
-      if (led->lpsp.Stores->NameType == 0x00)
-      {
-        snprintf((char *)leda->lpspa.Stores[i].NameType, 13, "String Name");
-      }
-      else
-      {
-        snprintf((char *)leda->lpspa.Stores[i].NameType, 13, "Integer Name");
-      }
-      snprintf((char *)leda->lpspa.Stores[i].NumValues, 7, "%"PRIu16, led->lpsp.Stores[i].NumValues);
-      for (j = 0; j < led->lpsp.Stores[i].NumValues; j++) // Cycle through the property values
-      {
-        snprintf((char *)leda->lpspa.Stores[i].PropValues[j].ValueSize, 12, "%"PRIu32, led->lpsp.Stores[i].PropValues[j].ValueSize);
-        if (led->lpsp.Stores[i].PropValues[j].ValueSize > 0)
-        {
-          // Print No of bytes (Name type) or ID (Integer Type)
-          if (led->lpsp.Stores[i].NameType == 0) // Name
-          {
-            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].NameSizeOrID, 12, "%"PRIu32, led->lpsp.Stores[i].PropValues[j].NameSizeOrID);
-            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Name, led->lpsp.Stores[i].PropValues[j].NameSizeOrID, "%s", led->lpsp.Stores[i].PropValues[j].Name);
-          }
-          else // Integer
-          {
-            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].NameSizeOrID, 12, "0x%.8"PRIX32, led->lpsp.Stores[i].PropValues[j].NameSizeOrID);
-            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Name, 6, "[N/A]");
-          }
-          snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Reserved, 6, "0x%.2"PRIX8, led->lpsp.Stores[i].PropValues[j].Reserved);
-          snprintf((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, 12, "0x%.4"PRIX16, led->lpsp.Stores[i].PropValues[j].PropertyType);
-          snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Padding, 12, "0x%.4"PRIX16, led->lpsp.Stores[i].PropValues[j].Padding);
-          switch (led->lpsp.Stores[i].PropValues[j].PropertyType)
-          {
-          case VT_EMPTY:  //  Not tested
-            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_EMPTY");
-            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 6, "[N/A]");
-            break;
-          case VT_NULL:  //  Not tested
-            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_NULL");
-            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 6, "[N/A]");
-            break;
-          case VT_I2:
-            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_I2");
-            integer16 = get_le_int16(led->lpsp.Stores[i].PropValues[j].Value, 0);
-            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 50, "0x%.4"PRIX16" (%"PRIi16")", integer16, integer16);
-            break;
-          case VT_I4:
-            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_I4");
-            integer32 = get_le_int32(led->lpsp.Stores[i].PropValues[j].Value, 0);
-            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 50, "0x%.8"PRIX32" (%"PRIi32")", integer32, integer32);
-            break;
-          case VT_R4:  //  Not tested
-            // TODO Fully Implement this
-            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_R4");
-            uinteger32 = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
-            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 100, "0x%.8"PRIX32" [Conversion from binary to IEEE 32 bit floating point not implemented]", uinteger32);
-            break;
-          case VT_R8:  //  Not tested
-            // TODO Fully Implement this
-            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_R8");
-            uinteger64 = get_le_uint64(led->lpsp.Stores[i].PropValues[j].Value, 0);
-            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 100, "0x%.16"PRIX64" [Conversion from binary to IEEE 64 bit floating point not implemented]", uinteger64);
-            break;
-          case VT_CY:  //  Not tested
-            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_CY");
-            integer64 = get_le_int64(led->lpsp.Stores[i].PropValues[j].Value, 0);
-            currency = (double)integer64 / 10000;
-            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 22, "%f.5 (Currency Units)", currency);
-            break;
-          case VT_DATE:  // Not tested
-            // TODO Fully Implement this
-            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_DATE");
-            integer64 = get_le_int64(led->lpsp.Stores[i].PropValues[j].Value, 0);
-            // An idea here is to convert the day using the integer part of the number (straight forward) 
-            // then calculate how many seconds are in the fractional part using 1 second = 1/86400
-            // the hours minutes and full seconds can be calculated from this. Whatever is left is 
-            // the fraction of a second.
-            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 100, "0x%.16"PRIX64" [Conversion from binary to DATE format not implemented]", uinteger64);
-            break;
-          case VT_BSTR:
-            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_BSTR");
-            len = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
-            get_chars(led->lpsp.Stores[i].PropValues[j].Value, 4, len, (unsigned char *)lp_buf);
-            if ((lp_buf[len - 1] == 0) && (lp_buf[len - 2] == 0)) // Is it unicode (2 byte string terminator)?
-            {
-              get_le_unistr(led->lpsp.Stores[i].PropValues[j].Value, 4, len / 2, lpw_buf);
-              snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, len, "%ls", lpw_buf);
-            }
-            else // Must be ANSI
-            {
-              snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, len, "%s", lp_buf);
-            }
-            break;
-          case VT_ERROR:  // Not tested
-            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_ERROR");
-            hresult = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
-            // TODO Fully Implement this
-            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 100, "0x%.16"PRIX32" [Conversion from HRESULT not fully implemented]", hresult);
-            break;
-          case VT_BOOL:
-            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_BOOL");
-            boolean = get_le_uint16(led->lpsp.Stores[i].PropValues[j].Value, 0);
-            if (boolean == 0x0000)
-            {
-              snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 20, "0x0000 (FALSE)");
-            }
-            else
-            {
-              snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 20, "0x%.4"PRIX16" (TRUE)", boolean);
-            }
-            break;
-          case VT_DECIMAL:  // Not tested
-            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_DECIMAL");
-            decimalscale = (uint8_t)leda->lpspa.Stores[i].PropValues[j].Value[2]; // First two bytes are reserved
-            decimalsign = (uint8_t)leda->lpspa.Stores[i].PropValues[j].Value[3];
-            decimalHi32 = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 4);
-            decimalLo64 = get_le_uint64(led->lpsp.Stores[i].PropValues[j].Value, 8);
-            if (decimalsign == 0)
-            {
-              strcat((char *)decsign, "POSITIVE");
-            }
-            else if (decimalsign == 0x80)
-            {
-              strcat((char *)decsign, "NEGATIVE");
-            }
-            else
-            {
-              strcat((char *)decsign, "ERROR");
-            }
-            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 200, "DECIMAL - scale: %"PRIu8", sign: %s, Hi32: %"PRIu32", Lo64: %"PRIu64, decimalscale, decsign, decimalHi32, decimalLo64);
-            break;
-          case VT_I1:  // Not tested
-            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_I1");
-            integer8 = (int8_t)leda->lpspa.Stores[i].PropValues[j].Value[0];
-            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 50, "0x%.2"PRIX8" (%"PRIi8")", integer8, integer8);
-            break;
-          case VT_UI1:  // Not tested
-            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_UI1");
-            uinteger8 = (uint8_t)leda->lpspa.Stores[i].PropValues[j].Value[0];
-            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 50, "0x%.2"PRIX8" (%"PRIu8")", uinteger8, uinteger8);
-            break;
-          case VT_UI2:  // Not tested
-            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_UI2");
-            uinteger16 = get_le_uint16(leda->lpspa.Stores[i].PropValues[j].Value, 0);
-            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 50, "0x%.4"PRIX16" (%"PRIu16")", uinteger16, uinteger16);
-            break;
-          case VT_UI4:
-            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_UI4");
-            uinteger32 = get_le_uint32(leda->lpspa.Stores[i].PropValues[j].Value, 0);
-            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 50, "0x%.8"PRIX32" (%"PRIu32")", uinteger32, uinteger32);
-            break;
-          case VT_I8:  // Not tested
-            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_I8");
-            integer64 = get_le_uint64(led->lpsp.Stores[i].PropValues[j].Value, 0);
-            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 80, "0x%.16"PRIX64" (%"PRIi64")", integer64, integer64);
-            break;
-          case VT_UI8:
-            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_UI8");
-            uinteger64 = get_le_uint64(led->lpsp.Stores[i].PropValues[j].Value, 0);
-            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 80, "0x%.16"PRIX64" (%"PRIu64")", uinteger64, uinteger64);
-            break;
-          case VT_INT:  // Not tested
-            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_INT");
-            integer32 = get_le_int32(led->lpsp.Stores[i].PropValues[j].Value, 0);
-            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 50, "0x%.8"PRIX32" (%"PRIi32")", integer32, integer32);
-            break;
-          case VT_UINT:  // Not tested
-            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_UINT");
-            uinteger32 = get_le_uint32(leda->lpspa.Stores[i].PropValues[j].Value, 0);
-            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 50, "0x%.8"PRIX32" (%"PRIu32")", uinteger32, uinteger32);
-            break;
-          case VT_LPSTR:  // Because the definition is CodePageString this could be Unicode
-            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_LPSTR");
-            len = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
-            get_chars(led->lpsp.Stores[i].PropValues[j].Value, 4, len, (unsigned char *)lp_buf);
-            if ((lp_buf[len - 1] == 0) && (lp_buf[len - 2] == 0)) // Is it unicode (2 byte string terminator)?
-            {
-              get_le_unistr(led->lpsp.Stores[i].PropValues[j].Value, 4, len / 2, lpw_buf);
-              snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, len, "%ls", lpw_buf);
-            }
-            else // Must be ANSI
-            {
-              snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, len, "%s", lp_buf);
-            }
-            break;
-          case VT_LPWSTR: // Always Unicode
-            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_LPWSTR");
-            len = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
-            get_le_unistr(led->lpsp.Stores[i].PropValues[j].Value, 4, len, lpw_buf);
-            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, len, "%ls", lpw_buf);
-            break;
-          case VT_FILETIME:
-            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_FILETIME");
-            filetime = get_le_uint64(led->lpsp.Stores[i].PropValues[j].Value, 0);
-            get_filetime_a_long(filetime, leda->lpspa.Stores[i].PropValues[j].Value);
-            break;
-          case VT_BLOB: //Not Tested
-            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_BLOB");
-            uinteger32 = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
-            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 50, "Size: %"PRIi32" bytes, [BLOB not shown]", uinteger32);
-            break;
-          case VT_STREAM: //Not Tested
-            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_STREAM");
-            len = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
-            get_chars(led->lpsp.Stores[i].PropValues[j].Value, 4, len, (unsigned char *)lp_buf);
-            if ((lp_buf[len - 1] == 0) && (lp_buf[len - 2] == 0)) // Is it unicode (2 byte string terminator)?
-            {
-              get_le_unistr(led->lpsp.Stores[i].PropValues[j].Value, 4, len / 2, lpw_buf);
-              snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, len, "%ls", lpw_buf);
-            }
-            else // Must be ANSI
-            {
-              snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, len, "%s", lp_buf);
-            }
-            break;
-          case VT_STORAGE: //Not Tested
-            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_STORAGE");
-            len = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
-            get_chars(led->lpsp.Stores[i].PropValues[j].Value, 4, len, (unsigned char *)lp_buf);
-            if ((lp_buf[len - 1] == 0) && (lp_buf[len - 2] == 0)) // Is it unicode (2 byte string terminator)?
-            {
-              get_le_unistr(led->lpsp.Stores[i].PropValues[j].Value, 4, len / 2, lpw_buf);
-              snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, len, "%ls", lpw_buf);
-            }
-            else // Must be ANSI
-            {
-              snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, len, "%s", lp_buf);
-            }
-            break;
-          case VT_STREAMED_OBJECT: //Not Tested
-            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_STREAMED_OBJECT");
-            len = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
-            get_chars(led->lpsp.Stores[i].PropValues[j].Value, 4, len, (unsigned char *)lp_buf);
-            if ((lp_buf[len - 1] == 0) && (lp_buf[len - 2] == 0)) // Is it unicode (2 byte string terminator)?
-            {
-              get_le_unistr(led->lpsp.Stores[i].PropValues[j].Value, 4, len / 2, lpw_buf);
-              snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, len, "%ls", lpw_buf);
-            }
-            else // Must be ANSI
-            {
-              snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, len, "%s", lp_buf);
-            }
-            break;
-          case VT_STORED_OBJECT: //Not Tested
-            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_STORED_OBJECT");
-            len = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
-            get_chars(led->lpsp.Stores[i].PropValues[j].Value, 4, len, (unsigned char *)lp_buf);
-            if ((lp_buf[len - 1] == 0) && (lp_buf[len - 2] == 0)) // Is it unicode (2 byte string terminator)?
-            {
-              get_le_unistr(led->lpsp.Stores[i].PropValues[j].Value, 4, len / 2, lpw_buf);
-              snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, len, "%ls", lpw_buf);
-            }
-            else // Must be ANSI
-            {
-              snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, len, "%s", lp_buf);
-            }
-            break;
-          case VT_BLOB_OBJECT: //Not Tested
-            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_BLOB_OBJECT");
-            uinteger32 = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
-            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 50, "Size: %"PRIi32" bytes, [BLOB not shown]", uinteger32);
-            break;
-          case VT_CF:  // Not tested
-            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_CF");
-            uinteger32 = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
-            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 50, "Size: %"PRIi32" bytes, [Clipboard Data not shown]", uinteger32);
-            break;
-          case VT_CLSID:
-            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_CLSID");
-            guid.Data1 = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
-            guid.Data2 = get_le_uint16(led->lpsp.Stores[i].PropValues[j].Value, 4);
-            guid.Data3 = get_le_uint16(led->lpsp.Stores[i].PropValues[j].Value, 6);
-            get_chars(led->lpsp.Stores[i].PropValues[j].Value, 8, 2, guid.Data4hi);
-            get_chars(led->lpsp.Stores[i].PropValues[j].Value, 10, 6, guid.Data4lo);
-            get_droid_a(&guid, &guida);
-            // For now just print out the GUID, and (if appropriate) the time and MAC address
-            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 150, "UUID: %s, Time: %s, Node (MAC addr): %s", guida.UUID, guida.Time_long, guida.Node);
-            break;
-          case VT_VERSIONED_STREAM: //Not Tested
-            strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_VERSIONED_STREAM");
-            len = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
-            get_chars(led->lpsp.Stores[i].PropValues[j].Value, 4, len, (unsigned char *)lp_buf);
-            if ((lp_buf[len - 1] == 0) && (lp_buf[len - 2] == 0)) // Is it unicode (2 byte string terminator)?
-            {
-              get_le_unistr(led->lpsp.Stores[i].PropValues[j].Value, 4, len / 2, lpw_buf);
-              snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, len, "%ls", lpw_buf);
-            }
-            else // Must be ANSI
-            {
-              snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, len, "%s", lp_buf);
-            }
-            break;
-          default:
-            if (led->lpsp.Stores[i].PropValues[j].PropertyType || 0x1000)
-            {
-              strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_VECTOR | ?");
-            }
-            else if (led->lpsp.Stores[i].PropValues[j].PropertyType || 0x2000)
-            {
-              strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_ARRAY | ?");
-            }
-            snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 43, "[Sorry, interpretation is not implemented]");
-          }
-        }
-        else
-        {
-          snprintf((char *)leda->lpspa.Stores[i].PropValues[j].NameSizeOrID, 6, "[N/A]");
-          snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Reserved, 6, "[N/A]");
-          snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Name, 6, "[N/A]");
-          snprintf((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, 6, "[N/A]");
-          snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Padding, 6, "[N/A]");
-          snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 6, "[N/A]");
-        }
-      }
+      get_propstore_a(&led->lpsp.Stores[i], &leda->lpspa.Stores[i]);
+      //snprintf((char *)leda->lpspa.Stores[i].StorageSize, 12, "%"PRIu32, led->lpsp.Stores[i].StorageSize);
+      //snprintf((char *)leda->lpspa.Stores[i].Version, 12, "0x%.8"PRIX32, led->lpsp.Stores[i].Version);
+      //get_droid_a(&led->lpsp.Stores[i].FormatID, &leda->lpspa.Stores[i].FormatID);
+      //if (led->lpsp.Stores->NameType == 0x00)
+      //{
+      //  snprintf((char *)leda->lpspa.Stores[i].NameType, 13, "String Name");
+      //}
+      //else
+      //{
+      //  snprintf((char *)leda->lpspa.Stores[i].NameType, 13, "Integer Name");
+      //}
+      //snprintf((char *)leda->lpspa.Stores[i].NumValues, 7, "%"PRIu16, led->lpsp.Stores[i].NumValues);
+      //for (j = 0; j < led->lpsp.Stores[i].NumValues; j++) // Cycle through the property values
+      //{
+      //  snprintf((char *)leda->lpspa.Stores[i].PropValues[j].ValueSize, 12, "%"PRIu32, led->lpsp.Stores[i].PropValues[j].ValueSize);
+      //  if (led->lpsp.Stores[i].PropValues[j].ValueSize > 0)
+      //  {
+      //    // Print No of bytes (Name type) or ID (Integer Type)
+      //    if (led->lpsp.Stores[i].NameType == 0) // Name
+      //    {
+      //      snprintf((char *)leda->lpspa.Stores[i].PropValues[j].NameSizeOrID, 12, "%"PRIu32, led->lpsp.Stores[i].PropValues[j].NameSizeOrID);
+      //      snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Name, led->lpsp.Stores[i].PropValues[j].NameSizeOrID, "%s", led->lpsp.Stores[i].PropValues[j].Name);
+      //    }
+      //    else // Integer
+      //    {
+      //      snprintf((char *)leda->lpspa.Stores[i].PropValues[j].NameSizeOrID, 12, "0x%.8"PRIX32, led->lpsp.Stores[i].PropValues[j].NameSizeOrID);
+      //      snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Name, 6, "[N/A]");
+      //    }
+      //    snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Reserved, 6, "0x%.2"PRIX8, led->lpsp.Stores[i].PropValues[j].Reserved);
+      //    snprintf((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, 12, "0x%.4"PRIX16, led->lpsp.Stores[i].PropValues[j].PropertyType);
+      //    snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Padding, 12, "0x%.4"PRIX16, led->lpsp.Stores[i].PropValues[j].Padding);
+      //    switch (led->lpsp.Stores[i].PropValues[j].PropertyType)
+      //    {
+      //    case VT_EMPTY:  //  Not tested
+      //      strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_EMPTY");
+      //      snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 6, "[N/A]");
+      //      break;
+      //    case VT_NULL:  //  Not tested
+      //      strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_NULL");
+      //      snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 6, "[N/A]");
+      //      break;
+      //    case VT_I2:
+      //      strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_I2");
+      //      integer16 = get_le_int16(led->lpsp.Stores[i].PropValues[j].Value, 0);
+      //      snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 50, "0x%.4"PRIX16" (%"PRIi16")", integer16, integer16);
+      //      break;
+      //    case VT_I4:
+      //      strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_I4");
+      //      integer32 = get_le_int32(led->lpsp.Stores[i].PropValues[j].Value, 0);
+      //      snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 50, "0x%.8"PRIX32" (%"PRIi32")", integer32, integer32);
+      //      break;
+      //    case VT_R4:  //  Not tested
+      //      // TODO Fully Implement this
+      //      strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_R4");
+      //      uinteger32 = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
+      //      snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 100, "0x%.8"PRIX32" [Conversion from binary to IEEE 32 bit floating point not implemented]", uinteger32);
+      //      break;
+      //    case VT_R8:  //  Not tested
+      //      // TODO Fully Implement this
+      //      strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_R8");
+      //      uinteger64 = get_le_uint64(led->lpsp.Stores[i].PropValues[j].Value, 0);
+      //      snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 100, "0x%.16"PRIX64" [Conversion from binary to IEEE 64 bit floating point not implemented]", uinteger64);
+      //      break;
+      //    case VT_CY:  //  Not tested
+      //      strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_CY");
+      //      integer64 = get_le_int64(led->lpsp.Stores[i].PropValues[j].Value, 0);
+      //      currency = (double)integer64 / 10000;
+      //      snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 22, "%f.5 (Currency Units)", currency);
+      //      break;
+      //    case VT_DATE:  // Not tested
+      //      // TODO Fully Implement this
+      //      strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_DATE");
+      //      integer64 = get_le_int64(led->lpsp.Stores[i].PropValues[j].Value, 0);
+      //      // An idea here is to convert the day using the integer part of the number (straight forward) 
+      //      // then calculate how many seconds are in the fractional part using 1 second = 1/86400
+      //      // the hours minutes and full seconds can be calculated from this. Whatever is left is 
+      //      // the fraction of a second.
+      //      snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 100, "0x%.16"PRIX64" [Conversion from binary to DATE format not implemented]", uinteger64);
+      //      break;
+      //    case VT_BSTR:
+      //      strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_BSTR");
+      //      len = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
+      //      get_chars(led->lpsp.Stores[i].PropValues[j].Value, 4, len, (unsigned char *)lp_buf);
+      //      if ((lp_buf[len - 1] == 0) && (lp_buf[len - 2] == 0)) // Is it unicode (2 byte string terminator)?
+      //      {
+      //        get_le_unistr(led->lpsp.Stores[i].PropValues[j].Value, 4, len / 2, lpw_buf);
+      //        snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, len, "%ls", lpw_buf);
+      //      }
+      //      else // Must be ANSI
+      //      {
+      //        snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, len, "%s", lp_buf);
+      //      }
+      //      break;
+      //    case VT_ERROR:  // Not tested
+      //      strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_ERROR");
+      //      hresult = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
+      //      // TODO Fully Implement this
+      //      snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 100, "0x%.16"PRIX32" [Conversion from HRESULT not fully implemented]", hresult);
+      //      break;
+      //    case VT_BOOL:
+      //      strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_BOOL");
+      //      boolean = get_le_uint16(led->lpsp.Stores[i].PropValues[j].Value, 0);
+      //      if (boolean == 0x0000)
+      //      {
+      //        snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 20, "0x0000 (FALSE)");
+      //      }
+      //      else
+      //      {
+      //        snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 20, "0x%.4"PRIX16" (TRUE)", boolean);
+      //      }
+      //      break;
+      //    case VT_DECIMAL:  // Not tested
+      //      strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_DECIMAL");
+      //      decimalscale = (uint8_t)leda->lpspa.Stores[i].PropValues[j].Value[2]; // First two bytes are reserved
+      //      decimalsign = (uint8_t)leda->lpspa.Stores[i].PropValues[j].Value[3];
+      //      decimalHi32 = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 4);
+      //      decimalLo64 = get_le_uint64(led->lpsp.Stores[i].PropValues[j].Value, 8);
+      //      if (decimalsign == 0)
+      //      {
+      //        strcat((char *)decsign, "POSITIVE");
+      //      }
+      //      else if (decimalsign == 0x80)
+      //      {
+      //        strcat((char *)decsign, "NEGATIVE");
+      //      }
+      //      else
+      //      {
+      //        strcat((char *)decsign, "ERROR");
+      //      }
+      //      snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 200, "DECIMAL - scale: %"PRIu8", sign: %s, Hi32: %"PRIu32", Lo64: %"PRIu64, decimalscale, decsign, decimalHi32, decimalLo64);
+      //      break;
+      //    case VT_I1:  // Not tested
+      //      strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_I1");
+      //      integer8 = (int8_t)leda->lpspa.Stores[i].PropValues[j].Value[0];
+      //      snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 50, "0x%.2"PRIX8" (%"PRIi8")", integer8, integer8);
+      //      break;
+      //    case VT_UI1:  // Not tested
+      //      strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_UI1");
+      //      uinteger8 = (uint8_t)leda->lpspa.Stores[i].PropValues[j].Value[0];
+      //      snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 50, "0x%.2"PRIX8" (%"PRIu8")", uinteger8, uinteger8);
+      //      break;
+      //    case VT_UI2:  // Not tested
+      //      strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_UI2");
+      //      uinteger16 = get_le_uint16(leda->lpspa.Stores[i].PropValues[j].Value, 0);
+      //      snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 50, "0x%.4"PRIX16" (%"PRIu16")", uinteger16, uinteger16);
+      //      break;
+      //    case VT_UI4:
+      //      strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_UI4");
+      //      uinteger32 = get_le_uint32(leda->lpspa.Stores[i].PropValues[j].Value, 0);
+      //      snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 50, "0x%.8"PRIX32" (%"PRIu32")", uinteger32, uinteger32);
+      //      break;
+      //    case VT_I8:  // Not tested
+      //      strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_I8");
+      //      integer64 = get_le_uint64(led->lpsp.Stores[i].PropValues[j].Value, 0);
+      //      snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 80, "0x%.16"PRIX64" (%"PRIi64")", integer64, integer64);
+      //      break;
+      //    case VT_UI8:
+      //      strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_UI8");
+      //      uinteger64 = get_le_uint64(led->lpsp.Stores[i].PropValues[j].Value, 0);
+      //      snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 80, "0x%.16"PRIX64" (%"PRIu64")", uinteger64, uinteger64);
+      //      break;
+      //    case VT_INT:  // Not tested
+      //      strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_INT");
+      //      integer32 = get_le_int32(led->lpsp.Stores[i].PropValues[j].Value, 0);
+      //      snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 50, "0x%.8"PRIX32" (%"PRIi32")", integer32, integer32);
+      //      break;
+      //    case VT_UINT:  // Not tested
+      //      strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_UINT");
+      //      uinteger32 = get_le_uint32(leda->lpspa.Stores[i].PropValues[j].Value, 0);
+      //      snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 50, "0x%.8"PRIX32" (%"PRIu32")", uinteger32, uinteger32);
+      //      break;
+      //    case VT_LPSTR:  // Because the definition is CodePageString this could be Unicode
+      //      strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_LPSTR");
+      //      len = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
+      //      get_chars(led->lpsp.Stores[i].PropValues[j].Value, 4, len, (unsigned char *)lp_buf);
+      //      if ((lp_buf[len - 1] == 0) && (lp_buf[len - 2] == 0)) // Is it unicode (2 byte string terminator)?
+      //      {
+      //        get_le_unistr(led->lpsp.Stores[i].PropValues[j].Value, 4, len / 2, lpw_buf);
+      //        snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, len, "%ls", lpw_buf);
+      //      }
+      //      else // Must be ANSI
+      //      {
+      //        snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, len, "%s", lp_buf);
+      //      }
+      //      break;
+      //    case VT_LPWSTR: // Always Unicode
+      //      strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_LPWSTR");
+      //      len = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
+      //      get_le_unistr(led->lpsp.Stores[i].PropValues[j].Value, 4, len, lpw_buf);
+      //      snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, len, "%ls", lpw_buf);
+      //      break;
+      //    case VT_FILETIME:
+      //      strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_FILETIME");
+      //      filetime = get_le_uint64(led->lpsp.Stores[i].PropValues[j].Value, 0);
+      //      get_filetime_a_long(filetime, leda->lpspa.Stores[i].PropValues[j].Value);
+      //      break;
+      //    case VT_BLOB: //Not Tested
+      //      strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_BLOB");
+      //      uinteger32 = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
+      //      snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 50, "Size: %"PRIi32" bytes, [BLOB not shown]", uinteger32);
+      //      break;
+      //    case VT_STREAM: //Not Tested
+      //      strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_STREAM");
+      //      len = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
+      //      get_chars(led->lpsp.Stores[i].PropValues[j].Value, 4, len, (unsigned char *)lp_buf);
+      //      if ((lp_buf[len - 1] == 0) && (lp_buf[len - 2] == 0)) // Is it unicode (2 byte string terminator)?
+      //      {
+      //        get_le_unistr(led->lpsp.Stores[i].PropValues[j].Value, 4, len / 2, lpw_buf);
+      //        snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, len, "%ls", lpw_buf);
+      //      }
+      //      else // Must be ANSI
+      //      {
+      //        snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, len, "%s", lp_buf);
+      //      }
+      //      break;
+      //    case VT_STORAGE: //Not Tested
+      //      strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_STORAGE");
+      //      len = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
+      //      get_chars(led->lpsp.Stores[i].PropValues[j].Value, 4, len, (unsigned char *)lp_buf);
+      //      if ((lp_buf[len - 1] == 0) && (lp_buf[len - 2] == 0)) // Is it unicode (2 byte string terminator)?
+      //      {
+      //        get_le_unistr(led->lpsp.Stores[i].PropValues[j].Value, 4, len / 2, lpw_buf);
+      //        snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, len, "%ls", lpw_buf);
+      //      }
+      //      else // Must be ANSI
+      //      {
+      //        snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, len, "%s", lp_buf);
+      //      }
+      //      break;
+      //    case VT_STREAMED_OBJECT: //Not Tested
+      //      strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_STREAMED_OBJECT");
+      //      len = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
+      //      get_chars(led->lpsp.Stores[i].PropValues[j].Value, 4, len, (unsigned char *)lp_buf);
+      //      if ((lp_buf[len - 1] == 0) && (lp_buf[len - 2] == 0)) // Is it unicode (2 byte string terminator)?
+      //      {
+      //        get_le_unistr(led->lpsp.Stores[i].PropValues[j].Value, 4, len / 2, lpw_buf);
+      //        snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, len, "%ls", lpw_buf);
+      //      }
+      //      else // Must be ANSI
+      //      {
+      //        snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, len, "%s", lp_buf);
+      //      }
+      //      break;
+      //    case VT_STORED_OBJECT: //Not Tested
+      //      strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_STORED_OBJECT");
+      //      len = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
+      //      get_chars(led->lpsp.Stores[i].PropValues[j].Value, 4, len, (unsigned char *)lp_buf);
+      //      if ((lp_buf[len - 1] == 0) && (lp_buf[len - 2] == 0)) // Is it unicode (2 byte string terminator)?
+      //      {
+      //        get_le_unistr(led->lpsp.Stores[i].PropValues[j].Value, 4, len / 2, lpw_buf);
+      //        snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, len, "%ls", lpw_buf);
+      //      }
+      //      else // Must be ANSI
+      //      {
+      //        snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, len, "%s", lp_buf);
+      //      }
+      //      break;
+      //    case VT_BLOB_OBJECT: //Not Tested
+      //      strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_BLOB_OBJECT");
+      //      uinteger32 = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
+      //      snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 50, "Size: %"PRIi32" bytes, [BLOB not shown]", uinteger32);
+      //      break;
+      //    case VT_CF:  // Not tested
+      //      strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_CF");
+      //      uinteger32 = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
+      //      snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 50, "Size: %"PRIi32" bytes, [Clipboard Data not shown]", uinteger32);
+      //      break;
+      //    case VT_CLSID:
+      //      strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_CLSID");
+      //      guid.Data1 = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
+      //      guid.Data2 = get_le_uint16(led->lpsp.Stores[i].PropValues[j].Value, 4);
+      //      guid.Data3 = get_le_uint16(led->lpsp.Stores[i].PropValues[j].Value, 6);
+      //      get_chars(led->lpsp.Stores[i].PropValues[j].Value, 8, 2, guid.Data4hi);
+      //      get_chars(led->lpsp.Stores[i].PropValues[j].Value, 10, 6, guid.Data4lo);
+      //      get_droid_a(&guid, &guida);
+      //      // For now just print out the GUID, and (if appropriate) the time and MAC address
+      //      snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 150, "UUID: %s, Time: %s, Node (MAC addr): %s", guida.UUID, guida.Time_long, guida.Node);
+      //      break;
+      //    case VT_VERSIONED_STREAM: //Not Tested
+      //      strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_VERSIONED_STREAM");
+      //      len = get_le_uint32(led->lpsp.Stores[i].PropValues[j].Value, 0);
+      //      get_chars(led->lpsp.Stores[i].PropValues[j].Value, 4, len, (unsigned char *)lp_buf);
+      //      if ((lp_buf[len - 1] == 0) && (lp_buf[len - 2] == 0)) // Is it unicode (2 byte string terminator)?
+      //      {
+      //        get_le_unistr(led->lpsp.Stores[i].PropValues[j].Value, 4, len / 2, lpw_buf);
+      //        snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, len, "%ls", lpw_buf);
+      //      }
+      //      else // Must be ANSI
+      //      {
+      //        snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, len, "%s", lp_buf);
+      //      }
+      //      break;
+      //    default:
+      //      if (led->lpsp.Stores[i].PropValues[j].PropertyType || 0x1000)
+      //      {
+      //        strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_VECTOR | ?");
+      //      }
+      //      else if (led->lpsp.Stores[i].PropValues[j].PropertyType || 0x2000)
+      //      {
+      //        strcat((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, " VT_ARRAY | ?");
+      //      }
+      //      snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 43, "[Sorry, interpretation is not implemented]");
+      //    }
+      //  }
+      //  else
+      //  {
+      //    snprintf((char *)leda->lpspa.Stores[i].PropValues[j].NameSizeOrID, 6, "[N/A]");
+      //    snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Reserved, 6, "[N/A]");
+      //    snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Name, 6, "[N/A]");
+      //    snprintf((char *)leda->lpspa.Stores[i].PropValues[j].PropertyType, 6, "[N/A]");
+      //    snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Padding, 6, "[N/A]");
+      //    snprintf((char *)leda->lpspa.Stores[i].PropValues[j].Value, 6, "[N/A]");
+      //  }
+      //}
     }
   }
   else

@@ -189,6 +189,24 @@ struct LIF_SER_PROPSTORE_A
   struct LIF_SER_PROPVALUE_A  PropValues[PROPVALUES];
 };
 
+struct LIF_PROPERTY_STORE_PROPS
+{
+  uint16_t                  Posn;  // Not in the spec but included to assist in forensic analysis and authentication of results
+  uint32_t                  Size;
+  uint32_t                  sig;
+  int32_t                   NumStores;
+  struct LIF_SER_PROPSTORE  Stores[PROPSTORES];
+};
+
+struct LIF_PROPERTY_STORE_PROPS_A
+{
+  unsigned char               Posn[8];
+  unsigned char               Size[10];
+  unsigned char               sig[12];
+  unsigned char               NumStores[10];
+  struct LIF_SER_PROPSTORE_A  Stores[PROPSTORES];
+};
+
 struct LIF_CONSOLE_PROPS
 {
   uint16_t       Posn;  // Not in the spec but included to assist in forensic analysis and authentication of results
@@ -335,24 +353,6 @@ struct LIF_KNOWN_FOLDER_PROPS_A
   unsigned char       sig[12];
   struct LIF_CLSID_A  KFGUID;
   unsigned char       KFOffset[10];
-};
-
-struct LIF_PROPERTY_STORE_PROPS
-{
-  uint16_t                  Posn;  // Not in the spec but included to assist in forensic analysis and authentication of results
-  uint32_t                  Size;
-  uint32_t                  sig;
-  int32_t                   NumStores;
-  struct LIF_SER_PROPSTORE  Stores[PROPSTORES];
-};
-
-struct LIF_PROPERTY_STORE_PROPS_A
-{
-  unsigned char               Posn[8];
-  unsigned char               Size[10];
-  unsigned char               sig[12];
-  unsigned char               NumStores[10];
-  struct LIF_SER_PROPSTORE_A  Stores[PROPSTORES]; 
 };
 
 struct LIF_SHIM_PROPS
@@ -691,5 +691,12 @@ extern int get_lif(FILE *, int, struct LIF *);
 extern int get_lif_a(struct LIF *, struct LIF_A *);
 //LIF must be a filled LIF structure
 //LIF_A is an empty LIF_A structure
+
+//fills a LIF_SER_PROPSTORE_A with the ASCII representation
+//of the LIF_SER_PROPSTORE
+//(0 if successful != 0 if not)
+extern int get_propstore_a(struct LIF_SER_PROPSTORE *, struct LIF_SER_PROPSTORE_A *);
+//LIF must be a filled LIF_SER_PROPSTORE structure
+//LIF_A is an empty LIF_SER_PROPSTORE_A structure
 
 #endif
