@@ -1,29 +1,32 @@
-/*********************************************************
-**                                                      **
-**                 liblife.h                            **
-**                                                      **
-** A library to handle the data from Windows link files **
-**                                                      **
-**         Copyright Paul Tew 2011 to 2017              **
-**                                                      **
-** Structures                                           **
-** -----------                                          **
-** LIF       - Link File data                           **
-** LIF_A     - ASCII representation of a LIF            **
-**                                                      **
-** Major Functions:                                     **
-** ----------------                                     **
-** test_link(FILE*)                                     **
-**       Returns 0 if the file pointed to by fp is a    **
-**       Windows Link file -1 if not.                   **
-**                                                      **
-** get_lif(FILE*, int, LIF*)                            **
-**       Populates LIF with the decoded link file data  **
-**                                                      **
-** get_lif_a(LIF*, LIF_A*)                              **
-**       Converts the LIF to a readable version         **
-**                                                      **
-*********************************************************/
+/***************************************************************
+**                                                            **
+**                       liblife.h                            **
+**                                                            **
+**    A library to handle the data from Windows link files    **
+**                                                            **
+**            Copyright Paul Tew 2011 to 2017                 **
+**                                                            **
+** Structures:                                                **
+** -----------                                                **
+** LIF       - Link File data                                 **
+** LIF_A     - ASCII representation of a LIF                  **
+**                                                            **
+** Exported Functions:                                        **
+** -------------------                                        **
+** test_link(FILE*)                                           **
+**       Returns 0 if the file pointed to by fp is a          **
+**       Windows Link file -1 if not.                         **
+**                                                            **
+** get_lif(FILE*, int, LIF*)                                  **
+**       Populates LIF with the decoded link file data        **
+**                                                            **
+** get_lif_a(LIF*, LIF_A*)                                    **
+**       Converts the LIF to a readable version               **
+**                                                            **
+** get_propstore_a(LIF_SER_PROPSTORE * LIF_SER_PROPSTORE_A *) **
+**       Converts the property store to a readable version    **
+**                                                            **
+***************************************************************/
 
 /*
 This file is part of Lifer.
@@ -60,7 +63,7 @@ https://msdn.microsoft.com/en-us/library/dd871305.aspx )
 
 /******************************************************************************/
 //Minor Definitions & Structures
-#define PROPSTORES    10    // The number of LIF_SER_PROPSTORE in a LIF_PROPERTY_STORE_PROPS structure
+#define PROPSTORES    7     // The number of LIF_SER_PROPSTORE in a LIF_PROPERTY_STORE_PROPS structure
 #define PROPVALUES    10    // The number of LIF_SER_PROPVALUE in each LIF_SER_PROPSTORE structure
 #define ITEMIDS       10    // The number of LIF_ITEMID items in a LIF_IDLIST
 #define MAXITEMIDSIZE 4096  // The maximum number of raw bytes in an ItemID
@@ -191,10 +194,11 @@ struct LIF_SER_PROPSTORE_A
 
 struct LIF_PROPERTY_STORE_PROPS
 {
-  uint16_t                  Posn;  // Not in the spec but included to assist in forensic analysis and authentication of results
+  // Now named PropertyStoreDataBlock MS-SHLLINK S2.5.7
+  uint16_t                  Posn;  // Not in the spec but included to assist in forensic analysis and therefore the authentication of results
   uint32_t                  Size;
   uint32_t                  sig;
-  int32_t                   NumStores;
+  int32_t                   NumStores; //Not in spec but used to report the number of stores in this DataBlock
   struct LIF_SER_PROPSTORE  Stores[PROPSTORES];
 };
 
@@ -209,7 +213,7 @@ struct LIF_PROPERTY_STORE_PROPS_A
 
 struct LIF_CONSOLE_PROPS
 {
-  uint16_t       Posn;  // Not in the spec but included to assist in forensic analysis and authentication of results
+  uint16_t       Posn;  // Not in the spec but included to assist in forensic analysis and therefore the authentication of results
   uint32_t       Size;
   uint32_t       sig;
   uint16_t       FillAttributes;
@@ -269,7 +273,7 @@ struct LIF_CONSOLE_PROPS_A
 
 struct LIF_CONSOLE_FE_PROPS
 {
-  uint16_t           Posn;	// Not in the spec but included to assist in forensic analysis and authentication of results
+  uint16_t           Posn;	// Not in the spec but included to assist in forensic analysis and therefore the authentication of results
   uint32_t           Size;
   uint32_t           sig;
   uint32_t           CodePage;
@@ -285,7 +289,7 @@ struct LIF_CONSOLE_FE_PROPS_A
 
 struct LIF_DARWIN_PROPS
 {
-  uint16_t           Posn;	// Not in the spec but included to assist in forensic analysis and authentication of results
+  uint16_t           Posn;	// Not in the spec but included to assist in forensic analysis and therefore the authentication of results
   uint32_t           Size;
   uint32_t           sig;
   unsigned char      DarwinDataAnsi[260];
@@ -303,7 +307,7 @@ struct LIF_DARWIN_PROPS_A
 
 struct LIF_ENVIRONMENT_PROPS
 {
-  uint16_t           Posn;	// Not in the spec but included to assist in forensic analysis and authentication of results
+  uint16_t           Posn;	// Not in the spec but included to assist in forensic analysis and therefore the authentication of results
   uint32_t           Size;
   uint32_t           sig;
   unsigned char      TargetAnsi[260];
@@ -321,7 +325,7 @@ struct LIF_ENVIRONMENT_PROPS_A
 
 struct LIF_ICON_ENVIRONMENT_PROPS
 {
-  uint16_t           Posn;	// Not in the spec but included to assist in forensic analysis and authentication of results
+  uint16_t           Posn;	// Not in the spec but included to assist in forensic analysis and therefore the authentication of results
   uint32_t           Size;
   uint32_t           sig;
   unsigned char      TargetAnsi[260];
@@ -339,7 +343,7 @@ struct LIF_ICON_ENVIRONMENT_PROPS_A
 
 struct LIF_KNOWN_FOLDER_PROPS
 {
-  uint16_t           Posn;  // Not in the spec but included to assist in forensic analysis and authentication of results
+  uint16_t           Posn;  // Not in the spec but included to assist in forensic analysis and therefore the authentication of results
   uint32_t           Size;
   uint32_t           sig;
   struct LIF_CLSID   KFGUID;
@@ -357,7 +361,7 @@ struct LIF_KNOWN_FOLDER_PROPS_A
 
 struct LIF_SHIM_PROPS
 {
-  uint16_t           Posn;  // Not in the spec but included to assist in forensic analysis and authentication of results
+  uint16_t           Posn;  // Not in the spec but included to assist in forensic analysis and therefore the authentication of results
   uint32_t           Size;
   uint32_t           sig;
   wchar_t            LayerName[600];
@@ -373,7 +377,7 @@ struct LIF_SHIM_PROPS_A
 
 struct LIF_SPECIAL_FOLDER_PROPS
 {
-  uint16_t           Posn;  // Not in the spec but included to assist in forensic analysis and authentication of results
+  uint16_t           Posn;  // Not in the spec but included to assist in forensic analysis and therefore the authentication of results
   uint32_t           Size;
   uint32_t           sig;
   uint32_t           SpecialFolderID;
@@ -391,7 +395,7 @@ struct LIF_SPECIAL_FOLDER_PROPS_A
 
 struct LIF_TRACKER_PROPS
 {
-  uint16_t           Posn;  // Not in the spec but included to assist in forensic analysis and authentication of results
+  uint16_t           Posn;  // Not in the spec but included to assist in forensic analysis and therefore the authentication of results
   uint32_t           Size;
   uint32_t           sig;
   uint32_t           Length;
@@ -419,7 +423,7 @@ struct LIF_TRACKER_PROPS_A
 
 struct LIF_VISTA_IDLIST_PROPS
 {
-  uint16_t           Posn;  // Not in the spec but included to assist in forensic analysis and authentication of results
+  uint16_t           Posn;  // Not in the spec but included to assist in forensic analysis and therefore the authentication of results
   uint32_t           Size;
   uint32_t           sig;
   //TODO Fix this!
@@ -687,16 +691,24 @@ extern int get_lif(FILE *, int, struct LIF *);
 //LIF is a pointer to a struct LIF which will hold the data
 
 //fills LIF_A with the ASCII representation of the LIF
-//(0 if successful < -1 if not)
+//(0 if successful, != 0 if not)
 extern int get_lif_a(struct LIF *, struct LIF_A *);
 //LIF must be a filled LIF structure
 //LIF_A is an empty LIF_A structure
+
+//Finds a series of Property stores in a buffer
+//(0 if successful, != 0 if not)
+extern int find_propstores(unsigned char *, int, int, struct LIF_PROPERTY_STORE_PROPS *);
+// unsigned char * (arg 0) is a pointer to a filled byte array
+// int (arg 1) is the size of the array
+// int (arg 2) is the position of the first byte in the array relative to the start of the link file
+// LIF_PROPERTY_STORE_PROPS * (arg 3) is a pointer to an empty structure (filled on success)
 
 //fills a LIF_SER_PROPSTORE_A with the ASCII representation
 //of the LIF_SER_PROPSTORE
 //(0 if successful != 0 if not)
 extern int get_propstore_a(struct LIF_SER_PROPSTORE *, struct LIF_SER_PROPSTORE_A *);
-//LIF must be a filled LIF_SER_PROPSTORE structure
-//LIF_A is an empty LIF_SER_PROPSTORE_A structure
+//LIF_SER_PROPSTORE   must be a filled structure
+//LIF_SER_PROPSTORE_A is an empty structure (filled on success)
 
 #endif

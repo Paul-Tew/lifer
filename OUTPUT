@@ -1,6 +1,14 @@
 EXPLANATION OF 'lifer' OUTPUT
 -----------------------------
 
+**SUMMARY**
+The fullest possible information about a link file can be obtained using:
+  $ lifer -i {link file(s)}|{directory containing link files}
+Basic details can be obtained using:
+  $ lifer -s {link file(s)}|{directory containing link files}
+Output to tab separated text file can be obtained using:
+  $ lifer -o tsv {link file(s)}|{directory containing link files} > {output file}
+
 **TEXT OUTPUT (option: '-o txt')**
 
   This is the default output so the option does not need to be explicitly stated
@@ -106,12 +114,14 @@ EXPLANATION OF 'lifer' OUTPUT
   a pull request)
 
 
-**EXTENDED TEXT OUTPUT (IDLIST INFORMATION) (option: '-io txt' or just 'i')**
+**EXTENDED TEXT OUTPUT (IDLIST INFORMATION) (option: '-io txt' or just '-i')**
 
   The interpretation of IDList information is currently experimental and 
   therefore needs to be switched on explicitly by using the '-i' option.
   Whilst this is in development the output may change as more data is 
   interpreted.
+  Currently the application searches for property store (MS-PROPSTORE) 
+  objects within the ItemID and prints out any data it finds.
 
 
 **TAB SEPARATED VALUES OUTPUT (option: '-o tsv')**

@@ -38,7 +38,7 @@ specified in the Microsoft document which I included as part of the git
 repository you cloned and should be sitting in the ./Test/ directory. You can
 do this by issuing the command:
 
-    ./lifer ./Test/Test.lnk
+    ./lifer ./Test/Test1.lnk
 
 You can also test that lifer works on a bunch of link files sitting in a
 directory by issuing the command:
@@ -50,7 +50,7 @@ Install the tool onto the OS by issuing the command:
     sudo install ./lifer /usr/bin/
 
 This will enable you to use lifer anywhere on your system without specifying
-the directory prefix 
+the directory prefix.
 (e.g. `lifer ./Test/Test.lnk` rather than `./lifer ./Test/Test.lnk`)
 
 

@@ -84,6 +84,7 @@ void help_message()
   printf("********************************************************************************\n");
 }
 
+
 //
 //Function: replace_comma(unsigned char * str, int len)
 //          Takes a zero terminated string 'str' of length 'len' max
@@ -676,7 +677,9 @@ void text_out(FILE* fp, char* fname, int less, int itemid)
   struct LIF_A   lif_a;
   struct stat    statbuf;
   char           buf[200];
-  int            i, j;
+  int            i, j, k, idpos = 0;
+  struct LIF_PROPERTY_STORE_PROPS  psp;
+  struct LIF_SER_PROPSTORE_A  psa;
 
   // Get the stat info for the file itself
   stat(fname, &statbuf);
@@ -744,18 +747,67 @@ void text_out(FILE* fp, char* fname, int less, int itemid)
       printf("  {S_2.2 - LinkTargetIDList}\n");
       printf("    Size:                %u bytes\n",
         lif.lidl.IDListSize + 2);
-      if (itemid > 0)
+      if (itemid > 0) // If the '-i' option is switched on
       {
+        idpos = lif.lh.H_size;
         printf("    IDList Size:         %s bytes\n",
           lif_a.lidla.IDListSize);
         printf("    Number of ItemIDs    %s\n", lif_a.lidla.NumItemIDs);
         for (i = 0; i < lif.lidl.NumItemIDs; i++)
         {
           printf("    {ItemID %i}\n", i + 1);
-          printf("      Size:              %s bytes\n", lif_a.lidla.Items[i].ItemIDSize);
+          printf("      ItemID  Size:      %s bytes\n", lif_a.lidla.Items[i].ItemIDSize);
+          if (find_propstores(&lif.lidl.Items[i].Data, lif.lidl.Items[i].ItemIDSize, idpos, &psp) == 0)
+          {
+            // If PropStoreProps exist:
+            printf("      [Property Stores found within this ItemID]\n");
+            printf("      Propstores Size:   %u bytes\n", psp.Size);
+            printf("      File Offset:       %u bytes\n", psp.Posn);
+            printf("      No of Prop Stores: %u\n", psp.NumStores);
+            for (j = 0; j < psp.NumStores; j++)
+            {
+              if (get_propstore_a(&psp.Stores[j], &psa) == 0)
+              {
+                printf("      {ItemID %u Property Store %u}\n", i + 1, j + 1);
+                printf("        Store Size:      %s bytes\n", psa.StorageSize);
+                printf("        Version:         %s\n", psa.Version);
+                printf("        Format ID:       %s\n", psa.FormatID);
+                printf("        Name Type:       %s\n", psa.NameType);
+                printf("        No of Values:    %s\n", psa.NumValues);
+                for (k = 0; k < psp.Stores[j].NumValues; k++)
+                {
+                  printf("        {Item ID %u Property Store %u Property Value %u}\n", i + 1, j + 1, k + 1);
+                  printf("          Value Size:    %s bytes\n", psa.PropValues[k].ValueSize);
+                  if (psp.Stores[j].PropValues[k].ValueSize > 0)
+                  {
+                    if (psp.Stores[j].NameType == 0)
+                    {
+                      printf("          Name Size:     %s bytes\n", psa.PropValues[k].NameSizeOrID);
+                      printf("          Name:          %s\n", psa.PropValues[k].Name);
+                    }
+                    else
+                    {
+                      printf("          ID:            %s\n", psa.PropValues[k].NameSizeOrID);
+                    }
+                    printf("          Property Type: %s\n", psa.PropValues[k].PropertyType);
+                    printf("          Value:         %s\n", psa.PropValues[k].Value);
+
+                  }
+                }
+              }
+              else
+              {
+                printf("        [Unable to interpret Property Store %u]\n", j);
+              }
+            }
+            idpos += lif.lidl.Items[i].ItemIDSize; // point idpos at the start of the next ItemID
+          }
+          else
+          {
+            printf("      [No Property Stores found in this ITemID]\n");
+          }
         }
         printf("    IDList Terminator    2 bytes\n");
-
       }
     }
   }

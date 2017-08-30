@@ -8,6 +8,7 @@
 /src/Test/Test7.lnk
 lifer
 lifer.exe
+*.bak
 *.suo
 *.user
 *.userosscache
