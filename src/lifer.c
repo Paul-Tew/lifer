@@ -757,7 +757,7 @@ void text_out(FILE* fp, char* fname, int less, int itemid)
         {
           printf("    {ItemID %i}\n", i + 1);
           printf("      ItemID  Size:      %s bytes\n", lif_a.lidla.Items[i].ItemIDSize);
-          if (find_propstores(&lif.lidl.Items[i].Data, lif.lidl.Items[i].ItemIDSize, idpos, &psp) == 0)
+          if (find_propstores((unsigned char*)&lif.lidl.Items[i].Data, lif.lidl.Items[i].ItemIDSize, idpos, &psp) == 0)
           {
             // If PropStoreProps exist:
             printf("      [Property Stores found within this ItemID]\n");
@@ -771,7 +771,7 @@ void text_out(FILE* fp, char* fname, int less, int itemid)
                 printf("      {ItemID %u Property Store %u}\n", i + 1, j + 1);
                 printf("        Store Size:      %s bytes\n", psa.StorageSize);
                 printf("        Version:         %s\n", psa.Version);
-                printf("        Format ID:       %s\n", psa.FormatID);
+                printf("        Format ID:       %s\n", psa.FormatID.UUID);
                 printf("        Name Type:       %s\n", psa.NameType);
                 printf("        No of Values:    %s\n", psa.NumValues);
                 for (k = 0; k < psp.Stores[j].NumValues; k++)

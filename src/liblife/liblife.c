@@ -200,7 +200,7 @@ extern int test_link(FILE* fp)
 //          LIF_SER_PROPSTORE is in psp->Posn.
 extern int find_propstores(unsigned char * data_buf, int size, int position, struct LIF_PROPERTY_STORE_PROPS * psp)
 {
-  int i, j, k, p, vp, loc, posn;
+  int i, j, k, p, vp, posn;
 
   for (k = 4; k < (size - 23); k++) // No point looking for Version sig prior to posn 4 or 
                                     // in last 23 bytes (length of which is determined from: 0 size Property Value [4 bytes]
@@ -1829,20 +1829,7 @@ int get_extradata(FILE * fp, int pos, struct LIF * lif)
 //copies the strings and creates an ASCII representation of the data.
 int get_extradata_a(struct LIF_EXTRA_DATA * led, struct LIF_EXTRA_DATA_A * leda)
 {
-  int       i, j, len;
-  uint8_t   uinteger8, decimalscale, decimalsign;
-  int8_t    integer8;
-  uint16_t  uinteger16, boolean;
-  int16_t   integer16;
-  uint32_t  uinteger32, hresult, decimalHi32;
-  int32_t   integer32;
-  uint64_t  uinteger64, filetime, decimalLo64;
-  int64_t   integer64;
-  double    currency;
-  char      decsign[9], lp_buf[300];
-  wchar_t   lpw_buf[300];
-  struct LIF_CLSID    guid;
-  struct LIF_CLSID_A  guida;
+  int       i;
 
   snprintf((char *)leda->Size, 10, "%"PRIu32, led->Size);
   leda->edtypes[0] = (char)0;
