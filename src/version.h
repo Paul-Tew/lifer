@@ -31,7 +31,7 @@ This file is part of Lifer, a Windows link file analyser.
 #define _MAJOR  3
 #define _MINOR  0
 // This is my revision number
-#define _BUILD  17 // IDLists PropertyStores now parsed using option '-io txt'
+#define _BUILD  18 // IDLists PropertyStores now parsed using option '-i' or '-io txt'
 // Just the current year
 #define _YEAR   2017
 
@@ -48,6 +48,9 @@ This file is part of Lifer, a Windows link file analyser.
   is hazy (because I only developed the tool for my own use). After
   initiating git and posting the tool to github there is obviously a much
   better recollection ;)
+
+  v3.0.18
+  Code clean up
 
   v3.0.17
   Property Stores embedded within ItemID objects are now detected and parsed

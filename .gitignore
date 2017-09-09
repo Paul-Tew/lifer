@@ -240,3 +240,5 @@ __pycache__/
 *.xsd.cs
 # Any VSCode settings
 .vscode/
+/src/lifer_Win_x64.exe
+/src/lifer_Win_x86.exe

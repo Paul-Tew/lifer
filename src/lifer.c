@@ -69,12 +69,13 @@ void help_message()
   printf("\nlifer - A Windows link file analyser\n");
   printf("lifer - A Windows link file analyser\n");
   printf("Version: %u.%u.%u\n", _MAJOR, _MINOR, _BUILD);
-  printf("Usage: lifer  [-vhs] [-o csv|tsv|txt] file(s)|directory\n\n");
+  printf("Usage: lifer  [-vhs] [-o csv|tsv|txt] file(s)|directory\n");
+  printf("       lifer -i [-o txt] file(s)|directory\n\n");
   printf("Options:\n  -v    print version number\n  -h    print this help\n");
   printf("  -s    shortened output (default is to output all fields)\n");
-  printf("  -i    print idlist information (only compatible with output type: full 'txt')\n");
   printf("  -o    output type (choose from csv, tsv or txt). \n");
   printf("        The default is txt.\n\n");
+  printf("  -i    print idlist information (only compatible with output type: 'txt')\n");
   printf("Output is to standard output, to send to a file, use the redirection\n");
   printf("operator '>'.\n\n");
   printf("Example:\n  lifer -o csv {DIRECTORY} > Links.csv\n\n");

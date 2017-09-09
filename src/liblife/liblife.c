@@ -184,7 +184,7 @@ extern int test_link(FILE* fp)
   return 0;
 }
 
-//TODO EXPERIMENTAL!!
+//EXPERIMENTAL!!
 //Function: find_propstore(unsigned char * data_buf, int size, struct LIF_PROPERTY_STORE_PROPS * psp)
 //          Takes a data buffer 'data_buf' no bigger than 'size' and
 //          searches for the first LIF_SER_PROPSTORE it can find (by looking
@@ -223,7 +223,6 @@ extern int find_propstores(unsigned char * data_buf, int size, int position, str
             psp->Size = 4; // The size of the last (uncounted) property store
             psp->sig = 0; // This is not needed here
             psp->NumStores = 0;
-            //**************************************
             for (i = 0; i < PROPSTORES; i++) // Cycle through all the valid property stores
             {
               psp->Stores[i].NumValues = 0;
@@ -290,9 +289,6 @@ extern int find_propstores(unsigned char * data_buf, int size, int position, str
               posn += psp->Stores[i].StorageSize; // Move to the next propertystore
               psp->NumStores++;
             } //Cycle through the Propstores
-
-            // TODO Fill LIF_SER_PROPSTORE - ongoing
-            //**************************************
             return 0;
           }
         }
@@ -302,7 +298,7 @@ extern int find_propstores(unsigned char * data_buf, int size, int position, str
   return -1;
 }
 
-// TODO - THIS FUNCTION IS EXPERIMENTAL!!!
+//THIS FUNCTION IS EXPERIMENTAL!!!
 //Function get_propstores_a(struct LIF_PROPERTY_STORE_PROPS * psp, struct LIF_PROPERTY_STORE_PROPS_A * pspa)
 //Property Stores (MS-PROPSTORE S2) turn up in Link files in a number of places:
 //  • Extradata.PropertyStoreDataBlock
