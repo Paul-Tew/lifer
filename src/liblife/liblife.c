@@ -25,13 +25,6 @@ This file is part of Lifer.
     along with Lifer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <assert.h>
-#include <errno.h>
-#include <inttypes.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-
 #include "./liblife.h"
 
 //Declaration of functions used privately
@@ -874,7 +867,7 @@ int get_linkinfo(FILE * fp, int size, int pos, struct LIF * lif)
 {
   unsigned char      size_buf[4];   //A small buffer to hold the size element
   unsigned char *    data_buf;
-  int       i;
+  unsigned int       i;
   //uint16_t  u16;
 
   if (lif->lh.Flags & 0x00000002) //There is a LinkInfo structure
@@ -1458,7 +1451,7 @@ int get_stringdata(FILE * fp, int pos, struct LIF * lif)
 {
   unsigned char      size_buf[2];   //A small buffer to hold the size element
   uint32_t           tsize = 0, str_size = 0;
-  int                i, j;
+  unsigned int       i, j;
   unsigned char      data_buf[600];
   wchar_t            uni_buf[300];
 
@@ -1556,7 +1549,7 @@ int get_stringdata_a(struct LIF_STRINGDATA * lsd, struct LIF_STRINGDATA_A * lsda
 //Unicode strings to ASCII if necessary)
 int get_extradata(FILE * fp, int pos, struct LIF * lif)
 {
-  int                i = 0, j = 0, p = 0, vp = 0, posn = 0, offset = pos;
+  unsigned int       i = 0, j = 0, p = 0, vp = 0, posn = 0, offset = pos;
   uint32_t           blocksize, blocksig, datasize;
   unsigned char      size_buf[4];   //A small buffer to hold the size element
   unsigned char      sig_buf[4];

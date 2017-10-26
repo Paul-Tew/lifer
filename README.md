@@ -132,7 +132,7 @@ cd "F:\\lifer\src\x64\Debug\"
 It is possible to make lifer in Windows without installing Visual Studio but you will still need to download and install the Visual C++ build tools available [here](http://landinghub.visualstudio.com/visual-cpp-build-tools)
 Once installed, lifer can be built in the ./src/ directory by issuing the command:
 ```
-CL lifer.c .\liblife\liblife.c .\Win\dirent.c .\Win\getopt.c
+CL lifer.c .\liblife\liblife.c .\Win\dirent.c .\Win\getopt.c .\libbin2hex\libbin2hex.c
 ```
 ## ACKNOWLEDGEMENTS
 'lifer' was originally a Linux/GNU only tool which was not really portable into Windows until I found solutions to the main stumbling blocks of navigating a directory and parsing the command-line options in the same way that GNU does. To this end I am deeply indebted to the following two projects:
@@ -145,6 +145,6 @@ Users are encouraged to read the [whitepaper](http://computerforensics.parsonage
 ## INFORMAL DISCLAIMER
 I am only a self-taught programmer so no doubt there are loads of errors and 'gotchas' in the code. To this end, I make absolutely NO promises that this tool won't harm your system. I tried hard not to bust your machine but the road to hell is paved with good intentions...
 ## FORMAL DISCLAIMER
-THIS MATERIAL IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT. SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OF IMPLIED WARRANTIES, SO THE ABOVE EXCLUSION MAY NOT APPLY TO YOU. IN NO EVENT WILL I BE LIABLE TO ANY PARTY FOR ANY DIRECT, INDIRECT, SPECIAL OR OTHER CONSEQUENTIAL DAMAGES FOR ANY USE OF THIS MATERIAL INCLUDING, WITHOUT LIMITATION, ANY LOST PROFITS, BUSINESS INTERRUPTION, LOSS OF PROGRAMS OR OTHER DATA ON YOUR INFORMATION HANDLING SYSTEM OR OTHERWISE, EVEN If WE ARE EXPRESSLY ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+THIS MATERIAL IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT. SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OF IMPLIED WARRANTIES, SO THE ABOVE EXCLUSION MAY NOT APPLY TO YOU. IN NO EVENT WILL I BE LIABLE TO ANY PARTY FOR ANY DIRECT, INDIRECT, SPECIAL OR OTHER CONSEQUENTIAL DAMAGES FOR ANY USE OF THIS MATERIAL INCLUDING, WITHOUT LIMITATION, ANY LOST PROFITS, BUSINESS INTERRUPTION, LOSS OF PROGRAMS OR OTHER DATA ON YOUR INFORMATION HANDLING SYSTEM OR OTHERWISE, EVEN IF WE ARE EXPRESSLY ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 Paul Tew - Apr 2017

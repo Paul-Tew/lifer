@@ -31,7 +31,7 @@ This file is part of Lifer, a Windows link file analyser.
 #define _MAJOR  3
 #define _MINOR  0
 // This is my revision number
-#define _BUILD  18 // IDLists PropertyStores now parsed using option '-i' or '-io txt'
+#define _BUILD  20 // IDLists without propery stores are printed out as raw hex/ansi
 // Just the current year
 #define _YEAR   2017
 

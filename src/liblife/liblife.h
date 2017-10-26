@@ -54,12 +54,17 @@ https://msdn.microsoft.com/en-us/library/dd871305.aspx )
 */
 
 #ifndef _LIBLIFE_H_
-#define _LIBLIFE_H_ 1
+#define _LIBLIFE_H_
 
 #include <inttypes.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include <wchar.h>
+#include <errno.h>
+#include <assert.h>
+
 
 /******************************************************************************/
 //Minor Definitions & Structures

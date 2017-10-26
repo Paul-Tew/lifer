@@ -116,12 +116,16 @@ Output to tab separated text file can be obtained using:
 
 **EXTENDED TEXT OUTPUT (IDLIST INFORMATION) (option: '-io txt' or just '-i')**
 
+  NOTE: The '-i'option is only available with the '-o txt' option (which is the
+  default)
   The interpretation of IDList information is currently experimental and 
   therefore needs to be switched on explicitly by using the '-i' option.
   Whilst this is in development the output may change as more data is 
   interpreted.
-  Currently the application searches for property store (MS-PROPSTORE) 
-  objects within the ItemID and prints out any data it finds.
+  Initially the application searches for property store (MS-PROPSTORE) 
+  objects within the ItemID and prints out any data it finds. 
+  Since v3.0.20 however, any ID List structures that do not contain
+  MS-PROPSTORE structures are printed out
 
 
 **TAB SEPARATED VALUES OUTPUT (option: '-o tsv')**

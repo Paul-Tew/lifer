@@ -40,6 +40,7 @@ This file is part of lifer.
 // local headers
 #include "./liblife/liblife.h"
 #include "./version.h"
+#include "./libbin2hex/libbin2hex.h"
 
 //Conditional includes and definitions dependant on OS
 #ifdef _WIN32
@@ -66,18 +67,19 @@ int filecount;
 void help_message()
 {
   printf("********************************************************************************\n");
-  printf("\nlifer - A Windows link file analyser\n");
-  printf("lifer - A Windows link file analyser\n");
-  printf("Version: %u.%u.%u\n", _MAJOR, _MINOR, _BUILD);
+  printf("\nlifer - A Windows link file (a.k.a. shortcut) analyser\n");
+  printf("Version: %u.%u.%u\n\n", _MAJOR, _MINOR, _BUILD);
   printf("Usage: lifer  [-vhs] [-o csv|tsv|txt] file(s)|directory\n");
-  printf("       lifer -i [-o txt] file(s)|directory\n\n");
-  printf("Options:\n  -v    print version number\n  -h    print this help\n");
+  printf("       lifer   -i    [-o txt]         file(s)|directory\n\n");
+  printf("Options:\n");
+  printf("  -v    print version number\n");
+  printf("  -h    print this help\n");
   printf("  -s    shortened output (default is to output all fields)\n");
   printf("  -o    output type (choose from csv, tsv or txt). \n");
-  printf("        The default is txt.\n\n");
-  printf("  -i    print idlist information (only compatible with output type: 'txt')\n");
-  printf("Output is to standard output, to send to a file, use the redirection\n");
-  printf("operator '>'.\n\n");
+  printf("        The default is txt.\n");
+  printf("  -i    print idlist information (only compatible with output type: 'txt')\n\n");
+  printf("Output is to standard output, therefore to send to a file, use the\n");
+  printf("redirection operator '>'.\n\n");
   printf("Example:\n  lifer -o csv {DIRECTORY} > Links.csv\n\n");
   printf("This will create a comma seperated file named Links.csv in the current\n");
   printf("directory. The file can be viewed in a spreadsheet and will contain details\n");
@@ -805,10 +807,16 @@ void text_out(FILE* fp, char* fname, int less, int itemid)
           }
           else
           {
-            printf("      [No Property Stores found in this ITemID]\n");
+            printf("      [No Property Stores found in this ITemID. Here is the raw data:]\n");
+            // TODO If there are no Property Stores in this ItemID then print out HEX/ANSI (or both)
+            bin2hex((unsigned char*)&lif.lidl.Items[i].Data, lif.lidl.Items[i].ItemIDSize, 1, 16, 6, 1);
           }
         }
         printf("    IDList Terminator    2 bytes\n");
+      }
+      else
+      {
+        printf("    (Use the '-i' option to see the contents)\n");
       }
     }
   }
