@@ -25,7 +25,7 @@ that's all.
 Start a command-line terminal and navigate to the **./lifer/src** directory.
 Issue the command:
 
-    gcc -Wall ./lifer.c ./liblife/liblife.c -o lifer
+    gcc -Wall ./lifer.c ./liblife/liblife.c ./libbin2hex/libbin2hex.c -o lifer
 
 Provided no warnings or errors appeared, you should now have an executable file
 'lifer' sitting in the directory, you might want to check this by issuing the
@@ -89,4 +89,4 @@ http://landinghub.visualstudio.com/visual-cpp-build-tools
 
 Once installed, lifer can be built in the ./src/ directory by issuing the command:
 
-CL lifer.c .\liblife\liblife.c .\Win\dirent.c .\Win\getopt.c
+CL lifer.c .\liblife\liblife.c .\libbin2hex\libbin2hex.c .\Win\dirent.c .\Win\getopt.c

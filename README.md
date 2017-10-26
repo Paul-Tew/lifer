@@ -93,7 +93,7 @@ Because this tool is pretty basic, the dependencies are minimal, ensure you have
 Start a command-line terminal and navigate to the **./lifer/src** directory.
 Issue the command:
 ```
-gcc -Wall ./lifer.c ./liblife/liblife.c -o lifer
+gcc -Wall ./lifer.c ./liblife/liblife.c ./libbin2hex/libbin2hex.c -o lifer
 ```
 Provided no warnings or errors appeared, you should now have an executable file 'lifer' sitting in the directory, you might want to check this by issuing the command:
 ```
