@@ -8,7 +8,7 @@ It started life as a lightweight tool that I wrote in order to extract certain i
 
 The information extracted is in accordance with the Microsoft Open Specification Document 'MS-SHLLNK' which can be found online [**here**](https://msdn.microsoft.com/en-us/library/dd871305.aspx).
 At the time of writing most parts of specification version 3.0 are implemented. Over time however, I hope to bring the tool into line with the full current specification and also include other goodies such as:
-* Relevant output from IDList containers (which need reverse engineering - see 'IDLIST.txt')
+* Output in XML format
 * Recognition of, and parsing of link file data within jump list (OLE) containers.
 
 ## EXAMPLE USAGE
@@ -59,17 +59,17 @@ The most detail about a link file can be gleaned by using the '-i' option which 
 
 All the link files in a directory (folder) can be parsed by just passing the name of the directory:
 ```
-lifer ./Test/WinXP
+lifer ./src/Test/WinXP
 ```
 (for brevity the output has not been shown).
 
 The most useful output for a number of link files can be created by sending the output as a tab (or comma) separated list to a file that can then be imported into a spreadsheet for analysis at your leisure. This can be achieved like this:
 ```
-lifer -o tsv ./Test/WinXP > WinXP.tsv
+lifer -o tsv ./src/Test/WinXP > WinXP.tsv
 ```
 or
 ```
-lifer -so tsv ./Test/WinXP > WinXP.tsv
+lifer -so tsv ./src/Test/WinXP > WinXP.tsv
 ```
 for a file that has some of the superfluous and uninteresting data redacted.
 ### WARNING ABOUT COMMA SEPARATED OUTPUT!!

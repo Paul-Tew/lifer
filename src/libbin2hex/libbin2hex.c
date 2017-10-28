@@ -61,7 +61,7 @@ along with bin2hex.  If not, see <http://www.gnu.org/licenses/>.
 
 extern int bin2hex(unsigned char * byte_array, unsigned int size, unsigned int gap, unsigned int cols, unsigned int margin, unsigned int ansi)
 {
-  int i, j, hdr = 0, stringlen = 0, line = 0, numlines = 0, charsinlastline = 0, lastchars = 0, spaces = 0;
+  unsigned int i, j, hdr = 0, stringlen = 0, line = 0, numlines = 0, charsinlastline = 0, spaces = 0;
   char *string, *pad, hex[4], offset[10], printchar[2], ansistr[34];
 
   // Ensure that parameters are within boundaries
@@ -114,7 +114,7 @@ extern int bin2hex(unsigned char * byte_array, unsigned int size, unsigned int g
     }
     strcat(string, " ANSI\n");
     // Print the header
-    printf(string);
+    printf("%s", string);
   }
 
   while (line < numlines) // line is the number of the whole line we are working on (0 based)
@@ -153,7 +153,7 @@ extern int bin2hex(unsigned char * byte_array, unsigned int size, unsigned int g
     }
     strcat(string, ansistr);
     strcat(string, "\n");
-    printf(string);
+    printf("%s", string);
     line++;
   }
   // Print the last line
@@ -202,7 +202,7 @@ extern int bin2hex(unsigned char * byte_array, unsigned int size, unsigned int g
   }
   strcat(string, pad);
   strcat(string, ansistr);
-  printf(string);
+  printf("%s", string);
   printf("\n");
   free(pad);
   free(string);

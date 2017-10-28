@@ -25,8 +25,7 @@ engineering) into this body of work...
   consistent (the same) among all link files that contain this ItemID.
   Sometimes this is the only ItemID (other than the TerminalID).
 
-• Some (older?) link files don't have this usual ItemID[0] structure - more on
-  these later...
+• Some (older?) link files don't have this usual ItemID[0] structure.
 
 • Quite a few modern ItemID structures contain one or more Property Stores
   (see MS-PROPSTORE S2) which are not readily identifiable from the ItemID 

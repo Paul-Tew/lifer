@@ -31,7 +31,7 @@ Provided no warnings or errors appeared, you should now have an executable file
 'lifer' sitting in the directory, you might want to check this by issuing the
 command:
 
-    ls -la
+    ls -l
 
 If all is OK then you can test that lifer works by testing it out on the file
 specified in the Microsoft document which I included as part of the git

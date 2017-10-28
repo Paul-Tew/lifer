@@ -118,14 +118,12 @@ Output to tab separated text file can be obtained using:
 
   NOTE: The '-i'option is only available with the '-o txt' option (which is the
   default)
-  The interpretation of IDList information is currently experimental and 
-  therefore needs to be switched on explicitly by using the '-i' option.
-  Whilst this is in development the output may change as more data is 
-  interpreted.
+  The interpretation of IDList information needs to be switched on explicitly 
+  by using the '-i' option.
   Initially the application searches for property store (MS-PROPSTORE) 
   objects within the ItemID and prints out any data it finds. 
   Since v3.0.20 however, any ID List structures that do not contain
-  MS-PROPSTORE structures are printed out
+  MS-PROPSTORE structures are printed out as raw hex and ANSII
 
 
 **TAB SEPARATED VALUES OUTPUT (option: '-o tsv')**
@@ -160,7 +158,7 @@ Output to tab separated text file can be obtained using:
 
 **SHORTENED TAB SEPARATED VALUES OUTPUT (option: '-so tsv')**
 
-  This is similar to shortened text output in that, some data I consider to be
+  This is similar to shortened text output so that some data I consider to be
   irrelevant for forensic investigations has been omitted.
 
 
