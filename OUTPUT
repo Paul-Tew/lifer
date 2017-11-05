@@ -4,10 +4,15 @@ EXPLANATION OF 'lifer' OUTPUT
 **SUMMARY**
 The fullest possible information about a link file can be obtained using:
   $ lifer -i {link file(s)}|{directory containing link files}
+
 Basic details can be obtained using:
   $ lifer -s {link file(s)}|{directory containing link files}
+
 Output to tab separated text file can be obtained using:
   $ lifer -o tsv {link file(s)}|{directory containing link files} > {output file}
+
+Output to an XML file can be obtained using:
+  $ lifer -o xml {link file(s)}|{directory containing link files} > {output file}
 
 **TEXT OUTPUT (option: '-o txt')**
 
@@ -105,7 +110,13 @@ Output to tab separated text file can be obtained using:
   probably optional and are missing from within the link file itself.
 
 
-**SHORTENED TEXT OUTPUT (option: '-so txt' or just '-s')**
+**XML OUTPUT**
+
+  This is similar to the text output except that the output is formatted as a
+  well-formed xml document.
+
+
+**SHORTENED TEXT OR XML OUTPUT (option: '-s')**
 
   With this type of output I have sought to resrict the amount of data and
   instead of printing everything, just keep it restricted to the kind of data
@@ -114,10 +125,10 @@ Output to tab separated text file can be obtained using:
   a pull request)
 
 
-**EXTENDED TEXT OUTPUT (IDLIST INFORMATION) (option: '-io txt' or just '-i')**
+**EXTENDED TEXT OR XML OUTPUT (IDLIST INFORMATION) (option: '-i')**
 
-  NOTE: The '-i'option is only available with the '-o txt' option (which is the
-  default)
+  NOTE: The '-i'option is only available with the '-o txt' (which is the
+  default) or with the '-o xml' options.
   The interpretation of IDList information needs to be switched on explicitly 
   by using the '-i' option.
   Initially the application searches for property store (MS-PROPSTORE) 

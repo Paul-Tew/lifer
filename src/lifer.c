@@ -59,7 +59,7 @@ This file is part of lifer.
 #endif
 
 //Global stuff
-enum otype { csv, tsv, txt };
+enum otype { csv, tsv, txt, xml };
 enum otype output_type;
 int filecount;
 
@@ -69,15 +69,15 @@ void help_message()
   printf("********************************************************************************\n");
   printf("\nlifer - A Windows link file (a.k.a. shortcut) analyser\n");
   printf("Version: %u.%u.%u\n\n", _MAJOR, _MINOR, _BUILD);
-  printf("Usage: lifer  [-vhs] [-o csv|tsv|txt] file(s)|directory\n");
-  printf("       lifer   -i    [-o txt]         file(s)|directory\n\n");
+  printf("Usage: lifer  [-vhs] [-o csv|tsv|txt|xml] file(s)|directory\n");
+  printf("       lifer   -i    [-o txt|xml]         file(s)|directory\n\n");
   printf("Options:\n");
   printf("  -v    print version number\n");
   printf("  -h    print this help\n");
   printf("  -s    shortened output (default is to output all fields)\n");
   printf("  -o    output type (choose from csv, tsv or txt). \n");
   printf("        The default is txt.\n");
-  printf("  -i    print idlist information (only compatible with output type: 'txt')\n\n");
+  printf("  -i    print idlist information (only with output type: 'txt' or 'xml')\n\n");
   printf("Output is to standard output, therefore to send to a file, use the\n");
   printf("redirection operator '>'.\n\n");
   printf("Example:\n  lifer -o csv {DIRECTORY} > Links.csv\n\n");
@@ -808,8 +808,7 @@ void text_out(FILE* fp, char* fname, int less, int itemid)
           else
           {
             printf("      [No Property Stores found in this ITemID. Here is the raw data:]\n");
-            // TODO If there are no Property Stores in this ItemID then print out HEX/ANSI (or both)
-            bin2hex((unsigned char*)&lif.lidl.Items[i].Data, lif.lidl.Items[i].ItemIDSize, 1, 16, 6, 1);
+            bin2hex((unsigned char*)&lif.lidl.Items[i].Data, lif.lidl.Items[i].ItemIDSize, 1, 16, 6, 1, 1);
           }
         }
         printf("    IDList Terminator    2 bytes\n");
@@ -1408,6 +1407,251 @@ void text_out(FILE* fp, char* fname, int less, int itemid)
 }
 
 //
+//Function: xml_out(FILE * fp) processes the link file and outputs the text
+//          version of the decoded data.
+void xml_out(FILE* fp, char* fname, int less, int itemid)
+{
+  struct LIF     lif;
+  struct LIF_A   lif_a;
+  struct stat    statbuf;
+  char           buf[200];
+  int            i, j, k, idpos = 0;
+  struct LIF_PROPERTY_STORE_PROPS  psp;
+  struct LIF_SER_PROPSTORE_A  psa;
+
+  // Get the stat info for the file itself
+  stat(fname, &statbuf);
+
+  if (get_lif(fp, statbuf.st_size, &lif) < 0)
+  {
+    fprintf(stderr, "Error processing file \'%s\' - sorry\n", fname);
+    return;
+  }
+  if (get_lif_a(&lif, &lif_a))
+  {
+    fprintf(stderr, "Could not make ASCII version of \'%s\' - sorry\n", fname);
+    return;
+  }
+
+  if (filecount == 0)
+  {
+    //Print the header
+    printf("<?xml version=\"1.0\" ?>\n");
+    printf("<!-- lifer, a Windows link file analyser. Version %i.%i.%i -->\n", _MAJOR, _MINOR, _BUILD);
+    printf("<LinkFiles>\n");
+  }
+  // Now deal with individual link files
+
+  printf("<LinkFile>\n");
+  // stat data
+  printf("<FileSystemInfo FileName=\"%s\" LinkFileSize=\"%u\">", fname, (unsigned int)statbuf.st_size);
+  printf("<FileTimes>\n");
+  printf("<!-- All times are UTC -->");
+  strftime(buf, 29, "%Y-%m-%d %H:%M:%S", gmtime(&statbuf.st_atime));
+  printf("<LastAccessed>%s</LastAccessed>\n", buf);
+  strftime(buf, 29, "%Y-%m-%d %H:%M:%S", gmtime(&statbuf.st_mtime));
+  printf("<LastModified>%s</LastModified>\n", buf);
+  strftime(buf, 29, "%Y-%m-%d %H:%M:%S", gmtime(&statbuf.st_ctime));
+  printf("<LastChanged>%s</LastChanged>\n", buf);
+  printf("</FileTimes>\n");
+  printf("</FileSystemInfo>\n");
+
+  printf("<EmbeddedInfo\n>");
+  //ShellLinkHeader
+  printf("<ShellLinkHeader Size=\"%s\">\n", lif_a.lha.H_size);
+  if (less == 0)
+  {
+    printf("<CLSID>%s</CLSID>\n", lif_a.lha.CLSID);
+    printf("<Flags>%s</Flags>\n", lif_a.lha.Flags);
+  }
+  printf("<Attributes>%s</Attributes>\n", lif_a.lha.Attr);
+  printf("<TargetTimes>\n");
+  printf("<!-- Times are UTC -->\n");
+  if (less == 0)
+  {
+    printf("<Created>%s</Created>\n", lif_a.lha.CrDate_long);
+    printf("<Accessed>%s</Accessed>\n", lif_a.lha.AcDate_long);
+    printf("<LastWritten>%s</LastWritten>\n", lif_a.lha.WtDate_long);
+  }
+  else
+  {
+    printf("<Created>%s</Created>\n", lif_a.lha.CrDate);
+    printf("<Accessed>%s</Accessed>\n", lif_a.lha.AcDate);
+    printf("<LastWritten>%s</LastWritten>\n", lif_a.lha.WtDate);
+  }
+  printf("</TargetTimes>\n");
+  printf("<TargetFileSize>%s</TargetFileSize>\n", lif_a.lha.Size);
+  if (less == 0) //omit this stuff if short info required
+  {
+    printf("<IconIndex>%s</IconIndex>\n", lif_a.lha.IconIndex);
+    printf("<WindowState>%s</WindowState>\n", lif_a.lha.ShowState);
+    printf("<HotKeys>%s</HotKeys>\n", lif_a.lha.Hotkey);
+    printf("<Reserved1>%s</Reserved1>\n", lif_a.lha.Reserved1);
+    printf("<Reserved2>%s</Reserved2>\n", lif_a.lha.Reserved2);
+    printf("<Reserved3>%s</Reserved3>\n", lif_a.lha.Reserved3);
+  }
+  printf("</ShellLinkHeader>\n");
+
+  // ItemIDList
+  if (lif.lh.Flags & 0x00000001) //If there is an ItemIDList
+  {
+    if (less == 0) //IDLists are not printed if the option is for shortened output
+    {
+      printf("<LinkTargetIDList Size=\"%u\" NumItemIDs=\"%u\">\n", lif.lidl.IDListSize, lif.lidl.NumItemIDs);
+      if (itemid > 0) // If the '-i' option is switched on
+      {
+        idpos = lif.lh.H_size;
+        for (i = 0; i < lif.lidl.NumItemIDs; i++)
+        {
+          printf("<ItemID Num=\"%i\" Size=\"%s\">\n", i + 1, lif_a.lidla.Items[i].ItemIDSize);
+          if (find_propstores((unsigned char*)&lif.lidl.Items[i].Data, lif.lidl.Items[i].ItemIDSize, idpos, &psp) == 0)
+          {
+            // If PropStoreProps exist:
+            printf("<PropStoreProps Size=\"%u\" FileOffset=\"%u\" NumStores=\"%u\">\n", psp.Size, psp.Posn, psp.NumStores);
+            for (j = 0; j < psp.NumStores; j++)
+            {
+              if (get_propstore_a(&psp.Stores[j], &psa) == 0)
+              {
+                printf("<PropertyStore Num=\"%u\" Size=\"%s\">\n", j + 1, psa.StorageSize);
+                printf("<Version>%s</Version>\n", psa.Version);
+                printf("<FormatID>%s</FormatID>\n", psa.FormatID.UUID);
+                printf("<NameType>%s</NameType>\n", psa.NameType);
+                printf("<PropValues NumValues=\"%s\">\n", psa.NumValues);
+                for (k = 0; k < psp.Stores[j].NumValues; k++)
+                {
+                  printf("<Value Num=\"%u\" Size=\"%s\">\n", k + 1, psa.PropValues[k].ValueSize);
+                  if (psp.Stores[j].PropValues[k].ValueSize > 0)
+                  {
+                    if (psp.Stores[j].NameType == 0)
+                    {
+                      printf("<NameSize>%s</NameSize>\n", psa.PropValues[k].NameSizeOrID);
+                      printf("<Name>%s</Name>\n", psa.PropValues[k].Name);
+                    }
+                    else
+                    {
+                      printf("<ID>%s</ID>\n", psa.PropValues[k].NameSizeOrID);
+                    }
+                    printf("<Type>%s</Type>\n", psa.PropValues[k].PropertyType);
+                    printf("<Content><![CDATA[%s]]></Content>\n", psa.PropValues[k].Value);
+                  }
+                  printf("</Value>\n");
+                }
+                printf("</PropValues>\n");
+                printf("</PropertyStore>\n");
+              }
+              else
+              {
+                printf("<!-- Unable to interpret Property Store -->\n", j);
+              }
+            }
+            printf("</PropStoreProps>\n");
+            idpos += lif.lidl.Items[i].ItemIDSize; // point idpos at the start of the next ItemID
+          }
+          else
+          {
+            printf("<!-- No Property Stores found in this ITemID. Here is the raw data -->\n");
+            printf("<![CDATA[\n");
+            bin2hex((unsigned char*)&lif.lidl.Items[i].Data, lif.lidl.Items[i].ItemIDSize, 1, 16, 0, 1, 0);
+            printf("]]>\n");
+            idpos += lif.lidl.Items[i].ItemIDSize; // point idpos at the start of the next ItemID
+          }
+          printf("</ItemID>\n");
+        }
+        printf("<IDListTerminator Size=\"2\"></IDListTerminator>\n");
+      }
+      printf("</LinkTargetIDList>\n");
+    }
+  }
+
+  // LinkInfo
+  //if (lif.lh.Flags & 0x00000002) //If there is a LinkInfo
+  //{
+  //  printf("  {S_2.3 - LinkInfo}\n");
+  //  if (less == 0)
+  //  {
+  //    printf("    Total Size:          %s bytes\n", lif_a.lia.Size);
+  //    printf("    Header Size:         %s bytes\n", lif_a.lia.HeaderSize);
+  //    printf("    Flags:               %s\n", lif_a.lia.Flags);
+  //    printf("    Volume ID Offset:    %s\n", lif_a.lia.IDOffset);
+  //    printf("    Base Path Offset:    %s\n", lif_a.lia.LBPOffset);
+  //    printf("    CNR Link Offset:     %s\n", lif_a.lia.CNRLOffset);
+  //    printf("    CPS Offset:          %s\n", lif_a.lia.CPSOffset);
+  //    printf("    LBP Offset Unicode:  %s\n", lif_a.lia.LBPOffsetU);
+  //    printf("    CPS Offset Unicode:  %s\n", lif_a.lia.CPSOffsetU);
+  //  }
+  //  //There is a Volume ID structure (& LBP)
+  //  if (lif.li.Flags & 0x00000001)
+  //  {
+  //    printf("    {S_2.3.1 - LinkInfo - VolumeID}\n");
+  //    if (less == 0)
+  //    {
+  //      printf("      Vol ID Size:       %s bytes\n", lif_a.lia.VolID.Size);
+  //    }
+  //    printf("      Drive Type:        %s\n", lif_a.lia.VolID.DriveType);
+  //    printf("      Drive Serial No:   %s\n", lif_a.lia.VolID.DriveSN);
+  //    if (less == 0)
+  //    {
+  //      if (!(lif.li.HeaderSize >= 0x00000024))//Which to use?
+  //                                             //ANSI or Unicode versions
+  //      {
+  //        printf("      Vol Label Offset:  %s\n", lif_a.lia.VolID.VLOffset);
+  //      }
+  //      else
+  //      {
+  //        printf("      Vol Label OffsetU: %s\n", lif_a.lia.VolID.VLOffsetU);
+  //      }
+  //    }
+  //    if (!(lif.li.HeaderSize >= 0x00000024))
+  //    {
+  //      printf("      Volume Label:      %s\n", lif_a.lia.VolID.VolumeLabel);
+  //    }
+  //    else
+  //    {
+  //      printf("      Volume LabelU:     %s\n", lif_a.lia.VolID.VolumeLabelU);
+  //    }
+  //    printf("      Local Base Path:   %s\n", lif_a.lia.LBP);
+  //  }//End of VolumeID
+  //   //CommonNetworkRelativeLink
+  //  if (lif.li.Flags & 0x00000002)
+  //  {
+  //    printf("    {S_2.3.2 - LinkInfo - CommonNetworkRelativeLink}\n");
+  //    if (less == 0)
+  //    {
+  //      printf("      CNR Size:          %s\n", lif_a.lia.CNR.Size);
+  //      printf("      Flags:             %s\n", lif_a.lia.CNR.Flags);
+  //      printf("      Net Name Offset:   %s\n", lif_a.lia.CNR.NetNameOffset);
+  //      printf("      Device Name Off:   %s\n", lif_a.lia.CNR.DeviceNameOffset);
+  //    }
+  //    printf("      Net Provider Type: %s\n", lif_a.lia.CNR.NetworkProviderType);
+  //    if ((less == 0) && (lif.li.CNR.NetNameOffset > 0x00000014))
+  //    {
+  //      printf("      Net Name Offset U: %s\n", lif_a.lia.CNR.NetNameOffsetU);
+  //      printf("      Device Name Off U: %s\n", lif_a.lia.CNR.DeviceNameOffsetU);
+  //    }
+  //    printf("      Net Name:          %s\n", lif_a.lia.CNR.NetName);
+  //    printf("      Device Name:       %s\n", lif_a.lia.CNR.DeviceName);
+  //    if (lif.li.CNR.NetNameOffset > 0x00000014)
+  //    {
+  //      printf("      Net Name Unicode:  %s\n", lif_a.lia.CNR.NetNameU);
+  //      printf("      Device Name Uni:   %s\n", lif_a.lia.CNR.DeviceNameU);
+  //    }
+  //    printf("    Common Path Suffix:  %s\n", lif_a.lia.CPS);
+  //  }//End of CNR
+  //  if (lif.li.LBPOffsetU > 0)
+  //  {
+  //    printf("    Local Base Path Uni: %s\n", lif_a.lia.LBPU);
+  //  }
+  //  if (lif.li.CPSOffsetU > 0)
+  //  {
+  //    printf("    Local Base Path Uni: %s\n", lif_a.lia.CPSU);
+  //  }
+  //}//End of Link Info
+
+  printf("</EmbeddedInfo>\n");
+  printf("</LinkFile>\n");
+}
+
+//
 //Function: proc_file() processes regular files
 void proc_file(char* fname, int less, int idlist)
 {
@@ -1437,8 +1681,11 @@ void proc_file(char* fname, int less, int idlist)
         case tsv:
           sv_out(fp, fname, less, '\t'); // Output to a separated file with the separator being a tab
           break;
+        case xml:
+          xml_out(fp, fname, less, idlist);
+          break;
         case txt:
-        default:       //Anything other than these 3 options should have been
+        default:       //Anything other than these 4 options should have been
           //trapped already - this is just belt & braces!
           text_out(fp, fname, less, idlist); // Output to plain text
         }
@@ -1531,10 +1778,10 @@ int main(int argc, char *argv[])
       process = 0;
       break;
     case 's':
-      less++;
+      less = 1;
       break;
     case 'i':
-      idlist++;
+      idlist = 1;
       break;
     case 'o':
       if (strcmp(optarg, "csv") == 0)
@@ -1548,6 +1795,10 @@ int main(int argc, char *argv[])
       else if (strcmp(optarg, "txt") == 0)
       {
         output_type = txt;
+      }
+      else if (strcmp(optarg, "xml") == 0)
+      {
+        output_type = xml;
       }
       else
       {
@@ -1603,6 +1854,11 @@ int main(int argc, char *argv[])
       proc_dir = 1; //Prevent processing of directories after first argument
       //(The default behaviour is to process 1 directory OR
       //several files)
+    }
+    // If the output is XML then we need to make it well-formed and close it off properly
+    if (output_type = xml)
+    {
+      printf("</LinkFiles>\n");
     }
   }
   exit(EXIT_SUCCESS);

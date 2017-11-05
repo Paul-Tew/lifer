@@ -37,6 +37,9 @@
 **              > 0 = output printable ansi characters after  **
 **                    any hex output                          **
 **                                                            **
+** header      == 0 = no header                               **
+**             >0 = print a header so long as cols % 8        **
+**                                                            **
 ***************************************************************/
 
 /*
@@ -66,6 +69,6 @@ along with libbin2hex.  If not, see <http://www.gnu.org/licenses/>.
 #include <malloc.h>
 #include <assert.h>
 
-extern int bin2hex(unsigned char *, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int);
+extern int bin2hex(unsigned char *, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int);
 
 #endif

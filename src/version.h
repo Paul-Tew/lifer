@@ -28,10 +28,10 @@ This file is part of Lifer, a Windows link file analyser.
 */
 
 // These are equivalent to the protocol revision for MS-SHLLINK
-#define _MAJOR  3
+#define _MAJOR  4
 #define _MINOR  0
 // This is my revision number
-#define _BUILD  20 // IDLists without propery stores are printed out as raw hex/ansi
+#define _BUILD  21 // Working on XML output
 // Just the current year
 #define _YEAR   2017
 
@@ -48,6 +48,14 @@ This file is part of Lifer, a Windows link file analyser.
   is hazy (because I only developed the tool for my own use). After
   initiating git and posting the tool to github there is obviously a much
   better recollection ;)
+
+  v4.0.21
+  The start of XML output and alignment with the updated MS-SHLLINK document
+  version 4.0 (Published 2017-09-15)
+
+  v3.0.20
+  Any ItemID objects that don't contain Property Stores are now printed out
+  in Hex/ANSI format so that analysts can view the raw data.
 
   v3.0.18
   Code clean up
@@ -125,6 +133,11 @@ This file is part of Lifer, a Windows link file analyser.
   In truth, I	had made a number of versions that were significantly different
   but with the same version number (poor, I know!) This was a version bump to
   supercede all previous versions.
+  In between I had largely 'cracked' the problem of porting the application to
+  Windows thanks to two crucial projects:
+  1. [dirent] Kevlin Henney
+  2. [getopt] Ludvik Jerabek
+  See README.md for further details
 
   2016 Q4 & 2017 Q1 v1.2.5
   Just tidying up the code so that it is fit to be viewed by the world at
@@ -140,14 +153,13 @@ This file is part of Lifer, a Windows link file analyser.
   upshot is that I finally retire, properly, and start doing things I want
   to do! *One* of these is engaging brain and implementing some of the
   neglected parts of lifer. Mission 1: - learn git because it was written by
-  my hero Linus Torvalds as a result of not having a suitable versioning
-  system for the Linux kernel code. Result of mission: - Linus is WAY
+  my hero Linus Torvalds. Result of mission: - Linus is WAY
   cleverer than me :(
-  Some basic versioning is implemented
+  Some basic versioning is implemented however.
 
   2012 v1.0.2
   Development continued until Oct 2012 at which point I retired from the UK
-  Police The tool lies dormant on my systems at this point.
+  Police. The tool lies dormant on my systems at this point.
 
   2011 Q4? v1.0.0
   You may have gathered that I hadn't incorporated versioning at this stage,

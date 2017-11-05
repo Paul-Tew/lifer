@@ -817,7 +817,7 @@ int get_idlist(FILE * fp, int size, int loc, struct LIF * lif)
         }
         else
         {
-          for (i = 0; (i < datasize) && (i <= MAXITEMIDSIZE); i++)
+          for (i = 0; (i < datasize + 2) && (i <= MAXITEMIDSIZE); i++)
           {
             lif->lidl.Items[numItems].Data[i] = getc(fp);
           }

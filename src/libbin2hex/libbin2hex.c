@@ -37,6 +37,9 @@
 **              > 0 = output printable ansi characters after  **
 **                    any hex output                          **
 **                                                            **
+** header      == 0 = no header                               **
+**             >0 = print a header so long as cols % 8        **
+**                                                            **
 ***************************************************************/
 
 /*
@@ -59,9 +62,9 @@ along with bin2hex.  If not, see <http://www.gnu.org/licenses/>.
 #include "./libbin2hex.h"
 
 
-extern int bin2hex(unsigned char * byte_array, unsigned int size, unsigned int gap, unsigned int cols, unsigned int margin, unsigned int ansi)
+extern int bin2hex(unsigned char * byte_array, unsigned int size, unsigned int gap, unsigned int cols, unsigned int margin, unsigned int ansi, unsigned int hdr)
 {
-  unsigned int i, j, hdr = 0, stringlen = 0, line = 0, numlines = 0, charsinlastline = 0, spaces = 0;
+  unsigned int i, j, stringlen = 0, line = 0, numlines = 0, charsinlastline = 0, spaces = 0;
   char *string, *pad, hex[4], offset[10], printchar[2], ansistr[34];
 
   // Ensure that parameters are within boundaries
@@ -88,9 +91,6 @@ extern int bin2hex(unsigned char * byte_array, unsigned int size, unsigned int g
   }
 #endif
 
-  if ((cols < 33) & (cols % 8 == 0) & (gap > 0)) //Are the number of columns reasonable and divisible by 8 and that there is a gap?
-    hdr = 1; // Turn on the headers if so
-
   stringlen = (gap * cols) + (cols * 2) + margin + (ansi * cols) + 0x20; // determine max length of a line
                                                                          // with (quite) a bit left over for a terminating 0x00 and other stuff
   numlines = size / cols;
@@ -103,7 +103,7 @@ extern int bin2hex(unsigned char * byte_array, unsigned int size, unsigned int g
     return -1;
   }
 
-  if (hdr == 1)
+  if ((cols < 33) & (cols % 8 == 0) & (gap > 0) & (hdr > 0))
   {
     // Build the header string
     snprintf(string, 10 + margin, "%*sOFFSET%*s", margin, "", 3, "");
@@ -115,12 +115,19 @@ extern int bin2hex(unsigned char * byte_array, unsigned int size, unsigned int g
     strcat(string, " ANSI\n");
     // Print the header
     printf("%s", string);
+    // Now underline the header
+    printf("%*s", margin, "");
+    for (j = 0; j < (int)strlen(string); j++)
+    {
+      printf("-");
+    }
+    printf("\n");
   }
 
   while (line < numlines) // line is the number of the whole line we are working on (0 based)
   {
     snprintf(string, margin + 1, "%*s", margin, "");
-    if (hdr == 1)
+    if (hdr > 0)
     {
       snprintf(offset, 10, "%.8"PRIX32" ", line * cols);
       strcat(string, offset);
