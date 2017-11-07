@@ -1646,6 +1646,33 @@ void xml_out(FILE* fp, char* fname, int less, int itemid)
     printf("</LinkInfo>\n");
   }//End of Link Info
 
+   //STRINGDATA
+  if (lif.lh.Flags & 0x0000007C)
+  {
+    printf("<StringData Size=\"%s\">\n", lif_a.lsda.Size);
+    if (lif.lh.Flags & 0x00000004)
+    {
+      printf("<NAME_STRING Characters=\"%s\">%s</NAME_STRING>\n", lif_a.lsda.CountChars[0], lif_a.lsda.Data[0]);
+    }
+    if (lif.lh.Flags & 0x00000008)
+    {
+      printf("<RELATIVE_PATH Characters=\"%s\">%s</RELATIVE_PATH>\n", lif_a.lsda.CountChars[1], lif_a.lsda.Data[1]);
+    }
+    if (lif.lh.Flags & 0x00000010)
+    {
+      printf("<WORKING_DIR Characters=\"%s\">%s</WORKING_DIR>\n", lif_a.lsda.CountChars[2], lif_a.lsda.Data[2]);
+    }
+    if (lif.lh.Flags & 0x00000020)
+    {
+      printf("<COMMAND_LINE_ARGUMENTS Characters=\"%s\">%s</COMMAND_LINE_ARGUMENTS>\n", lif_a.lsda.CountChars[3], lif_a.lsda.Data[3]);
+    }
+    if (lif.lh.Flags & 0x00000040)
+    {
+      printf("<ICON_LOCATION Characters=\"%s\">%s</ICON_LOCATION>\n", lif_a.lsda.CountChars[4], lif_a.lsda.Data[4]);
+    }
+    printf("</StringData>\n");
+  }// End of STRINGDATA
+
   printf("</EmbeddedInfo>\n");
   printf("</LinkFile>\n");
 }
