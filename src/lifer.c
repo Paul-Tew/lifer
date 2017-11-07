@@ -898,7 +898,7 @@ void text_out(FILE* fp, char* fname, int less, int itemid)
     }
     if (lif.li.CPSOffsetU > 0)
     {
-      printf("    Local Base Path Uni: %s\n", lif_a.lia.CPSU);
+      printf("    Common Path Sfx Uni: %s\n", lif_a.lia.CPSU);
     }
   }//End of Link Info
 //STRINGDATA
@@ -1563,89 +1563,88 @@ void xml_out(FILE* fp, char* fname, int less, int itemid)
     }
   }
 
-  // LinkInfo
-  //if (lif.lh.Flags & 0x00000002) //If there is a LinkInfo
-  //{
-  //  printf("  {S_2.3 - LinkInfo}\n");
-  //  if (less == 0)
-  //  {
-  //    printf("    Total Size:          %s bytes\n", lif_a.lia.Size);
-  //    printf("    Header Size:         %s bytes\n", lif_a.lia.HeaderSize);
-  //    printf("    Flags:               %s\n", lif_a.lia.Flags);
-  //    printf("    Volume ID Offset:    %s\n", lif_a.lia.IDOffset);
-  //    printf("    Base Path Offset:    %s\n", lif_a.lia.LBPOffset);
-  //    printf("    CNR Link Offset:     %s\n", lif_a.lia.CNRLOffset);
-  //    printf("    CPS Offset:          %s\n", lif_a.lia.CPSOffset);
-  //    printf("    LBP Offset Unicode:  %s\n", lif_a.lia.LBPOffsetU);
-  //    printf("    CPS Offset Unicode:  %s\n", lif_a.lia.CPSOffsetU);
-  //  }
-  //  //There is a Volume ID structure (& LBP)
-  //  if (lif.li.Flags & 0x00000001)
-  //  {
-  //    printf("    {S_2.3.1 - LinkInfo - VolumeID}\n");
-  //    if (less == 0)
-  //    {
-  //      printf("      Vol ID Size:       %s bytes\n", lif_a.lia.VolID.Size);
-  //    }
-  //    printf("      Drive Type:        %s\n", lif_a.lia.VolID.DriveType);
-  //    printf("      Drive Serial No:   %s\n", lif_a.lia.VolID.DriveSN);
-  //    if (less == 0)
-  //    {
-  //      if (!(lif.li.HeaderSize >= 0x00000024))//Which to use?
-  //                                             //ANSI or Unicode versions
-  //      {
-  //        printf("      Vol Label Offset:  %s\n", lif_a.lia.VolID.VLOffset);
-  //      }
-  //      else
-  //      {
-  //        printf("      Vol Label OffsetU: %s\n", lif_a.lia.VolID.VLOffsetU);
-  //      }
-  //    }
-  //    if (!(lif.li.HeaderSize >= 0x00000024))
-  //    {
-  //      printf("      Volume Label:      %s\n", lif_a.lia.VolID.VolumeLabel);
-  //    }
-  //    else
-  //    {
-  //      printf("      Volume LabelU:     %s\n", lif_a.lia.VolID.VolumeLabelU);
-  //    }
-  //    printf("      Local Base Path:   %s\n", lif_a.lia.LBP);
-  //  }//End of VolumeID
-  //   //CommonNetworkRelativeLink
-  //  if (lif.li.Flags & 0x00000002)
-  //  {
-  //    printf("    {S_2.3.2 - LinkInfo - CommonNetworkRelativeLink}\n");
-  //    if (less == 0)
-  //    {
-  //      printf("      CNR Size:          %s\n", lif_a.lia.CNR.Size);
-  //      printf("      Flags:             %s\n", lif_a.lia.CNR.Flags);
-  //      printf("      Net Name Offset:   %s\n", lif_a.lia.CNR.NetNameOffset);
-  //      printf("      Device Name Off:   %s\n", lif_a.lia.CNR.DeviceNameOffset);
-  //    }
-  //    printf("      Net Provider Type: %s\n", lif_a.lia.CNR.NetworkProviderType);
-  //    if ((less == 0) && (lif.li.CNR.NetNameOffset > 0x00000014))
-  //    {
-  //      printf("      Net Name Offset U: %s\n", lif_a.lia.CNR.NetNameOffsetU);
-  //      printf("      Device Name Off U: %s\n", lif_a.lia.CNR.DeviceNameOffsetU);
-  //    }
-  //    printf("      Net Name:          %s\n", lif_a.lia.CNR.NetName);
-  //    printf("      Device Name:       %s\n", lif_a.lia.CNR.DeviceName);
-  //    if (lif.li.CNR.NetNameOffset > 0x00000014)
-  //    {
-  //      printf("      Net Name Unicode:  %s\n", lif_a.lia.CNR.NetNameU);
-  //      printf("      Device Name Uni:   %s\n", lif_a.lia.CNR.DeviceNameU);
-  //    }
-  //    printf("    Common Path Suffix:  %s\n", lif_a.lia.CPS);
-  //  }//End of CNR
-  //  if (lif.li.LBPOffsetU > 0)
-  //  {
-  //    printf("    Local Base Path Uni: %s\n", lif_a.lia.LBPU);
-  //  }
-  //  if (lif.li.CPSOffsetU > 0)
-  //  {
-  //    printf("    Local Base Path Uni: %s\n", lif_a.lia.CPSU);
-  //  }
-  //}//End of Link Info
+  //LinkInfo
+  if (lif.lh.Flags & 0x00000002) //If there is a LinkInfo
+  {
+    printf("<LinkInfo Size=\"%s\">\n", lif_a.lia.Size);
+    if (less == 0)
+    {
+      printf("<LinkInfoHeader Size=\"%s\">\n", lif_a.lia.HeaderSize);
+      printf("<Flags>%s</Flags>\n", lif_a.lia.Flags);
+      printf("<VolumeIDOffset>%s</VolumeIDOffset>\n", lif_a.lia.IDOffset);
+      printf("<BasePathOffset>%s</BasePathOffset>\n", lif_a.lia.LBPOffset);
+      printf("<CNRLinkOffset>%s</CNRLinkOffset>\n", lif_a.lia.CNRLOffset);
+      printf("<CPSOffset>%s</CPSOffset>\n", lif_a.lia.CPSOffset);
+      printf("<LBPOffsetUnicode>%s</LBPOffsetUnicode>\n", lif_a.lia.LBPOffsetU);
+      printf("<CPSOffsetUnicode>%s</CPSOffsetUnicode>\n", lif_a.lia.CPSOffsetU);
+      printf("</LinkInfoHeader>\n");
+    }
+    //There is a Volume ID structure (& LBP)
+    if (lif.li.Flags & 0x00000001)
+    {
+      printf("<VolumeID Size=\"%s\">\n", lif_a.lia.VolID.Size);
+      printf("<DriveType>%s</DriveType>\n", lif_a.lia.VolID.DriveType);
+      printf("<DriveSerialNo>%s</DriveSerialNo>\n", lif_a.lia.VolID.DriveSN);
+      if (less == 0)
+      {
+        if (!(lif.li.HeaderSize >= 0x00000024))//Which to use?
+                                               //ANSI or Unicode versions
+        {
+          printf("<VolLabelOffset>%s</VolLabelOffset>\n", lif_a.lia.VolID.VLOffset);
+        }
+        else
+        {
+          printf("<VolLabelOffsetUnicode>%s</VolLabelOffsetUnicode>\n", lif_a.lia.VolID.VLOffsetU);
+        }
+      }
+      if (!(lif.li.HeaderSize >= 0x00000024))
+      {
+        printf("<VolumeLabel>%s</VolumeLabel>\n", lif_a.lia.VolID.VolumeLabel);
+      }
+      else
+      {
+        printf("<VolumeLabelUnicode>%s</VolumeLabelUnicode>\n", lif_a.lia.VolID.VolumeLabelU);
+      }
+      printf("<LocalBasePath>%s</LocalBasePath>\n", lif_a.lia.LBP);
+      printf("</VolumeID>\n");
+    }//End of VolumeID
+     //CommonNetworkRelativeLink
+    if (lif.li.Flags & 0x00000002)
+    {
+      printf("<CommonNetworkRelativeLink Size=\"%s\">\n", lif_a.lia.CNR.Size);
+      if (less == 0)
+      {
+        printf("<Flags>%s</Flags>\n", lif_a.lia.CNR.Flags);
+        printf("<NetNameOffset>%s</NetNameOffset>\n", lif_a.lia.CNR.NetNameOffset);
+        printf("<DeviceNameOffset>%s</DeviceNameOffset>\n", lif_a.lia.CNR.DeviceNameOffset);
+      }
+      printf("<NetProviderType>%s</NetProviderType>\n", lif_a.lia.CNR.NetworkProviderType);
+      if ((less == 0) && (lif.li.CNR.NetNameOffset > 0x00000014))
+      {
+        printf("<NetNameOffsetUnicode>%s</NetNameOffsetUnicode>\n", lif_a.lia.CNR.NetNameOffsetU);
+        printf("<DeviceNameOffsetUnicode>%s</DeviceNameOffsetUnicode>\n", lif_a.lia.CNR.DeviceNameOffsetU);
+      }
+      printf("<NetName>%s</NetName>\n", lif_a.lia.CNR.NetName);
+      printf("<DeviceName>%s</DeviceName>\n", lif_a.lia.CNR.DeviceName);
+      if (lif.li.CNR.NetNameOffset > 0x00000014)
+      {
+        printf("<NetNameUnicode>%s</NetNameUnicode>\n", lif_a.lia.CNR.NetNameU);
+        printf("<DeviceNameUnicode>%s</DeviceNameUnicode>\n", lif_a.lia.CNR.DeviceNameU);
+      }
+      printf("<CommonPathSuffix>%s</CommonPathSuffix>\n", lif_a.lia.CPS);
+
+      printf("</CommonNetworkRelativeLink>\n");
+    }
+    if (lif.li.LBPOffsetU > 0)
+    {
+      printf("<LocalBasePathUnicode>%s\n", lif_a.lia.LBPU);
+    }
+    if (lif.li.CPSOffsetU > 0)
+    {
+      printf("<CommonPathSuffixUnicode>%s</CommonPathSuffixUnicode>\n", lif_a.lia.CPSU);
+    }
+    printf("</LinkInfo>\n");
+  }//End of Link Info
 
   printf("</EmbeddedInfo>\n");
   printf("</LinkFile>\n");
