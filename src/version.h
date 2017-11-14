@@ -31,7 +31,7 @@ This file is part of Lifer, a Windows link file analyser.
 #define _MAJOR  4
 #define _MINOR  0
 // This is my revision number
-#define _BUILD  21 // Working on XML output
+#define _BUILD  22 // Now has XML output
 // Just the current year
 #define _YEAR   2017
 
@@ -48,6 +48,9 @@ This file is part of Lifer, a Windows link file analyser.
   is hazy (because I only developed the tool for my own use). After
   initiating git and posting the tool to github there is obviously a much
   better recollection ;)
+
+  v4.0.22
+  XML output and bug fixes
 
   v4.0.21
   The start of XML output and alignment with the updated MS-SHLLINK document
@@ -113,8 +116,8 @@ This file is part of Lifer, a Windows link file analyser.
   Just a version bump as a test.
   
   v3.0.1
-    The first attempt to bring lifer (as it stands) in line with the current
-    version of MS-SHLLINK. Actually not much changes except some of the names
+  The first attempt to bring lifer (as it stands) in line with the current
+  version of MS-SHLLINK. Actually not much changes except some of the names
   of previously capitalized constants are slightly changed and made
   mixed-case.
   

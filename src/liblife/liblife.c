@@ -436,8 +436,8 @@ extern int get_propstore_a(struct LIF_SER_PROPSTORE * ps, struct LIF_SER_PROPSTO
         break;
       case VT_DECIMAL:  // Not tested
         strcat((char *)psa->PropValues[j].PropertyType, " VT_DECIMAL");
-        decimalscale = (uint8_t)psa->PropValues[j].Value[2]; // First two bytes are reserved
-        decimalsign = (uint8_t)psa->PropValues[j].Value[3];
+        decimalscale = (uint8_t)ps->PropValues[j].Value[2]; // First two bytes are reserved
+        decimalsign = (uint8_t)ps->PropValues[j].Value[3];
         decimalHi32 = get_le_uint32(ps->PropValues[j].Value, 4);
         decimalLo64 = get_le_uint64(ps->PropValues[j].Value, 8);
         if (decimalsign == 0)
@@ -456,27 +456,27 @@ extern int get_propstore_a(struct LIF_SER_PROPSTORE * ps, struct LIF_SER_PROPSTO
         break;
       case VT_I1:  // Not tested
         strcat((char *)psa->PropValues[j].PropertyType, " VT_I1");
-        integer8 = (int8_t)psa->PropValues[j].Value[0];
+        integer8 = (int8_t)ps->PropValues[j].Value[0];
         snprintf((char *)psa->PropValues[j].Value, 50, "0x%.2"PRIX8" (%"PRIi8")", integer8, integer8);
         break;
       case VT_UI1:  // Not tested
         strcat((char *)psa->PropValues[j].PropertyType, " VT_UI1");
-        uinteger8 = (uint8_t)psa->PropValues[j].Value[0];
+        uinteger8 = (uint8_t)ps->PropValues[j].Value[0];
         snprintf((char *)psa->PropValues[j].Value, 50, "0x%.2"PRIX8" (%"PRIu8")", uinteger8, uinteger8);
         break;
       case VT_UI2:  // Not tested
         strcat((char *)psa->PropValues[j].PropertyType, " VT_UI2");
-        uinteger16 = get_le_uint16(psa->PropValues[j].Value, 0);
+        uinteger16 = get_le_uint16(ps->PropValues[j].Value, 0);
         snprintf((char *)psa->PropValues[j].Value, 50, "0x%.4"PRIX16" (%"PRIu16")", uinteger16, uinteger16);
         break;
       case VT_UI4:
         strcat((char *)psa->PropValues[j].PropertyType, " VT_UI4");
-        uinteger32 = get_le_uint32(psa->PropValues[j].Value, 0);
+        uinteger32 = get_le_uint32(ps->PropValues[j].Value, 0);
         snprintf((char *)psa->PropValues[j].Value, 50, "0x%.8"PRIX32" (%"PRIu32")", uinteger32, uinteger32);
         break;
       case VT_I8:  // Not tested
         strcat((char *)psa->PropValues[j].PropertyType, " VT_I8");
-        integer64 = get_le_uint64(ps->PropValues[j].Value, 0);
+        integer64 = get_le_int64(ps->PropValues[j].Value, 0);
         snprintf((char *)psa->PropValues[j].Value, 80, "0x%.16"PRIX64" (%"PRIi64")", integer64, integer64);
         break;
       case VT_UI8:
@@ -491,7 +491,7 @@ extern int get_propstore_a(struct LIF_SER_PROPSTORE * ps, struct LIF_SER_PROPSTO
         break;
       case VT_UINT:  // Not tested
         strcat((char *)psa->PropValues[j].PropertyType, " VT_UINT");
-        uinteger32 = get_le_uint32(psa->PropValues[j].Value, 0);
+        uinteger32 = get_le_uint32(ps->PropValues[j].Value, 0);
         snprintf((char *)psa->PropValues[j].Value, 50, "0x%.8"PRIX32" (%"PRIu32")", uinteger32, uinteger32);
         break;
       case VT_LPSTR:  // Because the definition is CodePageString this could be Unicode

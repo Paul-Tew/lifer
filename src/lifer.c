@@ -75,7 +75,7 @@ void help_message()
   printf("  -v    print version number\n");
   printf("  -h    print this help\n");
   printf("  -s    shortened output (default is to output all fields)\n");
-  printf("  -o    output type (choose from csv, tsv or txt). \n");
+  printf("  -o    output type (choose from csv, tsv, txt or xml). \n");
   printf("        The default is txt.\n");
   printf("  -i    print idlist information (only with output type: 'txt' or 'xml')\n\n");
   printf("Output is to standard output, therefore to send to a file, use the\n");
@@ -1258,7 +1258,7 @@ void text_out(FILE* fp, char* fname, int less, int itemid)
       printf("      File Offset:       %s bytes\n", lif_a.leda.lspa.Posn);
       printf("      BlockSize:         %s bytes\n", lif_a.leda.lspa.Size);
       printf("      BlockSignature:    %s\n", lif_a.leda.lspa.sig);
-      printf("      Number of Stores:  %s\n", lif_a.leda.lspa.LayerName);
+      printf("      Layer Name:        %s\n", lif_a.leda.lspa.LayerName);
     }
   }
   if (lif.led.edtypes & SPECIAL_FOLDER_PROPS)
@@ -1444,9 +1444,9 @@ void xml_out(FILE* fp, char* fname, int less, int itemid)
 
   printf("<LinkFile>\n");
   // stat data
-  printf("<FileSystemInfo FileName=\"%s\" LinkFileSize=\"%u\">", fname, (unsigned int)statbuf.st_size);
+  printf("<FileSystemInfo FileName=\"%s\" LinkFileSize=\"%u\">\n", fname, (unsigned int)statbuf.st_size);
   printf("<FileTimes>\n");
-  printf("<!-- All times are UTC -->");
+  printf("<!-- All times are UTC -->\n");
   strftime(buf, 29, "%Y-%m-%d %H:%M:%S", gmtime(&statbuf.st_atime));
   printf("<LastAccessed>%s</LastAccessed>\n", buf);
   strftime(buf, 29, "%Y-%m-%d %H:%M:%S", gmtime(&statbuf.st_mtime));
@@ -1456,7 +1456,7 @@ void xml_out(FILE* fp, char* fname, int less, int itemid)
   printf("</FileTimes>\n");
   printf("</FileSystemInfo>\n");
 
-  printf("<EmbeddedInfo\n>");
+  printf("<EmbeddedInfo>\n");
   //ShellLinkHeader
   printf("<ShellLinkHeader Size=\"%s\">\n", lif_a.lha.H_size);
   if (less == 0)
@@ -1541,7 +1541,7 @@ void xml_out(FILE* fp, char* fname, int less, int itemid)
               }
               else
               {
-                printf("<!-- Unable to interpret Property Store -->\n", j);
+                printf("<!-- Unable to interpret Property Store %i -->\n", j);
               }
             }
             printf("</PropStoreProps>\n");
@@ -1672,6 +1672,443 @@ void xml_out(FILE* fp, char* fname, int less, int itemid)
     }
     printf("</StringData>\n");
   }// End of STRINGDATA
+
+  //EXTRADATA
+  printf("<ExtraData Size=\"%s\" EDStructures=\"%s\">\n", lif_a.leda.Size, lif_a.leda.edtypes);
+  if (lif.led.edtypes & CONSOLE_PROPS)
+  {
+    printf("<ConsoleDataBlock FileOffset=\"%s\" Size=\"%s\">\n", lif_a.leda.lcpa.Posn, lif_a.leda.lcpa.Size);
+    if (less == 0)
+    {
+      printf("<BlockSignature>%s</BlockSignature>\n", lif_a.leda.lcpa.sig);
+      //Build the FillAttributes string
+      buf[0] = (char)0;
+      if (lif.led.lcp.FillAttributes & 0x0001) strncat(buf, "FOREGROUND_BLUE | ", 18);
+      if (lif.led.lcp.FillAttributes & 0x0002) strncat(buf, "FOREGROUND_GREEN | ", 19);
+      if (lif.led.lcp.FillAttributes & 0x0004) strncat(buf, "FOREGROUND_RED | ", 17);
+      if (lif.led.lcp.FillAttributes & 0x0008) strncat(buf, "FOREGROUND_INTENSITY | ", 23);
+      if (lif.led.lcp.FillAttributes & 0x0010) strncat(buf, "BACKGROUND_BLUE | ", 18);
+      if (lif.led.lcp.FillAttributes & 0x0020) strncat(buf, "BACKGROUND_GREEN | ", 19);
+      if (lif.led.lcp.FillAttributes & 0x0040) strncat(buf, "BACKGROUND_RED | ", 17);
+      if (lif.led.lcp.FillAttributes & 0x0080) strncat(buf, "BACKGROUND_INTENSITY | ", 23);
+      i = strlen(buf);
+      if (i > 2)
+      {
+        buf[i - 3] = (unsigned char)0; // Remove the last pipe character
+      }
+      else
+      {
+        snprintf(buf, 300, "[NONE]");
+      }
+      printf("<FillAttributes>%s  %s</FillAttributes>\n", lif_a.leda.lcpa.FillAttributes, buf);
+      buf[0] = (char)0;
+      if (lif.led.lcp.PopupFillAttributes & 0x0001) strncat(buf, "FOREGROUND_BLUE | ", 18);
+      if (lif.led.lcp.PopupFillAttributes & 0x0002) strncat(buf, "FOREGROUND_GREEN | ", 19);
+      if (lif.led.lcp.PopupFillAttributes & 0x0004) strncat(buf, "FOREGROUND_RED | ", 17);
+      if (lif.led.lcp.PopupFillAttributes & 0x0008) strncat(buf, "FOREGROUND_INTENSITY | ", 23);
+      if (lif.led.lcp.PopupFillAttributes & 0x0010) strncat(buf, "BACKGROUND_BLUE | ", 18);
+      if (lif.led.lcp.PopupFillAttributes & 0x0020) strncat(buf, "BACKGROUND_GREEN | ", 19);
+      if (lif.led.lcp.PopupFillAttributes & 0x0040) strncat(buf, "BACKGROUND_RED | ", 17);
+      if (lif.led.lcp.PopupFillAttributes & 0x0080) strncat(buf, "BACKGROUND_INTENSITY | ", 23);
+      i = strlen(buf);
+      if (i > 2)
+      {
+        buf[i - 3] = (unsigned char)0; // Remove the last pipe character
+      }
+      else
+      {
+        snprintf(buf, 300, "[NONE]");
+      }
+      printf("<PopupFillAttributes>%s  %s</PopupFillAttributes>\n", lif_a.leda.lcpa.PopupFillAttributes, buf);
+      printf("<ScreenBufSizeX>%s</ScreenBufSizeX>\n", lif_a.leda.lcpa.ScreenBufferSizeX);
+      printf("<ScreenBufSizeY>%s</ScreenBufSizeY>\n", lif_a.leda.lcpa.ScreenBufferSizeY);
+      printf("<WindowSizeX>%s</WindowSizeX>\n", lif_a.leda.lcpa.WindowSizeX);
+      printf("<WindowSizeY>%s</WindowSizeY>\n", lif_a.leda.lcpa.WindowSizeY);
+      printf("<WindowOriginX>%s</WindowOriginX>\n", lif_a.leda.lcpa.WindowOriginX);
+      printf("<WindowOriginY>%s</WindowOriginY>\n", lif_a.leda.lcpa.WindowOriginY);
+      printf("<Unused1>%s</Unused1>\n", lif_a.leda.lcpa.Unused1);
+      printf("<Unused2>%s</Unused2>\n", lif_a.leda.lcpa.Unused2);
+      printf("<FontSize>%s</FontSize>\n", lif_a.leda.lcpa.FontSize);
+      buf[0] = (char)0;
+      switch (lif.led.lcp.FontFamily)
+      {
+      case 0x0000:
+        strncat(buf, "FF_DONTCARE", 11);
+        break;
+      case 0x0010:
+        strncat(buf, "FF_ROMAN", 8);
+        break;
+      case 0x0020:
+        strncat(buf, "FF_SWISS", 8);
+        break;
+      case 0x0030:
+        strncat(buf, "FF_MODERN", 9);
+        break;
+      case 0x0040:
+        strncat(buf, "FF_SCRIPT", 9);
+        break;
+      case 0x0050:
+        strncat(buf, "FF_DECORATIVE", 13);
+        break;
+      default:
+        strncat(buf, "UNKNOWN (Not allowed in specification)", 39);
+      }
+      printf("<FontFamily>%s  %s</FontFamily>\n", lif_a.leda.lcpa.FontFamily, buf);
+      buf[0] = (char)0;
+      if (lif.led.lcp.FontWeight < 700)
+      {
+        strncat(buf, "A regular-weight font", 21);
+      }
+      else
+      {
+        strncat(buf, "A bold font", 11);
+      }
+      printf("<FontWeight>%s  %s</FontWeight>\n", lif_a.leda.lcpa.FontWeight, buf);
+      printf("<FaceName>%s</FaceName>\n", lif_a.leda.lcpa.FaceName);
+      buf[0] = (char)0;
+      if (lif.led.lcp.CursorSize <= 25)
+      {
+        strncat(buf, "A small cursor", 14);
+      }
+      else if ((lif.led.lcp.CursorSize > 25) & (lif.led.lcp.CursorSize <= 50))
+      {
+        strncat(buf, "A medium cursor", 15);
+      }
+      else if ((lif.led.lcp.CursorSize > 50) & (lif.led.lcp.CursorSize <= 100))
+      {
+        strncat(buf, "A large cursor", 14);
+      }
+      else
+      {
+        strncat(buf, "An undefined cursor size", 25);
+      }
+      printf("<CursorSize>%s  %s</CursorSize>\n", lif_a.leda.lcpa.CursorSize, buf);
+      buf[0] = (char)0;
+      if (lif.led.lcp.FullScreen == 0)
+      {
+        strncat(buf, "Off", 3);
+      }
+      else
+      {
+        strncat(buf, "On", 2);
+      }
+      printf("<FullScreen>%s  %s</FullScreen>\n", lif_a.leda.lcpa.FullScreen, buf);
+      buf[0] = (char)0;
+      if (lif.led.lcp.QuickEdit == 0)
+      {
+        strncat(buf, "Off", 3);
+      }
+      else
+      {
+        strncat(buf, "On", 2);
+      }
+      printf("<QuickEdit>%s  %s</QuickEdit>\n", lif_a.leda.lcpa.QuickEdit, buf);
+      buf[0] = (char)0;
+      if (lif.led.lcp.InsertMode == 0)
+      {
+        strncat(buf, "Disabled", 8);
+      }
+      else
+      {
+        strncat(buf, "Enabled", 7);
+      }
+      printf("<InsertMode>%s  %s</InsertMode>\n", lif_a.leda.lcpa.InsertMode, buf);
+      buf[0] = (char)0;
+      if (lif.led.lcp.AutoPosition == 0)
+      {
+        strncat(buf, "Off", 20);
+      }
+      else
+      {
+        strncat(buf, "On", 19);
+      }
+      printf("<AutoPosition>%s  %s</AutoPosition>\n", lif_a.leda.lcpa.AutoPosition, buf);
+      printf("<HistoryBufferSize>%s</HistoryBufferSize>\n", lif_a.leda.lcpa.HistoryBufferSize);
+      printf("<NumberOfHistoryBuffers>%s</NumberOfHistoryBuffers>\n", lif_a.leda.lcpa.NumberOfHistoryBuffers);
+      buf[0] = (char)0;
+      if (lif.led.lcp.HistoryNoDup == 0)
+      {
+        strncat(buf, "Duplicates not allowed", 22);
+      }
+      else
+      {
+        strncat(buf, "Duplicates allowed", 18);
+      }
+      printf("<HistoryNoDuplicates>%s  %s</HistoryNoDuplicates>\n", lif_a.leda.lcpa.HistoryNoDup, buf);
+      printf("<ColorTable>\n");
+      printf("%s %s %s %s\n", lif_a.leda.lcpa.ColorTable[0],
+        lif_a.leda.lcpa.ColorTable[1],
+        lif_a.leda.lcpa.ColorTable[2],
+        lif_a.leda.lcpa.ColorTable[3]);
+      printf("%s %s %s %s\n", lif_a.leda.lcpa.ColorTable[4],
+        lif_a.leda.lcpa.ColorTable[5],
+        lif_a.leda.lcpa.ColorTable[6],
+        lif_a.leda.lcpa.ColorTable[7]);
+      printf("%s %s %s %s\n", lif_a.leda.lcpa.ColorTable[8],
+        lif_a.leda.lcpa.ColorTable[9],
+        lif_a.leda.lcpa.ColorTable[10],
+        lif_a.leda.lcpa.ColorTable[11]);
+      printf("%s %s %s %s\n", lif_a.leda.lcpa.ColorTable[12],
+        lif_a.leda.lcpa.ColorTable[13],
+        lif_a.leda.lcpa.ColorTable[14],
+        lif_a.leda.lcpa.ColorTable[15]);
+      printf("</ColorTable>\n");
+    }
+    printf("</ConsoleDataBlock>\n");
+  }
+  if (lif.led.edtypes & CONSOLE_FE_PROPS)
+  {
+    printf("<ConsoleFEDataBlock FileOffset=\"%s\" Size=\"%s\">\n", lif_a.leda.lcfepa.Posn, lif_a.leda.lcfepa.Size);
+    if (less == 0)
+    {
+      printf("<BlockSignature>%s</BlockSignature>\n", lif_a.leda.lcfepa.sig);
+    }
+    printf("<CodePage>%s</CodePage>\n", lif_a.leda.lcfepa.CodePage);
+    printf("</ConsoleFEDataBlock>\n");
+  }
+  if (lif.led.edtypes & DARWIN_PROPS)
+  {
+    printf("<DarwinDataBlock FileOffset=\"%s\" Size=\"%s\">\n", lif_a.leda.ldpa.Posn, lif_a.leda.ldpa.Size);
+    if (less == 0)
+    {
+      printf("<BlockSignature>%s</BlockSignature>\n", lif_a.leda.ldpa.sig);
+    }
+    printf("<DarwinDataAnsi><![CDATA[%s]]></DarwinDataAnsi>\n", lif_a.leda.ldpa.DarwinDataAnsi);
+    printf("<DarwinDataUnicode><![CDATA[%s]]></DarwinDataUnicode>\n", lif_a.leda.ldpa.DarwinDataUnicode);
+    printf("</DarwinDataBlock>\n");
+  }
+  if (lif.led.edtypes & ENVIRONMENT_PROPS)
+  {
+    printf("<EnvironmentVariableDataBlock FileOffset=\"%s\" Size=\"%s\">\n", lif_a.leda.lepa.Posn, lif_a.leda.lepa.Size);
+    if (less == 0)
+    {
+      printf("<BlockSignature>%s</BlockSignature>\n", lif_a.leda.lepa.sig);
+    }
+    printf("<TargetAnsi><![CDATA[%s]]></TargetAnsi>\n", lif_a.leda.lepa.TargetAnsi);
+    printf("<TargetUnicode><![CDATA[%s]]></TargetUnicode>\n", lif_a.leda.lepa.TargetUnicode);
+    printf("</EnvironmentVariableDataBlock>\n");
+  }
+  if (lif.led.edtypes & ICON_ENVIRONMENT_PROPS)
+  {
+    printf("<IconEnvironmentDataBlock FileOffset=\"%s\" Size=\"%s\">\n", lif_a.leda.liepa.Posn, lif_a.leda.liepa.Size);
+    if (less == 0)
+    {
+      printf("<BlockSignature>%s</BlockSignature>\n", lif_a.leda.liepa.sig);
+    }
+    printf("<TargetAnsi><![CDATA[%s]]></TargetAnsi>\n", lif_a.leda.liepa.TargetAnsi);
+    printf("<TargetUnicode><![CDATA[%s]]></TargetUnicode>\n", lif_a.leda.liepa.TargetUnicode);
+    printf("</IconEnvironmentDataBlock>\n");
+  }
+  if (lif.led.edtypes & KNOWN_FOLDER_PROPS)
+  {
+    //printf("<KnownFolderDataBlock FileOffset=\"%s\" Size=\"%s\">\n", lif_a.leda.lkfpa.Posn, lif_a.leda.lkfpa.Size);
+    if (less == 0)
+    {
+      printf("<BlockSignature>%s</BlockSignature>\n", lif_a.leda.lkfpa.sig);
+    }
+    printf("<KnownFolderID><![CDATA[%s]]></KnownFolderID>\n", lif_a.leda.lkfpa.KFGUID.UUID);
+    if (less == 0)
+    {
+      printf("<LocalOffset>%s</LocalOffset>\n", lif_a.leda.lkfpa.KFOffset);
+    }
+  }
+  if (lif.led.edtypes & PROPERTY_STORE_PROPS)
+  {
+    printf("<PropertyStoreDataBlock FileOffset=\"%s\" Size=\"%s\" NumStores=\"%s\">\n", lif_a.leda.lpspa.Posn, lif_a.leda.lpspa.Size, lif_a.leda.lpspa.NumStores);
+    if (less == 0)
+    {
+      printf("<BlockSignature>%s</BlockSignature>\n", lif_a.leda.lpspa.sig);
+      for (i = 0; i < lif.led.lpsp.NumStores; i++)
+      {
+        printf("<PropertyStore Size=\"%s\" NumValues=\"%s\">\n", lif_a.leda.lpspa.Stores[i].StorageSize, lif_a.leda.lpspa.Stores[i].NumValues);
+        printf("<Version>%s</Version>\n", lif_a.leda.lpspa.Stores[i].Version);
+        printf("<FormatID>%s</FormatID>\n", lif_a.leda.lpspa.Stores[i].FormatID.UUID);
+        printf("<NameType>%s</NameType>\n", lif_a.leda.lpspa.Stores[i].NameType);
+        for (j = 0; j < lif.led.lpsp.Stores[i].NumValues; j++)
+        {
+          printf("<PropertyValue Size=\"%s\">\n", lif_a.leda.lpspa.Stores[i].PropValues[j].ValueSize);
+          if (lif.led.lpsp.Stores[i].PropValues[j].ValueSize > 0)
+          {
+            if (lif.led.lpsp.Stores[i].NameType == 0)
+            {
+              printf("<NameSize>%s</NameSize>\n", lif_a.leda.lpspa.Stores[i].PropValues[j].NameSizeOrID);
+              printf("<Name>%s</Name>\n", lif_a.leda.lpspa.Stores[i].PropValues[j].Name);
+            }
+            else
+            {
+              printf("<ID>%s</ID>\n", lif_a.leda.lpspa.Stores[i].PropValues[j].NameSizeOrID);
+            }
+            printf("<PropertyType>%s</PropertyType>\n", lif_a.leda.lpspa.Stores[i].PropValues[j].PropertyType);
+            printf("<Value><![CDATA[%s]]></Value>\n", lif_a.leda.lpspa.Stores[i].PropValues[j].Value);
+          }
+          printf("</PropertyValue>\n");
+        }
+        printf("</PropertyStore>\n");
+      }
+    }
+    printf("</PropertyStoreDataBlock>");
+  }
+
+  if (lif.led.edtypes & SHIM_PROPS)
+  {
+    printf("<ShimDataBlock FileOffset=\"%s\" Size=\"%s\">\n", lif_a.leda.lspa.Posn, lif_a.leda.lspa.Size);
+    if (less == 0)
+    {
+      printf("<BlockSignature>%s</BlockSignature>\n", lif_a.leda.lspa.sig);
+      printf("<LayerName>%s</LayerName>\n", lif_a.leda.lspa.LayerName);
+    }
+    printf("</ShimDataBlock>\n");
+  }
+
+  if (lif.led.edtypes & SPECIAL_FOLDER_PROPS)
+  {
+    printf("<SpecialFolderDataBlock FileOffset=\"%s\" Size=\"%s\">\n", lif_a.leda.lsfpa.Posn, lif_a.leda.lsfpa.Size);
+    if (less == 0)
+    {
+      printf("<BlockSignature>%s</BlockSignature>\n", lif_a.leda.lsfpa.sig);
+      printf("<FolderID>%s</FolderID>\n", lif_a.leda.lsfpa.SpecialFolderID);
+      printf("<Offset>%s</Offset>\n", lif_a.leda.lsfpa.Offset);
+    }
+    printf("</SpecialFolderDataBlock>\n");
+  }
+
+  if (lif.led.edtypes & TRACKER_PROPS)
+  {
+    printf("<TrackerDataBlock FileOffset=\"%s\" Size=\"%s\">\n", lif_a.leda.ltpa.Posn, lif_a.leda.ltpa.Size);
+    if (less == 0)
+    {
+      printf("<BlockSignature>%s</BlockSignature>\n", lif_a.leda.ltpa.sig);
+      printf("<Length>%s</Length>\n", lif_a.leda.ltpa.Length);
+      printf("<Version>%s</Version>\n", lif_a.leda.ltpa.Version);
+    }
+    printf("<MachineID>%s</MachineID>\n", lif_a.leda.ltpa.MachineID);
+    printf("<Droid1>\n");
+    printf("<UUID>\n%s\n", lif_a.leda.ltpa.Droid1.UUID);
+    if (less == 0)
+    {
+      printf("<Version>%s</Version>\n", lif_a.leda.ltpa.Droid1.Version);
+      printf("<Variant>%s</Variant>\n", lif_a.leda.ltpa.Droid1.Variant);
+    }
+    if ((lif_a.leda.ltpa.Droid1.Version[0] == '1')
+      & (lif_a.leda.ltpa.Droid1.Version[1] == ' '))
+    {
+      printf("<Sequence>%s</Sequence>\n",
+        lif_a.leda.ltpa.Droid1.ClockSeq);
+      if (less == 0)
+      {
+        printf("<Time>%s</Time>\n",
+          lif_a.leda.ltpa.Droid1.Time_long);
+      }
+      else
+      {
+        printf("<Time>%s</Time>\n", lif_a.leda.ltpa.Droid1.Time);
+      }
+      printf("<Node><!-- Mac Address -->%s</Node>\n",
+        lif_a.leda.ltpa.Droid1.Node);
+    }
+    printf("</UUID>\n");
+    printf("</Droid1>\n");
+
+    printf("<Droid2>\n");
+    printf("<UUID>\n%s\n", lif_a.leda.ltpa.Droid2.UUID);
+    if (less == 0)
+    {
+      printf("<Version>%s</Version>\n", lif_a.leda.ltpa.Droid2.Version);
+      printf("<Variant>%s</Variant>\n", lif_a.leda.ltpa.Droid2.Variant);
+    }
+    if ((lif_a.leda.ltpa.Droid2.Version[0] == '1')
+      & (lif_a.leda.ltpa.Droid2.Version[1] == ' '))
+    {
+      printf("<Sequence>%s</Sequence>\n",
+        lif_a.leda.ltpa.Droid2.ClockSeq);
+      if (less == 0)
+      {
+        printf("<Time>%s</Time>\n",
+          lif_a.leda.ltpa.Droid2.Time_long);
+      }
+      else
+      {
+        printf("<Time>%s</Time>\n", lif_a.leda.ltpa.Droid2.Time);
+      }
+      printf("<Node><!-- Mac Address -->%s</Node>\n",
+        lif_a.leda.ltpa.Droid2.Node);
+    }
+    printf("</UUID>\n");
+    printf("</Droid2>\n");
+
+    //Rather a simplistic test to see if the two sets of Droids are the same
+    if (!((lif.led.ltp.Droid1.Data1 == lif.led.ltp.DroidBirth1.Data1)
+      & (lif.led.ltp.Droid2.Data1 == lif.led.ltp.DroidBirth2.Data1)
+      & (less != 0)))
+    {
+      printf("<DroidBirth1>\n");
+      printf("<UUID>\n%s\n", lif_a.leda.ltpa.DroidBirth1.UUID);
+      if (less == 0)
+      {
+        printf("<Version>%s</Version>\n", lif_a.leda.ltpa.DroidBirth1.Version);
+        printf("<Variant>%s</Variant>\n", lif_a.leda.ltpa.DroidBirth1.Variant);
+      }
+      if ((lif_a.leda.ltpa.DroidBirth1.Version[0] == '1')
+        & (lif_a.leda.ltpa.DroidBirth1.Version[1] == ' '))
+      {
+        printf("<Sequence>%s</Sequence>\n",
+          lif_a.leda.ltpa.DroidBirth1.ClockSeq);
+        if (less == 0)
+        {
+          printf("<Time>%s</Time>\n",
+            lif_a.leda.ltpa.DroidBirth1.Time_long);
+        }
+        else
+        {
+          printf("<Time>%s</Time>\n", lif_a.leda.ltpa.DroidBirth1.Time);
+        }
+        printf("<Node><!-- Mac Address -->%s</Node>\n",
+          lif_a.leda.ltpa.DroidBirth1.Node);
+      }
+      printf("</UUID>\n");
+      printf("</DroidBirth1>\n");
+
+      printf("<DroidBirth2>\n");
+      printf("<UUID>\n%s\n", lif_a.leda.ltpa.DroidBirth2.UUID);
+      if (less == 0)
+      {
+        printf("<Version>%s</Version>\n", lif_a.leda.ltpa.DroidBirth2.Version);
+        printf("<Variant>%s</Variant>\n", lif_a.leda.ltpa.DroidBirth2.Variant);
+      }
+      if ((lif_a.leda.ltpa.DroidBirth2.Version[0] == '1')
+        & (lif_a.leda.ltpa.DroidBirth2.Version[1] == ' '))
+      {
+        printf("<Sequence>%s</Sequence>\n",
+          lif_a.leda.ltpa.DroidBirth2.ClockSeq);
+        if (less == 0)
+        {
+          printf("<Time>%s</Time>\n",
+            lif_a.leda.ltpa.DroidBirth2.Time_long);
+        }
+        else
+        {
+          printf("<Time>%s</Time>\n", lif_a.leda.ltpa.DroidBirth2.Time);
+        }
+        printf("<Node><!-- Mac Address -->%s</Node>\n",
+          lif_a.leda.ltpa.DroidBirth2.Node);
+      }
+      printf("</UUID>\n");
+      printf("</DroidBirth2>\n");
+    }
+    printf("</TrackerDataBlock>\n");
+  }
+
+  if (lif.led.edtypes & VISTA_AND_ABOVE_IDLIST_PROPS)
+  {
+    printf("<VistaAndAboveIDListDataBlock FileOffset=\"%s\" Size=\"%s\">\n", lif_a.leda.lvidlpa.Posn, lif_a.leda.lvidlpa.Size);
+    if (less == 0)
+    {
+      printf("<BlockSignature>%s</BlockSignature>\n", lif_a.leda.lvidlpa.sig);
+      printf("<NumItems>%s</NumItems>\n", lif_a.leda.lvidlpa.NumItemIDs);
+    }
+    printf("</VistaAndAboveIDListDataBlock>\n");
+  }
+  printf("</ExtraData>\n");
 
   printf("</EmbeddedInfo>\n");
   printf("</LinkFile>\n");
@@ -1882,7 +2319,7 @@ int main(int argc, char *argv[])
       //several files)
     }
     // If the output is XML then we need to make it well-formed and close it off properly
-    if (output_type = xml)
+    if (output_type == xml)
     {
       printf("</LinkFiles>\n");
     }
