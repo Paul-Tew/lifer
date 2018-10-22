@@ -250,8 +250,10 @@ void sv_out(FILE* fp, char* fname, int less, char sep)
       printf("ED CDB WindowOriginY%c", sep);
       printf("ED CDB Unused1%c", sep);
       printf("ED CDB Unused2%c", sep);
-      printf("ED CDB FontSize%c", sep);
+      printf("ED CDB FontHeight%c", sep);
+      printf("ED CDB FontWidth%c", sep);
       printf("ED CDB FontFamily%c", sep);
+      printf("ED CDB FontPitch%c", sep);
       printf("ED CDB FontWeight%c", sep);
       printf("ED CDB FaceName%c", sep);
       printf("ED CDB CursorSize%c", sep);
@@ -500,8 +502,10 @@ void sv_out(FILE* fp, char* fname, int less, char sep)
     printf("%s%c", lif_a.leda.lcpa.WindowOriginY, sep);
     printf("%s%c", lif_a.leda.lcpa.Unused1, sep);
     printf("%s%c", lif_a.leda.lcpa.Unused2, sep);
-    printf("%s%c", lif_a.leda.lcpa.FontSize, sep);
+    printf("%s%c", lif_a.leda.lcpa.FontHeight, sep);
+    printf("%s%c", lif_a.leda.lcpa.FontWidth, sep);
     printf("%s%c", lif_a.leda.lcpa.FontFamily, sep);
+    printf("%s%c", lif_a.leda.lcpa.FontPitch, sep);
     printf("%s%c", lif_a.leda.lcpa.FontWeight, sep);
     printf("%s%c", lif_a.leda.lcpa.FaceName, sep);
     printf("%s%c", lif_a.leda.lcpa.CursorSize, sep);
@@ -1025,32 +1029,60 @@ void text_out(FILE* fp, char* fname, int less, int itemid)
       printf("      WindowOriginY:     %s\n", lif_a.leda.lcpa.WindowOriginY);
       printf("      Unused1:           %s\n", lif_a.leda.lcpa.Unused1);
       printf("      Unused2:           %s\n", lif_a.leda.lcpa.Unused2);
-      printf("      FontSize:          %s\n", lif_a.leda.lcpa.FontSize);
+      printf("      {FontSize}\n");
+      printf("        FontHeight:      %s\n", lif_a.leda.lcpa.FontHeight);
+      printf("        FontWidth:       %s\n", lif_a.leda.lcpa.FontWidth);
+      printf("      {FontFamily}\n");
       buf[0] = (char)0;
-      switch (lif.led.lcp.FontFamily)
+      switch (lif.led.lcp.FontFamily_Family)
       {
-      case 0x0000:
+      case 0x00000000:
         strncat(buf, "FF_DONTCARE", 11);
         break;
-      case 0x0010:
+      case 0x00000010:
         strncat(buf, "FF_ROMAN", 8);
         break;
-      case 0x0020:
+      case 0x00000020:
         strncat(buf, "FF_SWISS", 8);
         break;
-      case 0x0030:
+      case 0x00000030:
         strncat(buf, "FF_MODERN", 9);
         break;
-      case 0x0040:
+      case 0x00000040:
         strncat(buf, "FF_SCRIPT", 9);
         break;
-      case 0x0050:
-        strncat(buf, "FF_DECORATIVE", 13);
+      case 0x00000050:
+        strncat(buf, "FF_DECORATIVE", 12);
         break;
       default:
-        strncat(buf, "UNKNOWN (Not allowed in specification)", 39);
+        strncat(buf, "UNKNOWN (Not allowed in specification) | ", 39);
       }
-      printf("      FontFamily:        %s   %s\n", lif_a.leda.lcpa.FontFamily, buf);
+      printf("        Family:          %s   %s\n", lif_a.leda.lcpa.FontFamily, buf);
+
+      buf[0] = (char)0;
+      if (lif.led.lcp.FontFamily_Pitch == 0x0000) strncat(buf, "TMPF_NONE | ", 12);
+      else 
+      {
+        if (lif.led.lcp.FontFamily_Pitch & 0x0001)
+          strncat(buf, "TMPF_FIXED_PITCH | ", 19);
+        if (lif.led.lcp.FontFamily_Pitch & 0x0002) 
+          strncat(buf, "TMPF_VECTOR | ", 14);
+        if (lif.led.lcp.FontFamily_Pitch & 0x0004) 
+          strncat(buf, "TMPF_TRUETYPE | ", 16);
+        if (lif.led.lcp.FontFamily_Pitch & 0x008) 
+          strncat(buf, "TMPF_DEVICE | ", 14);
+      }
+      i = strlen(buf);
+      if (i > 2)
+      {
+        buf[i - 3] = (unsigned char)0; // Remove the last pipe character
+      }
+      else
+      {
+        snprintf(buf, 300, "Unknown");
+      }
+      printf("        Pitch:           %s   %s\n", lif_a.leda.lcpa.FontPitch, buf);
+
       buf[0] = (char)0;
       if (lif.led.lcp.FontWeight < 700)
       {
@@ -1728,9 +1760,10 @@ void xml_out(FILE* fp, char* fname, int less, int itemid)
       printf("<WindowOriginY>%s</WindowOriginY>\n", lif_a.leda.lcpa.WindowOriginY);
       printf("<Unused1>%s</Unused1>\n", lif_a.leda.lcpa.Unused1);
       printf("<Unused2>%s</Unused2>\n", lif_a.leda.lcpa.Unused2);
-      printf("<FontSize>%s</FontSize>\n", lif_a.leda.lcpa.FontSize);
+      printf("<FontHeight>%s</FontHeight>\n", lif_a.leda.lcpa.FontHeight);
+      printf("<FontWidth>%s</FontWidth>\n", lif_a.leda.lcpa.FontWidth);
       buf[0] = (char)0;
-      switch (lif.led.lcp.FontFamily)
+      switch (lif.led.lcp.FontFamily_Family)
       {
       case 0x0000:
         strncat(buf, "FF_DONTCARE", 11);
@@ -1754,6 +1787,29 @@ void xml_out(FILE* fp, char* fname, int less, int itemid)
         strncat(buf, "UNKNOWN (Not allowed in specification)", 39);
       }
       printf("<FontFamily>%s  %s</FontFamily>\n", lif_a.leda.lcpa.FontFamily, buf);
+      buf[0] = (char)0;
+      if (lif.led.lcp.FontFamily_Pitch == 0x0000) strncat(buf, "TMPF_NONE | ", 12);
+      else
+      {
+        if (lif.led.lcp.FontFamily_Pitch & 0x0001)
+          strncat(buf, "TMPF_FIXED_PITCH | ", 19);
+        if (lif.led.lcp.FontFamily_Pitch & 0x0002)
+          strncat(buf, "TMPF_VECTOR | ", 14);
+        if (lif.led.lcp.FontFamily_Pitch & 0x0004)
+          strncat(buf, "TMPF_TRUETYPE | ", 16);
+        if (lif.led.lcp.FontFamily_Pitch & 0x008)
+          strncat(buf, "TMPF_DEVICE | ", 14);
+      }
+      i = strlen(buf);
+      if (i > 2)
+      {
+        buf[i - 3] = (unsigned char)0; // Remove the last pipe character
+      }
+      else
+      {
+        snprintf(buf, 300, "Unknown");
+      }
+      printf("<FontPitch>%s  %s</FontPitch>\n", lif_a.leda.lcpa.FontPitch, buf);
       buf[0] = (char)0;
       if (lif.led.lcp.FontWeight < 700)
       {

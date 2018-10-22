@@ -697,7 +697,7 @@ int get_lhdr(FILE *fp, struct LIF *lif)
 //into a readable form and populates the strings in LIF_HDR_A
 int get_lhdr_a(struct LIF_HDR* lh, struct LIF_HDR_A* lha)
 {
-  unsigned char lk[20], hk1[10], hk2[10], hk3[10], attr_str[400], flag_str[600];
+  unsigned char lk[30], hk1[24], hk2[10], hk3[10], attr_str[400], flag_str[600];
 
   snprintf((char *)lha->H_size, 10, "%"PRIu32, lh->H_size);
   snprintf((char *)lha->CLSID, 40, "{00021401-0000-0000-C000-000000000046}");
@@ -726,34 +726,47 @@ int get_lhdr_a(struct LIF_HDR* lh, struct LIF_HDR_A* lha)
   }
   // 
   // High key first
-  if (lh->Hotkey.HighKey & 0x01)
+  if (lh->Hotkey.HighKey == 0x00)
   {
-    sprintf((char *)hk1, "SHIFT + ");
-  }
-  else
-  {
-    //Just create a null length string if the relevant key isn't there
-    hk1[0] = 0;
-  }
-  if (lh->Hotkey.HighKey & 0x02)
-  {
-    sprintf((char *)hk2, "CTRL + ");
-  }
-  else
-  {
+    sprintf((char *)hk1, "No Modifier key(s): ");
     hk2[0] = 0;
-  }
-  if (lh->Hotkey.HighKey & 0x04)
-  {
-    sprintf((char *)hk3, "ALT + ");
+    hk3[0] = 0;
   }
   else
   {
-    hk3[0] = 0;
+    if (lh->Hotkey.HighKey & 0x01)
+    {
+      sprintf((char *)hk1, "SHIFT + ");
+    }
+    else
+    {
+      //Just create a null length string if the relevant key isn't there
+      hk1[0] = 0;
+    }
+    if (lh->Hotkey.HighKey & 0x02)
+    {
+      sprintf((char *)hk2, "CTRL + ");
+    }
+    else
+    {
+      hk2[0] = 0;
+    }
+    if (lh->Hotkey.HighKey & 0x04)
+    {
+      sprintf((char *)hk3, "ALT + ");
+    }
+    else
+    {
+      hk3[0] = 0;
+    }
   }
   //
   // Then the Low key
-  if (((lh->Hotkey.LowKey > 0x2F) && (lh->Hotkey.LowKey < 0x5B)))
+  if (lh->Hotkey.LowKey == 0x00)
+  {
+    sprintf((char *)lk, "And no key assigned.");
+  }
+  else if (((lh->Hotkey.LowKey > 0x2F) && (lh->Hotkey.LowKey < 0x5B)))
   {
     // Regular keys
     sprintf((char *)lk, "%u", (unsigned int)lh->Hotkey.LowKey);
@@ -779,7 +792,7 @@ int get_lhdr_a(struct LIF_HDR* lh, struct LIF_HDR_A* lha)
   }
 
   //Now write the keys to the LIF_HDR_A
-  snprintf((char *)lha->Hotkey, 40, "%s%s%s%s", hk1, hk2, hk3, lk);
+  snprintf((char *)lha->Hotkey, 60, "%s%s%s%s", hk1, hk2, hk3, lk);
   snprintf((char *)lha->Reserved1, 10, "0x0000");
   snprintf((char *)lha->Reserved2, 20, "0x00000000");
   snprintf((char *)lha->Reserved3, 20, "0x00000000");
@@ -1613,8 +1626,12 @@ int get_extradata(FILE * fp, int pos, struct LIF * lif)
       lif->led.lcp.WindowOriginY = get_le_uint16(data_buf, 14);
       lif->led.lcp.Unused1 = get_le_uint32(data_buf, 16);
       lif->led.lcp.Unused2 = get_le_uint32(data_buf, 20);
-      lif->led.lcp.FontSize = get_le_uint32(data_buf, 24);
+      //In previous versions FontSize is a 32 bit DWORD but in MS-SHLLINK v5.0 it is split into FontHeight & FontWidth
+      lif->led.lcp.FontSize_Width = get_le_uint16(data_buf, 24);
+      lif->led.lcp.FontSize_Height = get_le_uint16(data_buf, 26);
       lif->led.lcp.FontFamily = get_le_uint32(data_buf, 28);
+      lif->led.lcp.FontFamily_Family = lif->led.lcp.FontFamily & 0x00F0;
+      lif->led.lcp.FontFamily_Pitch = lif->led.lcp.FontFamily & 0x000F;
       lif->led.lcp.FontWeight = get_le_uint32(data_buf, 32);
       if (get_le_unistr(data_buf, 36, 32, lif->led.lcp.FaceName) == 0)
       {
@@ -1839,8 +1856,10 @@ int get_extradata_a(struct LIF_EXTRA_DATA * led, struct LIF_EXTRA_DATA_A * leda)
     snprintf((char *)leda->lcpa.WindowOriginY, 8, "%"PRIu16, led->lcp.WindowOriginY);
     snprintf((char *)leda->lcpa.Unused1, 12, "0x%.8"PRIX32, led->lcp.Unused1);
     snprintf((char *)leda->lcpa.Unused2, 12, "0x%.8"PRIX32, led->lcp.Unused2);
-    snprintf((char *)leda->lcpa.FontSize, 12, "%"PRIu32, led->lcp.FontSize);
-    snprintf((char *)leda->lcpa.FontFamily, 12, "0x%.4"PRIX32, led->lcp.FontFamily);
+    snprintf((char *)leda->lcpa.FontHeight, 12, "%"PRIu16, led->lcp.FontSize_Height);
+    snprintf((char *)leda->lcpa.FontWidth, 12, "%"PRIu16, led->lcp.FontSize_Width);
+    snprintf((char *)leda->lcpa.FontFamily, 12, "0x%.4"PRIX16, led->lcp.FontFamily_Family);
+    snprintf((char *)leda->lcpa.FontPitch, 12, "0x%.4"PRIX16, led->lcp.FontFamily_Pitch);
     snprintf((char *)leda->lcpa.FontWeight, 12, "%"PRIu32, led->lcp.FontWeight);
     snprintf((char *)leda->lcpa.FaceName, 64, "%ls", led->lcp.FaceName);
     snprintf((char *)leda->lcpa.CursorSize, 12, "%"PRIu32, led->lcp.CursorSize);
@@ -1871,7 +1890,8 @@ int get_extradata_a(struct LIF_EXTRA_DATA * led, struct LIF_EXTRA_DATA_A * leda)
     snprintf((char *)leda->lcpa.WindowOriginY, 8, "[N/A]");
     snprintf((char *)leda->lcpa.Unused1, 12, "[N/A]");
     snprintf((char *)leda->lcpa.Unused2, 12, "[N/A]");
-    snprintf((char *)leda->lcpa.FontSize, 12, "[N/A]");
+    snprintf((char *)leda->lcpa.FontHeight, 12, "[N/A]");
+    snprintf((char *)leda->lcpa.FontWidth, 12, "[N/A]");
     snprintf((char *)leda->lcpa.FontFamily, 12, "[N/A]");
     snprintf((char *)leda->lcpa.FontWeight, 12, "[N/A]");
     snprintf((char *)leda->lcpa.FaceName, 64, "[N/A]");

@@ -28,12 +28,12 @@ This file is part of Lifer, a Windows link file analyser.
 */
 
 // These are equivalent to the protocol revision for MS-SHLLINK
-#define _MAJOR  4
+#define _MAJOR  5
 #define _MINOR  0
 // This is my revision number
-#define _BUILD  22 // Now has XML output
+#define _BUILD  23 // Now has XML output
 // Just the current year
-#define _YEAR   2017
+#define _YEAR   2018
 
 /*     VERSION HISTORY
 

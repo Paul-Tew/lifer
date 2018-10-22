@@ -231,8 +231,12 @@ struct LIF_CONSOLE_PROPS
   uint16_t       WindowOriginY;
   uint32_t       Unused1;
   uint32_t       Unused2;
-  uint32_t       FontSize;
+  //In previous versions FontSize is a 32 bit DWORD but in MS-SHLLINK v5.0 it is better split into FontHeight & FontWidth
+  uint16_t       FontSize_Height;
+  uint16_t       FontSize_Width;
   uint32_t       FontFamily;
+  uint16_t       FontFamily_Family;
+  uint16_t       FontFamily_Pitch;
   uint32_t       FontWeight;
   wchar_t        FaceName[32];
   uint32_t       CursorSize;
@@ -261,8 +265,10 @@ struct LIF_CONSOLE_PROPS_A
   unsigned char      WindowOriginY[8];
   unsigned char      Unused1[12];
   unsigned char      Unused2[12];
-  unsigned char      FontSize[12];
-  unsigned char      FontFamily[12];
+  unsigned char      FontHeight[12]; //Changed from FontSize in MS-SHLLINK v5.0
+  unsigned char      FontWidth[12];  //Changed from FontSize in MS-SHLLINK v5.0
+  unsigned char      FontFamily[30];
+  unsigned char      FontPitch[100]; //Added in MS-SHLLINK v5.0
   unsigned char      FontWeight[12];
   unsigned char      FaceName[64];
   unsigned char      CursorSize[12];
@@ -656,7 +662,7 @@ struct LIF_HDR_A
   unsigned char               Size[25];
   unsigned char               IconIndex[25];
   unsigned char               ShowState[40];
-  unsigned char               Hotkey[40];       //Sec 2.1.3
+  unsigned char               Hotkey[60];       //Sec 2.1.3
   unsigned char               Reserved1[10];
   unsigned char               Reserved2[20];
   unsigned char               Reserved3[20];
