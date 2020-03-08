@@ -163,8 +163,7 @@ Output to an XML file can be obtained using:
   and 2.5.11) are not parsed and ItemID values are only counted. In the
   fullness of time I will include some parsing but the same issue as with
   property stores exists in that, there can be a variable number of such
-  values. Until I implement XML output you will have to rely on text output to
-  get as full a picture of the content as is currently available.
+  values.
 
 
 **SHORTENED TAB SEPARATED VALUES OUTPUT (option: '-so tsv')**
@@ -197,10 +196,5 @@ Output to an XML file can be obtained using:
   inserting a TAB character into a string and messing up the formatting of any
   tsv output, in my experience I have never seen it, but it COULD happen!
 
-
-**XML OUTPUT (option: '-o xml')**
-
-  Not yet implemented but on my 'TODO' list
-
 Paul Tew
-June 2017
+March 2020

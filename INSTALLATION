@@ -57,11 +57,11 @@ the directory prefix.
 * WINDOWS INSTALLATION *
 
 
-The lifer github project comes complete with a Visual Studio 2017 project
+The lifer github project comes complete with a Visual Studio 2019 project
 solution so the easiest way to create a Windows executable is to install Visual
-Studio 2017 first. There is a free version (known as the 'community' version)
+Studio 2019 first. There is a free version (known as the 'community' version)
 available at 
-https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community&rel=15
+https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=Community&rel=16
 
 Once Visual Studio is installed:
 * Left-click on **File->Open->Project/Solution** and browse to the
@@ -85,7 +85,7 @@ Once Visual Studio is installed:
 
 It is possible to make lifer in Windows without installing Visual Studio but you
 will still need to download and install the Visual C++ build tools available at
-http://landinghub.visualstudio.com/visual-cpp-build-tools
+https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16
 
 Once installed, lifer can be built in the ./src/ directory by issuing the command:
 
