@@ -9,6 +9,7 @@
 ** Usage:                                               **
 ** lifer [-vh]                                          **
 ** lifer [-s] [-o csv|tsv|txt] dir|file(s)              **
+** lifer -i [-o txt|xml]                                **
 **                                                      **
 *********************************************************/
 
@@ -2241,21 +2242,30 @@ void read_dir(char* dirname, int less, int idlist)
 
   if ((dp = opendir(dirname)) == NULL)
   {
+    // Opening the directory was unsuccessful
     perror("Error");
     fprintf(stderr, "whilst processing directory: \'%s\'\n", dirname);
     return;
   }
-  _chdir(dirname);
-  //Iterate through the directory entries
-  while ((entry = readdir(dp)) != NULL)
+  if (_chdir(dirname) == 0)
   {
-    stat(entry->d_name, &statbuf);
-    //Don't want anything but regular files
-    if ((statbuf.st_mode & S_IFMT) == S_IFREG)
-    {
-      proc_file(entry->d_name, less, idlist);
-    }
-  }//End of iterating through directory entry
+      //Iterate through the directory entries
+      while ((entry = readdir(dp)) != NULL)
+      {
+          stat(entry->d_name, &statbuf);
+              //Don't want anything but regular files
+              if ((statbuf.st_mode & S_IFMT) == S_IFREG)
+              {
+                  proc_file(entry->d_name, less, idlist);
+              }
+      }//End of iterating through directory entry
+  }
+  else //Changing the directory wasn't successful
+  {
+      perror("Error");
+      fprintf(stderr, "whilst processing directory: \'%s\'\n", dirname);
+      return;
+  }
 }
 
 //

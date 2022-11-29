@@ -48,6 +48,8 @@ artifacts/
 *_i.c
 *_p.c
 *_i.h
+*.filters
+*.idb
 *.ilk
 *.meta
 *.obj
@@ -56,6 +58,7 @@ artifacts/
 *.pgc
 *.pgd
 *.rsp
+*.recipe
 *.sbr
 *.tlb
 *.tli
@@ -65,7 +68,7 @@ artifacts/
 *.log
 *.vspscc
 *.vssscc
-.builds
+*.builds
 *.pidb
 *.svclog
 *.scc
