@@ -76,11 +76,6 @@ for a file that has some of the superfluous and uninteresting data redacted.
 ### WARNING ABOUT COMMA SEPARATED OUTPUT!!
 Strings within link files can sometimes contain commas. Because this causes a conflict with the field separator any commas within strings have been replaced with semi-colons (i.e. ',' replaced with ';'). This is only true for the '-o csv' option and not the default '-o txt' or the '-o tsv' and '-o xml' options.
 
-## MOTIVATION
-Windows link files (shortcuts) can harbour a trove of information for a forensic analyst. For example, perhaps determining that a disk that is no longer attached to the machine may well have been attached sometime in the past or maybe an indication of the the names and location of folders that have since been deleted.
-As a forensic analyst I was using tools to interpret this data for me but none of them were open-source and I had no idea that the information presented was correct. In particular I had a concern that dates and times were not being interpreted fully and accurately and so I wrote a tool to do the job.
-Initially lifer just parsed the information I was after but as with these things, I needed more and more information until I was interpreting pretty much the whole link file so I separated the tool and the library. Around 2012 I retired from my role and development pretty much stopped. Now I have more time so I've started on the project anew...
-
 ## INSTALLATION FROM RELEASE
 Visit the [**Releases Page**](https://github.com/Paul-Tew/lifer/releases) and choose the appropriate executable file for your machine from the latest release and download it.
 Rename the executable to 'lifer' (or 'lifer.exe' for windows). Ensure it has the correct attributes to run as an executable file and either place it in a folder containing the link files you want to examine or add the location to your PATH variable and you'll be good to go.
