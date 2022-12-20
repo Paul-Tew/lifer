@@ -31,7 +31,7 @@ This file is part of Lifer, a Windows link file analyser.
 #define _MAJOR  6
 #define _MINOR  0
 // This is my revision number
-#define _BUILD  24 // Now has XML output
+#define _BUILD  24
 // Just the current year
 #define _YEAR   2022
 
