@@ -4,7 +4,7 @@
 **                                                      **
 ** A library to handle the data from Windows link files **
 **                                                      **
-**         Copyright Paul Tew 2011 to 2017              **
+**         Copyright Paul Tew 2011 to 2022              **
 **                                                      **
 *********************************************************/
 

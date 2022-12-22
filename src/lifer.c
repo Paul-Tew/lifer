@@ -4,7 +4,7 @@
 **                                                      **
 **            A Windows link file examiner              **
 **                                                      **
-**         Copyright Paul Tew 2011 to 2017              **
+**         Copyright Paul Tew 2011 to 2022              **
 **                                                      **
 ** Usage:                                               **
 ** lifer [-vh]                                          **

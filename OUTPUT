@@ -86,7 +86,7 @@ Output to an XML file can be obtained using:
     •  Last Accessed   (The time the operating system updated the access time)
     •  Last Modified   (The time the operating system decided that the file
                         had been modified)
-    •  Last Changed    (Not he same as Last Modified time!)
+    •  Last Changed    (Not the same as Last Modified time!)
 
     *A SIDE NOTE ABOUT TIMES...*
     Modern Windows file systems record these three times and in addition record 
