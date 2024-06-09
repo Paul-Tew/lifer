@@ -51,7 +51,7 @@ This file is part of Lifer, a Windows link file analyser.
 
   v7.0.25
   Updated to conform to the updated MS-SHLLINK document
-  version 6.0 (Published 2021-06-25)
+  version 7.0 (Published 2021-06-25)
 
   v6.0.24
   Updated to conform to the updated MS-SHLLINK document
@@ -145,7 +145,7 @@ This file is part of Lifer, a Windows link file analyser.
   version of that document we are working from (the obvious thing is that
   from this point I need to align with the then current version of 3.0) but I
   hadn't updated the code to this version.
-  In truth, I	had made a number of versions that were significantly different
+  In truth, I had made a number of versions that were significantly different
   but with the same version number (poor, I know!) This was a version bump to
   supercede all previous versions.
   In between I had largely 'cracked' the problem of porting the application to

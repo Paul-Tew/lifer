@@ -308,7 +308,7 @@ extern int find_propstores(unsigned char * data_buf, int size, int position, str
 //   int != 0 = failure
 extern int get_propstore_a(struct LIF_SER_PROPSTORE * ps, struct LIF_SER_PROPSTORE_A * psa)
 {
-  int       j, len;
+  int       j=0, len;
   uint8_t   uinteger8, decimalscale, decimalsign;
   int8_t    integer8;
   uint16_t  uinteger16, boolean;
@@ -326,7 +326,7 @@ extern int get_propstore_a(struct LIF_SER_PROPSTORE * ps, struct LIF_SER_PROPSTO
   snprintf((char *)psa->StorageSize, 12, "%"PRIu32, ps->StorageSize);
   snprintf((char *)psa->Version, 12, "0x%.8"PRIX32, ps->Version);
   get_droid_a(&ps->FormatID, &psa->FormatID);
-  if (ps->NameType == 0x00)
+  if (ps->NameType.ValueSize==0)
   {
     snprintf((char *)psa->NameType, 13, "String Name");
   }
