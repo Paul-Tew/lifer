@@ -28,12 +28,12 @@ This file is part of Lifer, a Windows link file analyser.
 */
 
 // These are equivalent to the protocol revision for MS-SHLLINK
-#define _MAJOR  7
+#define _MAJOR  8
 #define _MINOR  0
 // This is my revision number
-#define _BUILD  25
+#define _BUILD  26
 // Just the current year
-#define _YEAR   2022
+#define _YEAR   2024
 
 /*     VERSION HISTORY
 
@@ -48,6 +48,10 @@ This file is part of Lifer, a Windows link file analyser.
   is hazy (because I only developed the tool for my own use). After
   initiating git and posting the tool to github there is obviously a much
   better recollection ;)
+
+  v8.0.26
+  Updated to conform to the updated MS-SHLLINK document
+  version 8.0 (Published 2024-04-23)
 
   v7.0.25
   Updated to conform to the updated MS-SHLLINK document
